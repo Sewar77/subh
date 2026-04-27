@@ -15,10 +15,18 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import TranslateIcon from "@mui/icons-material/Translate";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-
+import { useNavigate } from "react-router-dom";
 export default function Navbar() {
-  const pages = ["Home", "Educational Resources", "Who We Are", "Contact Us"];
-
+  const pages = [
+    {
+      name: "Home",
+      path: "/",
+    },
+    { name: "Educational Resources", path: "/edu" },
+    { name: "Who We Are", path: "/about" },
+    { name: "Contact Us", path: "/contact" },
+  ];
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   return (
@@ -51,7 +59,8 @@ export default function Navbar() {
         >
           {pages.map((page) => (
             <Typography
-              key={page}
+              key={page.name}
+              onClick={() => navigate(page.path)}
               sx={{
                 color: "text.secondary",
                 fontWeight: 500,
@@ -59,7 +68,7 @@ export default function Navbar() {
                 "&:hover": { color: "success.main" },
               }}
             >
-              {page}
+              {page.name}
             </Typography>
           ))}
         </Box>
@@ -121,9 +130,14 @@ export default function Navbar() {
 
           <List>
             {pages.map((page) => (
-              <ListItem key={page} disablePadding>
-                <ListItemButton onClick={() => setOpen(false)}>
-                  {page}
+              <ListItem key={page.name} disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    navigate(page.path);
+                    setOpen(false);
+                  }}
+                >
+                  {page.name}
                 </ListItemButton>
               </ListItem>
             ))}

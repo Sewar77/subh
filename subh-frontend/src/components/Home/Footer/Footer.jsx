@@ -9,7 +9,8 @@ export default function Footer() {
     <>
       <Container
         sx={{
-          position: "relative",
+          position: "static",
+          bottom: 0,
           display: "inline-block",
           mx: "auto",
           background: "linear-gradient(90deg, #bb40bf, #613389, #102943)",
@@ -21,6 +22,7 @@ export default function Footer() {
           p: 6,
           color: "text.secondary",
           alignItems: "center",
+          borderRadius: 2,
         }}
       >
         <Grid

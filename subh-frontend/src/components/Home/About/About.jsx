@@ -102,7 +102,10 @@ export default function About() {
                 }}
               >
                 <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 600, color: "white" }}
+                  >
                     Vision:
                   </Typography>
                   To offer curricula and learning resources that empower
@@ -129,7 +132,10 @@ export default function About() {
                 }}
               >
                 <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 600, color: "white" }}
+                  >
                     Mission:
                   </Typography>
                   To enhance the educational process with flexible and

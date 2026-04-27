@@ -71,7 +71,7 @@ export default function News() {
           borderRadius: 3,
         }}
       >
-        <Typography variant="h4" sx={{ color: "text.secondary" }}>
+        <Typography variant="h4" sx={{ color: "white" }}>
           Hot News
         </Typography>
         <NewsCarousel />
