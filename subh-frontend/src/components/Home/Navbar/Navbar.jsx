@@ -100,6 +100,7 @@ export default function Navbar() {
                 background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
               },
             }}
+            onClick={() => navigate("/register")}
           >
             Join Us
           </Button>
