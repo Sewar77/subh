@@ -9,7 +9,7 @@ export default function About() {
           mt: 4,
           // mb: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
           width: "100%",
-          maxWidth: "1400px",
+          // maxWidth: "1400px",
           mx: "auto",
           p: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
         }}
@@ -78,7 +78,7 @@ export default function About() {
               },
               textAlign: "center",
               width: "100%",
-              maxWidth: "1300px",
+              // maxWidth: "1300px",
               mx: "auto",
               p: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
               alignItems: "center",

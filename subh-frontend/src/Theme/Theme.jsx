@@ -19,7 +19,7 @@ export const theme = createTheme({
 
     background: {
       default: "#d9d6e6",
-      paper: "#613389",
+      paper: " #bb40bf ",
     },
 
     text: {
@@ -68,7 +68,10 @@ export const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          backdropFilter: "blur(10px)",
+          backdropFilter: "blur(20px)",
+          backgroundImage: "none",
+          border: "1px solid rgba(255,255,255,0.05)",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
         },
       },
     },

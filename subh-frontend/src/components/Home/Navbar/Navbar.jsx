@@ -35,7 +35,7 @@ export default function Navbar() {
       sx={{
         mb: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
         width: "100%",
-        maxWidth: "1400px",
+        // maxWidth: "1400px",
         mx: "auto",
         p: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
         borderRadius: 5,
