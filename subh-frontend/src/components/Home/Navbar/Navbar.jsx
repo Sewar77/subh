@@ -22,7 +22,7 @@ export default function Navbar() {
       name: "Home",
       path: "/",
     },
-    { name: "Educational Resources", path: "/edu" },
+    { name: "Educational Resources", path: "/educational/courses" },
     { name: "Who We Are", path: "/about" },
     { name: "Contact Us", path: "/contact" },
   ];
