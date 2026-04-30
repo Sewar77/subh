@@ -28,6 +28,6 @@ export const getUserByEmail = async (email) => {
 };
 
 export const getAllUsers = async () => {
-  const result = pool.query(`select * from users`);
+  const result = await pool.query(`select * from users`);
   return result.rows;
 };

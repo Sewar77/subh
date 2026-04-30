@@ -1,0 +1,86 @@
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  IconButton,
+  InputBase,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import SearchIcon from "@mui/icons-material/Search";
+import { useAuth } from "../../../Hooks/useAuth";
+import { useContext, useEffect } from "react";
+import { authContext } from "../../../Context/authContext";
+import { usersContext } from "../../../Context/usersContext";
+import LogoutIcon from "@mui/icons-material/Logout";
+export default function AdminNavbar() {
+  const { user, logout } = useAuth();
+  const { loadUser } = useContext(authContext);
+  const { loadUsers } = useContext(usersContext);
+  useEffect(() => {
+    loadUser();
+  }, []);
+  useEffect(() => {
+    loadUsers();
+  }, []);
+  const handleLogout = () => {
+    logout();
+  };
+  return (
+    <AppBar position="sticky" elevation={0}>
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <IconButton color="inherit">
+            <MenuIcon />
+          </IconButton>
+
+          <Typography variant="h6" fontWeight={600}>
+            Hi, {user?.name}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "rgba(255,255,255,0.05)",
+            px: 2,
+            py: 0.5,
+            borderRadius: 2,
+            width: "300px",
+          }}
+        >
+          <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
+          <InputBase
+            placeholder="Search..."
+            sx={{ color: "inherit", width: "100%" }}
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
+          <IconButton color="inherit">
+            <NotificationsIcon />
+          </IconButton>
+          <IconButton color="inherit">
+            <AccountCircle />
+          </IconButton>
+          <IconButton color="inherit" onClick={handleLogout}>
+            <LogoutIcon />
+          </IconButton>
+        </Box>
+      </Toolbar>
+    </AppBar>
+  );
+}

@@ -7,6 +7,9 @@ import Register from "./components/Auth/Register.jsx";
 import Login from "./components/Auth/Login.jsx";
 import { Toaster } from "react-hot-toast";
 import AdminDashboard from "./Pages/Admin/AdminDashboard.jsx";
+import AdminLayout from "./Layout/AdminLayout.jsx";
+import ManageUsers from "./components/Admin/Manage/ManageUsers/ManageUsers.jsx";
+import AddUser from "./components/Admin/Manage/ManageUsers/AddUser.jsx";
 function App() {
   return (
     <>
@@ -17,8 +20,13 @@ function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/educational/courses" element={<EducationalPrograms />} />
+        {/* admin routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<ManageUsers />} />
+          <Route path="add/user" element={<AddUser />} />
+        </Route>
       </Routes>
     </>
   );

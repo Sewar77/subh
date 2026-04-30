@@ -4,11 +4,13 @@ import {
   registerUserSchema,
 } from "../validation/auth.Validation.js";
 import {
+  currentUser,
   loginUserController,
+  logout,
   registerUserController,
 } from "../controller/auth.Controller.js";
 import { validate } from "../middleware/validate.Middleware.js";
-
+import { protect } from "../middleware/protect.Middleware.js";
 const route = express.Router();
 
 route.post(
@@ -17,5 +19,7 @@ route.post(
   registerUserController,
 );
 route.post("/auth/login", validate(loginUserSchema), loginUserController);
+route.get("/auth/me", protect, currentUser);
+route.post("/auth/logout", logout);
 
 export default route;

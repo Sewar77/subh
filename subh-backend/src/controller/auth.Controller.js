@@ -1,4 +1,8 @@
-import { getUserByEmail, registerUserModel } from "../models/auth.Models.js";
+import {
+  getUserByEmail,
+  getUserById,
+  registerUserModel,
+} from "../models/auth.Models.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 export const registerUserController = async (req, res) => {
@@ -51,12 +55,42 @@ export const loginUserController = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
-
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
     return res.status(200).json({
       message: "Login successful",
       user: isUserExist,
       token,
     });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error", err });
+  }
+};
+
+export const currentUser = async (req, res) => {
+  try {
+    const me = req.user.id;
+    const user = await getUserById(me);
+
+    if (!user) {
+      return res.status(401).json({ message: "unautherzed", err });
+    }
+    return res.status(200).json({ message: "user infor", user: user });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error", err });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      expires: new Date(0),
+    });
+    return res.status(200).json({ message: "logged out" });
   } catch (err) {
     return res.status(500).json({ message: "Internal server error", err });
   }

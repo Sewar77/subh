@@ -7,15 +7,16 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { theme } from "./Theme/Theme.jsx";
 import { BrowserRouter } from "react-router-dom";
 import AuthProvider from "./Context/authContext.jsx";
+import UsersProvider from "./Context/usersContext.jsx";
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
+  <BrowserRouter>
+    <AuthProvider>
+      <UsersProvider>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <App />
         </ThemeProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>,
+      </UsersProvider>
+    </AuthProvider>
+  </BrowserRouter>,
 );

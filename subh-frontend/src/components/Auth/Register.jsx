@@ -12,8 +12,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 export default function Register() {
   const [userType, setUserType] = useState();
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setUserType(e.target.value);
   };
@@ -126,7 +128,8 @@ export default function Register() {
               }}
             />
             <Typography variant="body2">
-              Already Have an Account? LoginIn
+              Already Have an Account?{" "}
+              <Button onClick={() => navigate("/login")}>Login</Button>
             </Typography>
             <Button
               variant="contained"
