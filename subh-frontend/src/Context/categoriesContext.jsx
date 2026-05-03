@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createContext } from "react";
 import { api } from "../../api";
 import toast from "react-hot-toast";
@@ -15,11 +15,11 @@ export default function CategoriesProvider({ children }) {
       toast.error(err);
     }
   };
-  useEffect(() => {
-    loadCategories();
-  }, []);
+
   return (
-    <categoriesContext.Provider value={{ categories, setCategories }}>
+    <categoriesContext.Provider
+      value={{ categories, setCategories, loadCategories }}
+    >
       {children}
     </categoriesContext.Provider>
   );

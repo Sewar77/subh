@@ -2,10 +2,11 @@ import {
   Button,
   CircularProgress,
   Container,
-  Paper,
+  Box,
   TextField,
   Typography,
-  Box,
+  Divider,
+  Paper,
 } from "@mui/material";
 import toast from "react-hot-toast";
 import { useState } from "react";
@@ -14,16 +15,17 @@ import { useCategories } from "../../../../Hooks/useCategories";
 
 export default function AddCategory() {
   const { createCategories } = useCategories();
-  // bilingual state
+
   const [nameEn, setNameEn] = useState("");
   const [nameAr, setNameAr] = useState("");
   const [descEn, setDescEn] = useState("");
   const [descAr, setDescAr] = useState("");
-  // image state
+
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
+
   const { uploadImage, uploadedUrl, loading, error } = useUpload();
-  // file select
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
@@ -37,20 +39,14 @@ export default function AddCategory() {
     setPreview(URL.createObjectURL(selectedFile));
   };
 
-  // upload image
   const handleUpload = () => {
-    if (!file) {
-      toast.error("Select image first");
-      return;
-    }
-
+    if (!file) return toast.error("Select image first");
     uploadImage(file);
   };
 
-  // submit category
   const handleSubmit = () => {
     if (!nameEn || !nameAr) {
-      toast.error("English and Arabic names are required");
+      toast.error("Both English and Arabic names are required");
       return;
     }
 
@@ -59,19 +55,14 @@ export default function AddCategory() {
       return;
     }
 
-    const data = {
+    createCategories({
       name_en: nameEn,
       name_ar: nameAr,
       description_en: descEn,
       description_ar: descAr,
       image: uploadedUrl,
-    };
+    });
 
-    createCategories(data);
-
-    console.log("FINAL DATA:", data);
-
-    // optional reset
     setNameEn("");
     setNameAr("");
     setDescEn("");
@@ -81,27 +72,36 @@ export default function AddCategory() {
   };
 
   return (
-    <Container>
-      <Typography variant="h4" sx={{ mt: 4 }}>
+    <Container maxWidth="md">
+      <Typography variant="h4" sx={{ mt: 4, fontWeight: 700 }}>
         Add Category
       </Typography>
 
       <Paper
         sx={{
           mt: 3,
-          p: 3,
+          p: 4,
           display: "flex",
           flexDirection: "column",
           gap: 3,
+          borderRadius: 3,
+          bgcolor: "text.secondary",
         }}
-        elevation={4}
+        elevation={3}
       >
-        {/* English */}
+        <Typography fontWeight={700} color="text.primary">
+          English
+        </Typography>
+
         <TextField
           label="Name (English)"
           value={nameEn}
           onChange={(e) => setNameEn(e.target.value)}
           fullWidth
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
         />
 
         <TextField
@@ -111,30 +111,57 @@ export default function AddCategory() {
           fullWidth
           multiline
           rows={2}
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
         />
 
-        {/* Arabic */}
+        <Divider />
+
+        {/* ARABIC */}
+        <Typography fontWeight={700} textAlign="right" color="text.secondary">
+          العربية
+        </Typography>
+
         <TextField
-          label="الاسم باللغة العربية"
+          label="الاسم"
           value={nameAr}
           onChange={(e) => setNameAr(e.target.value)}
           fullWidth
-          inputProps={{ dir: "rtl" }}
+          InputProps={{ dir: "rtl" }}
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
         />
 
         <TextField
-          label="الوصف باللغة العربية"
+          label="الوصف"
           value={descAr}
           onChange={(e) => setDescAr(e.target.value)}
           fullWidth
           multiline
           rows={2}
-          inputProps={{ dir: "rtl" }}
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
+          InputProps={{ dir: "rtl" }}
         />
 
-        {/* Upload */}
-        <Box>
-          <Typography sx={{ mb: 1 }}>Upload Image</Typography>
+        <Divider />
+
+        {/* IMAGE UPLOAD */}
+        <Box
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            border: "1px dashed rgba(15, 23, 42, 0.2)",
+            bgcolor: "#f8fafc",
+          }}
+        >
+          <Typography sx={{ mb: 1, fontWeight: 600 }}>Image Upload</Typography>
 
           <input type="file" onChange={handleFileChange} />
 
@@ -143,26 +170,26 @@ export default function AddCategory() {
               <img
                 src={preview}
                 alt="preview"
-                width="150"
-                style={{ borderRadius: 8 }}
+                width="140"
+                style={{ borderRadius: 12 }}
               />
             </Box>
           )}
 
           <Button
             variant="outlined"
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, textTransform: "none" }}
             onClick={handleUpload}
             disabled={loading}
           >
             Upload Image
           </Button>
 
-          {loading && <CircularProgress size={20} sx={{ ml: 2 }} />}
+          {loading && <CircularProgress size={18} sx={{ ml: 2 }} />}
 
           {uploadedUrl && (
             <Typography sx={{ mt: 1, color: "green" }}>
-              Image uploaded ✅
+              Image uploaded ✔
             </Typography>
           )}
 
@@ -171,13 +198,13 @@ export default function AddCategory() {
           )}
         </Box>
 
-        {/* Submit */}
         <Button
           variant="contained"
+          size="large"
           onClick={handleSubmit}
           disabled={!uploadedUrl || !nameEn || !nameAr}
         >
-          Add Category
+          Create Category
         </Button>
       </Paper>
     </Container>

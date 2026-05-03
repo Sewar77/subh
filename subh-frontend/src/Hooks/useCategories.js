@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { categoriesContext } from "../Context/categoriesContext";
 
 export const useCategories = () => {
-  const { categories, setCategories } = useContext(categoriesContext);
+  const { categories, setCategories, loadCategories } =
+    useContext(categoriesContext);
   const navigate = useNavigate();
 
   const createCategories = async (catData) => {
@@ -23,5 +24,5 @@ export const useCategories = () => {
     }
   };
 
-  return { createCategories, categories };
+  return { createCategories, categories, loadCategories };
 };
