@@ -29,7 +29,13 @@ export default function AdminNavbar() {
     logout();
   };
   return (
-    <AppBar position="sticky" elevation={0}>
+    <AppBar
+      position="sticky"
+      elevation={3}
+      sx={{
+        bgcolor: "primary.main",
+      }}
+    >
       <Toolbar
         sx={{
           display: "flex",
@@ -49,7 +55,7 @@ export default function AdminNavbar() {
           sx={{
             display: "flex",
             alignItems: "center",
-            backgroundColor: "rgba(255,255,255,0.05)",
+            backgroundColor: "primary.contrastText",
             px: 2,
             py: 0.5,
             borderRadius: 2,

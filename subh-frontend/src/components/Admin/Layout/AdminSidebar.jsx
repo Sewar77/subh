@@ -7,30 +7,29 @@ import {
   Divider,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-/*
-{
-          label: "Workshop Appointments",
-          path: "/admin/workshop-appointments",
-        },
-        { label: "Workshops", path: "/admin/workshops" },
-        { label: "Contact Us", path: "/admin/contact" },
-*/
 export default function AdminSidebar() {
   const sections = [
-    {
-      title: "Text Books",
-      items: [
-        { label: "View Books", path: "/admin/courses" },
-        { label: "Add Book", path: "/admin/news" },
-        { label: "Edit Book", path: "/admin/settings" },
-      ],
-    },
     {
       title: "Categories",
       items: [
         { label: "View Categories", path: "/admin/categories" },
-        { label: "Add Category", path: "" },
-        { label: "Edit Category", path: "" },
+        { label: "Add Category", path: "/admin/new-category" },
+      ],
+    },
+    {
+      title: "Users",
+      items: [
+        { label: "Users", path: "/admin/users" },
+        { label: "Add User", path: "/admin/add/user" },
+        { label: "Delete Users", path: "/admin/users/delete" },
+      ],
+    },
+    {
+      title: "Text Books",
+      items: [
+        { label: "View Books", path: "/admin" },
+        { label: "Add Book", path: "/admin" },
+        { label: "Edit Book", path: "/admin" },
       ],
     },
     {
@@ -65,14 +64,7 @@ export default function AdminSidebar() {
         { label: "Edit Category", path: "" },
       ],
     },
-    {
-      title: "Users",
-      items: [
-        { label: "Users", path: "/admin/users" },
-        { label: "Add User", path: "/admin/add/user" },
-        { label: "Delete Users", path: "/admin/users/delete" },
-      ],
-    },
+
     {
       title: "Reports",
       items: [
@@ -86,16 +78,14 @@ export default function AdminSidebar() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        bgcolor: "background.paper",
-        width: { md: "250px", lg: "300px" },
+        bgcolor: "primary.contrastText",
+        width: { md: "270px", lg: "350px" },
         color: "text.primary",
         p: 2,
         display: { xs: "none", md: "block" },
         borderRight: "1px solid",
         borderColor: "divider",
-        position: "static",
-        overflow: "auto",
+        minHeight: "100vh",
       }}
     >
       {sections.map((section, index) => (

@@ -4,114 +4,149 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
-  InputLabel,
-  MenuItem,
   Paper,
   Radio,
   RadioGroup,
   TextField,
   Typography,
+  Divider,
+  Box,
 } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 export default function AddUser() {
-  const [userType, setUserType] = useState();
-  const navigate = useNavigate();
-  const handleChange = (e) => {
-    setUserType(e.target.value);
-  };
+  const [userType, setUserType] = useState("individual");
+
   return (
-    <>
-      <Container>
-        <Typography variant="h4" sx={{ mt: 4, color: "text.secondary" }}>
-          Add User
+    <Container maxWidth="md">
+      <Typography variant="h4" sx={{ mt: 4, fontWeight: 700 }}>
+        Add User
+      </Typography>
+
+      <Paper
+        sx={{
+          mt: 3,
+          p: 4,
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          borderRadius: 3,
+          bgcolor: "text.secondary",
+        }}
+        elevation={3}
+      >
+        <Typography fontWeight={700} color="text.secondary">
+          User Info
         </Typography>
-        <Paper
+        <TextField
+          label="First Name"
+          fullWidth
           sx={{
-            minHeight: "100vh",
-            mt: 3,
-            p: 3,
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            bgcolor: "background.default",
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
           }}
-          elevation={4}
-        >
-          <TextField
-            label="First Name"
-            fullWidth
-            sx={{ bgcolor: "text.primary", input: { color: "text.secondary" } }}
-          />
-          <TextField
-            label="Last Name"
-            fullWidth
-            sx={{ bgcolor: "text.primary", input: { color: "text.secondary" } }}
-          />
-          <TextField
-            label="UserName"
-            fullWidth
-            sx={{ bgcolor: "text.primary", input: { color: "text.secondary" } }}
-          />
-          <TextField
-            label="Email"
-            type="email"
-            fullWidth
-            sx={{ bgcolor: "text.primary", input: { color: "text.secondary" } }}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            sx={{ bgcolor: "text.primary", input: { color: "text.secondary" } }}
-          />
-          <FormControl>
-            <FormLabel id="demo-radio-buttons-group-label">User Type</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              defaultValue="individual"
-              name="radio-buttons-group"
-            >
-              <FormControlLabel
-                value="individual"
-                control={<Radio />}
-                label="Individual"
-                sx={{
-                  bgcolor: "text.primary",
-                  color: "text.secondary",
-                }}
-              />
-              <FormControlLabel
-                value="company"
-                control={<Radio />}
-                label="Company"
-                sx={{
-                  bgcolor: "text.primary",
-                  color: "text.secondary",
-                }}
-              />
-            </RadioGroup>
-          </FormControl>
-          <TextField
-            label="Address"
-            multiline
-            rows={3}
-            fullWidth
-            sx={{
-              bgcolor: "text.primary",
-              textarea: { color: "text.secondary" },
-            }}
-          />
-          <TextField
-            label="Phone Number"
-            placeholder="+1 - 215-456-7890"
-            type="tel"
-            fullWidth
-            sx={{ bgcolor: "text.primary", input: { color: "text.secondary" } }}
-          />
-          <Button variant="contained">Add the User</Button>
-        </Paper>
-      </Container>
-    </>
+        />
+        <TextField
+          label="Last Name"
+          fullWidth
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
+        />
+        <TextField
+          label="Username"
+          fullWidth
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
+        />
+        <TextField
+          label="Email"
+          type="email"
+          fullWidth
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
+        />
+        <TextField
+          label="Password"
+          type="password"
+          fullWidth
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
+        />
+        <Divider />
+        <FormControl>
+          <FormLabel sx={{ color: "text.primary" }}>User Type</FormLabel>
+
+          <RadioGroup
+            value={userType}
+            onChange={(e) => setUserType(e.target.value)}
+          >
+            <FormControlLabel
+              value="individual"
+              control={
+                <Radio
+                  sx={{
+                    color: "#64748b",
+                    "&.Mui-checked": {
+                      color: "#6366f1",
+                    },
+                  }}
+                />
+              }
+              label="Individual"
+            />
+
+            <FormControlLabel
+              value="company"
+              control={
+                <Radio
+                  sx={{
+                    color: "#64748b",
+                    "&.Mui-checked": {
+                      color: "#6366f1",
+                    },
+                  }}
+                />
+              }
+              label="Company"
+            />
+          </RadioGroup>
+        </FormControl>
+        <Divider />
+
+        <TextField
+          label="Address"
+          multiline
+          rows={3}
+          fullWidth
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
+        />
+
+        <TextField
+          label="Phone Number"
+          placeholder="+962..."
+          type="tel"
+          fullWidth
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
+        />
+
+        <Button variant="contained" size="large">
+          Add User
+        </Button>
+      </Paper>
+    </Container>
   );
 }

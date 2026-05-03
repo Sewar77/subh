@@ -7,84 +7,160 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Avatar,
+  Stack,
+  Paper,
+  Chip,
+  Button,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { useContext } from "react";
 import { usersContext } from "../../../../Context/usersContext";
 import AddUserBtn from "./AddUserBtn";
+
 export default function ManageUsers() {
   const { users } = useContext(usersContext);
-  const headerStyle = {
-    fontWeight: "bold",
-    fontSize: { xs: "0.8rem", md: "1rem" },
-    color: "text.secondary",
-  };
-  const bodyStyle = {
-    fontWeight: "bold",
-    fontSize: { xs: "0.8rem", md: "1rem" },
-    color: "primary.main",
-  };
+  const theme = useTheme();
+
   return (
-    <Box
-      sx={{
-        color: "text.primary",
-      }}
-    >
+    <Box sx={{ color: "text.primary", p: 2 }}>
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: 2,
-          p: 2,
+          mb: 3,
         }}
       >
         <Typography
           variant="h4"
           sx={{
             fontSize: { xs: "1.5rem", md: "2rem" },
-            color: {
-              bodyStyle,
-            },
+            fontWeight: 700,
           }}
         >
-          Subh Users
+          Users
         </Typography>
 
         <AddUserBtn />
       </Box>
-
       <TableContainer
+        component={Paper}
         sx={{
-          width: "100%",
-          overflowX: "auto",
-          px: { xs: 1, md: 2 },
+          borderRadius: 3,
+          bgcolor: "background.default",
+          overflow: "auto",
         }}
       >
-        <Table
-          sx={{
-            minWidth: 500,
-            "& .MuiTableCell-root": {
-              borderBottom: "1px solid rgba(255,255,255,0.2)",
-              fontSize: { xs: "0.75rem", md: "0.9rem" },
-            },
-          }}
-        >
-          <TableHead>
+        <Table>
+          <TableHead
+            sx={{
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              alignItems: "center",
+              alignContent: "center",
+              p: 2,
+            }}
+          >
             <TableRow>
-              <TableCell sx={headerStyle}>Email</TableCell>
-              <TableCell sx={headerStyle}>User Type</TableCell>
-              <TableCell sx={headerStyle}>Active</TableCell>
+              <TableCell
+                sx={{
+                  width: 360,
+                  alignItems: "center",
+                }}
+              >
+                User
+              </TableCell>
+              <TableCell sx={{ width: 360 }}>Email</TableCell>
+              <TableCell sx={{ width: 360 }}>Role</TableCell>
+              <TableCell sx={{ width: 360 }}>Status</TableCell>
+              <TableCell sx={{ width: 360, textAlign: "center" }}>
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell sx={bodyStyle}>{user.email}</TableCell>
-                <TableCell sx={bodyStyle}>{user.user_type}</TableCell>
-                <TableCell sx={bodyStyle}>
-                  {user.is_active ? "Active" : "Not Active"}
+            {users?.map((user) => (
+              <TableRow
+                key={user.id}
+                hover
+                sx={{
+                  p: 2,
+                  "&:hover": {
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                  "&:last-child td": { borderBottom: 0 },
+                }}
+              >
+                <TableCell>
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
+                    sx={{
+                      alignItems: "center",
+                    }}
+                  >
+                    <Avatar sx={{ bgcolor: "primary.main" }}>
+                      {user.email?.charAt(0).toUpperCase()}
+                    </Avatar>
+
+                    <Typography fontWeight={600}>
+                      {user.name || "User"}
+                    </Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>
+                  <Chip
+                    label={user.user_type}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
+                </TableCell>
+
+                <TableCell>
+                  <Chip
+                    label={user.is_active ? "Active" : "Inactive"}
+                    size="small"
+                    color={user.is_active ? "success" : "error"}
+                  />
+                </TableCell>
+
+                {/* ACTIONS */}
+                <TableCell>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ justifyContent: "center" }}
+                  >
+                    <Tooltip title="Edit">
+                      <IconButton size="small" color="primary">
+                        <EditOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Delete">
+                      <IconButton size="small" color="error">
+                        <DeleteOutlineOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      sx={{ textTransform: "none" }}
+                    >
+                      View
+                    </Button>
+                  </Stack>
                 </TableCell>
               </TableRow>
             ))}
