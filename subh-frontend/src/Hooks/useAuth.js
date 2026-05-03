@@ -30,7 +30,7 @@ export const useAuth = () => {
       const res = await api.post("/auth/logout");
       setUser(null);
       toast.success("Logout Successfully");
-      navigate("/")
+      navigate("/");
     } catch (err) {
       console.log(err);
       toast.error(err.response?.data?.message || "Logout failed");

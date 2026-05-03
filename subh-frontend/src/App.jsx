@@ -10,6 +10,8 @@ import AdminDashboard from "./Pages/Admin/AdminDashboard.jsx";
 import AdminLayout from "./Layout/AdminLayout.jsx";
 import ManageUsers from "./components/Admin/Manage/ManageUsers/ManageUsers.jsx";
 import AddUser from "./components/Admin/Manage/ManageUsers/AddUser.jsx";
+import DisplayCategories from "./components/Admin/Manage/ManageCategories/DisplayCategories.jsx";
+import AddCategory from "./components/Admin/Manage/ManageCategories/AddCategory.jsx";
 function App() {
   return (
     <>
@@ -26,6 +28,8 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<ManageUsers />} />
           <Route path="add/user" element={<AddUser />} />
+          <Route path="categories" element={<DisplayCategories />} />
+          <Route path="new-category" element={<AddCategory />} />
         </Route>
       </Routes>
     </>
