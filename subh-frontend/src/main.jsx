@@ -8,14 +8,17 @@ import { theme } from "./Theme/Theme.jsx";
 import { BrowserRouter } from "react-router-dom";
 import AuthProvider from "./Context/authContext.jsx";
 import UsersProvider from "./Context/usersContext.jsx";
+import CategoriesProvider from "./Context/categoriesContext.jsx";
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <AuthProvider>
       <UsersProvider>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <App />
-        </ThemeProvider>
+        <CategoriesProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <App />
+          </ThemeProvider>
+        </CategoriesProvider>
       </UsersProvider>
     </AuthProvider>
   </BrowserRouter>,

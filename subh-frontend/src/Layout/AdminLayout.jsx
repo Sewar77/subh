@@ -18,19 +18,14 @@ export default function AdminLayout() {
       >
         <Box
           sx={{
-            width: 250,
-            position: "fixed",
             top: 0,
             left: 0,
-            height: "100vh",
-            marginTop: "65px",
           }}
         >
           <AdminSidebar />
         </Box>
         <Box
           sx={{
-            marginLeft: { md: "300px" },
             width: "100%",
           }}
         >

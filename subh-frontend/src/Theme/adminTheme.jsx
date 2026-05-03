@@ -25,14 +25,13 @@ export const adminTheme = createTheme({
     },
 
     background: {
-      default: "#69839c",
+      default: "#0b1220",
     },
 
     text: {
-      primary: "#f1f5f9",
-      secondary: "#1e293b",
+      primary: "#e2e8f0",
+      secondary: "#94a3b8",
     },
-
     divider: "rgba(148, 163, 184, 0.2)",
   },
 

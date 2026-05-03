@@ -7,21 +7,62 @@ import {
   Divider,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-
-export default function AdminSidebar() {
-  const sections = [
-    {
-      title: "Courses",
-      items: [
-        { label: "Courses", path: "/admin/courses" },
-        { label: "News", path: "/admin/news" },
-        { label: "Site Settings", path: "/admin/settings" },
-        {
+/*
+{
           label: "Workshop Appointments",
           path: "/admin/workshop-appointments",
         },
         { label: "Workshops", path: "/admin/workshops" },
         { label: "Contact Us", path: "/admin/contact" },
+*/
+export default function AdminSidebar() {
+  const sections = [
+    {
+      title: "Text Books",
+      items: [
+        { label: "View Books", path: "/admin/courses" },
+        { label: "Add Book", path: "/admin/news" },
+        { label: "Edit Book", path: "/admin/settings" },
+      ],
+    },
+    {
+      title: "Categories",
+      items: [
+        { label: "View Categories", path: "/admin/categories" },
+        { label: "Add Category", path: "" },
+        { label: "Edit Category", path: "" },
+      ],
+    },
+    {
+      title: "Work Shops",
+      items: [
+        { label: "View Categories", path: "" },
+        { label: "Add Category", path: "" },
+        { label: "Edit Category", path: "" },
+      ],
+    },
+    {
+      title: "News",
+      items: [
+        { label: "View Categories", path: "" },
+        { label: "Add Category", path: "" },
+        { label: "Edit Category", path: "" },
+      ],
+    },
+    {
+      title: "Contact Us",
+      items: [
+        { label: "View Categories", path: "" },
+        { label: "Add Category", path: "" },
+        { label: "Edit Category", path: "" },
+      ],
+    },
+    {
+      title: "About Us",
+      items: [
+        { label: "View Categories", path: "" },
+        { label: "Add Category", path: "" },
+        { label: "Edit Category", path: "" },
       ],
     },
     {
@@ -30,6 +71,14 @@ export default function AdminSidebar() {
         { label: "Users", path: "/admin/users" },
         { label: "Add User", path: "/admin/add/user" },
         { label: "Delete Users", path: "/admin/users/delete" },
+      ],
+    },
+    {
+      title: "Reports",
+      items: [
+        { label: "View Categories", path: "" },
+        { label: "Add Category", path: "" },
+        { label: "Edit Category", path: "" },
       ],
     },
   ];
@@ -46,6 +95,7 @@ export default function AdminSidebar() {
         borderRight: "1px solid",
         borderColor: "divider",
         position: "static",
+        overflow: "auto",
       }}
     >
       {sections.map((section, index) => (
