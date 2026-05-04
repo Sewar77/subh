@@ -1,8 +1,10 @@
 import { Button, Stack, Typography, Paper, Box } from "@mui/material";
 import NewsCarousel from "./NewsCarousel";
 import About from "../About/About";
+import { useNavigate } from "react-router-dom";
 
 export default function News() {
+  const navigate = useNavigate();
   return (
     <Box
       sx={{
@@ -42,6 +44,7 @@ export default function News() {
               background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
             },
           }}
+          onClick={() => navigate("/register")}
         >
           Discover More
         </Button>
@@ -58,6 +61,7 @@ export default function News() {
               background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
             },
           }}
+          onClick={() => navigate("register")}
         >
           Sign Up Now
         </Button>

@@ -31,7 +31,7 @@ export default function AddUser() {
           flexDirection: "column",
           gap: 3,
           borderRadius: 3,
-          bgcolor: "text.secondary",
+          bgcolor: "background.paper",
         }}
         elevation={3}
       >

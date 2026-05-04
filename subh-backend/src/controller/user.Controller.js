@@ -3,6 +3,7 @@ import {
   getUserByEmail,
   getUserById,
 } from "../models/auth.Models.js";
+import { deleteUser } from "../models/user.Model.js";
 
 export const getAllUsersController = async (req, res) => {
   try {
@@ -31,13 +32,27 @@ export const getUserByIdController = async (req, res) => {
 };
 
 export const getUserByEmailController = async (req, res) => {
-  const email = req.req;
+  const email = req.body;
   try {
     const user = await getUserByEmail(email);
     if (!user) {
       return res.status(404).json({ message: "user not found" });
     }
     return res.status(200).json({ message: "user found", user: user });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const deleteUserController = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const user = await getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    await deleteUser(userId);
+    return res.status(200).json({ message: "user eleted" });
   } catch (err) {
     return res.status(500).json({ message: "Internal server error" });
   }

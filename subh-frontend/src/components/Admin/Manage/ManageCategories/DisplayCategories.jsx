@@ -20,14 +20,15 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import { useTheme } from "@mui/material/styles";
 import { useCategories } from "../../../../Hooks/useCategories";
 import AddCategoriesBtn from "./AddCategoriesBtn";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 
 export default function DisplayCategories() {
-  const { categories, loadCategories } = useCategories();
+  const { categories, loadCategories, deleteCategoryById } = useCategories();
   const theme = useTheme();
-  useEffect(() => {
-    loadCategories();
-  }, []);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+
   return (
     <Box sx={{ color: "text.primary", p: 2 }}>
       <Box
@@ -90,7 +91,11 @@ export default function DisplayCategories() {
                 }}
               >
                 <TableCell>
-                  <Stack direction="row" spacing={2} alignItems="center">
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    sx={{ alignItems: "center" }}
+                  >
                     <Avatar
                       src={category.image}
                       variant="rounded"
@@ -177,8 +182,7 @@ export default function DisplayCategories() {
                   <Stack
                     direction="row"
                     spacing={1}
-                    justifyContent="center"
-                    alignItems="center"
+                    sx={{ justifyContent: "center", alignItems: "center" }}
                   >
                     <Tooltip title="Edit">
                       <IconButton size="small" color="primary">
@@ -187,7 +191,13 @@ export default function DisplayCategories() {
                     </Tooltip>
 
                     <Tooltip title="Delete">
-                      <IconButton size="small" color="error">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          (setConfirmDelete(true), setSelectedId(category.id));
+                        }}
+                      >
                         <DeleteOutlineOutlinedIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -210,6 +220,17 @@ export default function DisplayCategories() {
           </TableBody>
         </Table>
       </TableContainer>
+      {confirmDelete && (
+        <ConfirmDeleteModal
+          open={confirmDelete}
+          onClose={() => setConfirmDelete(false)}
+          onConfirm={() => (
+            deleteCategoryById(selectedId),
+            setConfirmDelete(false)
+          )}
+          label={"Category"}
+        />
+      )}
     </Box>
   );
 }
