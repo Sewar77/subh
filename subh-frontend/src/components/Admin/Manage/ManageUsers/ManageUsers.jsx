@@ -18,13 +18,17 @@ import {
 import { useTheme } from "@mui/material/styles";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { usersContext } from "../../../../Context/usersContext";
 import AddUserBtn from "./AddUserBtn";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
+import { useUser } from "../../../../Hooks/useUsers";
 
 export default function ManageUsers() {
-  const { users } = useContext(usersContext);
+  const { users, deleteUserById } = useUser();
   const theme = useTheme();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   return (
     <Box sx={{ color: "text.primary", p: 2 }}>
@@ -148,7 +152,13 @@ export default function ManageUsers() {
                     </Tooltip>
 
                     <Tooltip title="Delete">
-                      <IconButton size="small" color="error">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          (setConfirmDelete(true), setSelectedId(user.id));
+                        }}
+                      >
                         <DeleteOutlineOutlinedIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -167,6 +177,17 @@ export default function ManageUsers() {
           </TableBody>
         </Table>
       </TableContainer>
+      {confirmDelete && (
+        <ConfirmDeleteModal
+          open={confirmDelete}
+          onClose={() => setConfirmDelete(false)}
+          onConfirm={() => (
+            deleteUserById(selectedId),
+            setConfirmDelete(false)
+          )}
+          label={"User"}
+        />
+      )}
     </Box>
   );
 }

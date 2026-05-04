@@ -100,9 +100,9 @@ export default function Navbar() {
                 background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
               },
             }}
-            onClick={() => navigate("/register")}
+            onClick={() => navigate("/login")}
           >
-            Join Us
+            Login
           </Button>
           <IconButton
             onClick={() => setOpen(true)}

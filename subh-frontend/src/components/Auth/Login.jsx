@@ -13,13 +13,14 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useAuth } from "../../Hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 export default function Login() {
   const [userData, setUserData] = useState({
     email: "",
     password: "",
   });
   console.log(userData);
-
+  const navigate = useNavigate();
   const { login } = useAuth();
   const handleLogin = () => {
     login(userData);
@@ -99,7 +100,8 @@ export default function Login() {
               }}
             />
             <Typography variant="body2">
-              Already Have an Account? LoginIn
+              Don`t have an account?
+              <Button onClick={() => navigate("/register")}>Register</Button>
             </Typography>
             <Button
               variant="contained"

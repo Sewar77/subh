@@ -25,3 +25,35 @@ export const getAllCategories = async () => {
 
   return result.rows;
 };
+
+export const deleteCategory = async (catId) => {
+  const result = await pool.query(
+    `DELETE FROM categories WHERE id = $1 RETURNING *`,
+    [catId],
+  );
+
+  return result.rows[0];
+};
+
+export const updateCategory = async (catId, catData) => {
+  const result = await pool.query(
+    `UPDATE categories 
+     SET name_en = $1,
+         name_ar = $2,
+         description_en = $3,
+         description_ar = $4,
+         image = $5
+     WHERE id = $6
+     RETURNING *`,
+    [
+      catData.name_en,
+      catData.name_ar,
+      catData.description_en,
+      catData.description_ar,
+      catData.image,
+      catId,
+    ],
+  );
+
+  return result.rows[0];
+};
