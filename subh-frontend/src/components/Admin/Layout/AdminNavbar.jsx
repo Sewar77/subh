@@ -46,7 +46,6 @@ export default function AdminNavbar() {
           <IconButton color="inherit">
             <MenuIcon />
           </IconButton>
-
           <Typography variant="h6" fontWeight={600}>
             Hi, {user?.name}
           </Typography>
@@ -62,10 +61,10 @@ export default function AdminNavbar() {
             width: "300px",
           }}
         >
-          <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
+          <SearchIcon sx={{ mr: 1, color: "text.primary" }} />
           <InputBase
             placeholder="Search..."
-            sx={{ color: "inherit", width: "100%" }}
+            sx={{ color: "text.primary", width: "100%" }}
           />
         </Box>
         <Box

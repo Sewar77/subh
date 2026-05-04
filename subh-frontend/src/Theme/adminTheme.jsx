@@ -14,12 +14,15 @@ export const adminTheme = createTheme({
 
     background: {
       default: "#f1f5f9",
-      paper: "#ffffff",
+      paper: "#ded0d0",
     },
 
     text: {
       primary: "#0f172a",
       secondary: "#64748b",
+    },
+    error: {
+      main: "##ff0000",
     },
   },
 

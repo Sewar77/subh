@@ -85,7 +85,7 @@ export default function AddCategory() {
           flexDirection: "column",
           gap: 3,
           borderRadius: 3,
-          bgcolor: "text.secondary",
+          bgcolor: "background.paper",
         }}
         elevation={3}
       >

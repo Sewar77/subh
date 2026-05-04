@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { api } from "../../api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -24,5 +24,18 @@ export const useCategories = () => {
     }
   };
 
-  return { createCategories, categories, loadCategories };
+  const deleteCategoryById = async (catId) => {
+    const res = await api.delete(`/category/delete/${catId}`);
+    try {
+      toast.success("delete categoery!");
+      loadCategories();
+    } catch (error) {
+      console.log(error);
+      toast.error(error);
+    }
+  };
+  useEffect(() => {
+    loadCategories();
+  }, []);
+  return { createCategories, categories, loadCategories, deleteCategoryById };
 };
