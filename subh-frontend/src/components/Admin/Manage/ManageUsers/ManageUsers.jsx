@@ -20,9 +20,11 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { useContext, useState } from "react";
 import { usersContext } from "../../../../Context/usersContext";
-import AddUserBtn from "./AddUserBtn";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 import { useUser } from "../../../../Hooks/useUsers";
+import DeleteButton from "../../Buttons/DeleteBtn";
+import ViewButton from "../../Buttons/ViewBtn";
+import AddButton from "../../Buttons/AddBtn";
 
 export default function ManageUsers() {
   const { users, deleteUserById } = useUser();
@@ -51,7 +53,7 @@ export default function ManageUsers() {
           Users
         </Typography>
 
-        <AddUserBtn />
+        <AddButton label={"User"} to={"/admin/add/user"} />
       </Box>
       <TableContainer
         component={Paper}
@@ -151,25 +153,13 @@ export default function ManageUsers() {
                       </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Delete">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => {
-                          (setConfirmDelete(true), setSelectedId(user.id));
-                        }}
-                      >
-                        <DeleteOutlineOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <DeleteButton
+                      onClick={() => {
+                        (setConfirmDelete(true), setSelectedId(user.id));
+                      }}
+                    />
 
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      sx={{ textTransform: "none" }}
-                    >
-                      View
-                    </Button>
+                    <ViewButton />
                   </Stack>
                 </TableCell>
               </TableRow>

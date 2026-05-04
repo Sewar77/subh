@@ -5,8 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { categoriesContext } from "../Context/categoriesContext";
 
 export const useCategories = () => {
-  const { categories, setCategories, loadCategories } =
+  const { categories, setCategories, loadCategories, category, setCategory } =
     useContext(categoriesContext);
+
   const navigate = useNavigate();
 
   const createCategories = async (catData) => {
@@ -18,6 +19,29 @@ export const useCategories = () => {
     try {
       setCategories(res.data.categories);
       toast.success("created categories ! ");
+    } catch (error) {
+      console.log(error);
+      toast.error(error);
+    }
+  };
+
+  const updateCategory = async (id, catData) => {
+    try {
+      const res = await api.put(`/category/update/${id}`, catData);
+      setCategories((prev) =>
+        prev.map((cat) => (cat.id === id ? res.data.category : cat)),
+      );
+      toast.success("Category updated!");
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message || "Update failed");
+    }
+  };
+
+  const getCategory = async (catId) => {
+    try {
+      const res = await api.get(`/category/${catId}`);
+      setCategory(res.data.category);
     } catch (error) {
       console.log(error);
       toast.error(error);
@@ -37,5 +61,13 @@ export const useCategories = () => {
   useEffect(() => {
     loadCategories();
   }, []);
-  return { createCategories, categories, loadCategories, deleteCategoryById };
+  return {
+    createCategories,
+    categories,
+    loadCategories,
+    deleteCategoryById,
+    getCategory,
+    category,
+    updateCategory,
+  };
 };

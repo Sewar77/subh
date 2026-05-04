@@ -5,6 +5,7 @@ import {
   createCategoryController,
   deleteCategoryController,
   getAllCategoriesController,
+  getCategoryByIdController,
   updateCategoryController,
 } from "../controller/categories.Controller.js";
 const route = express.Router();
@@ -17,5 +18,6 @@ route.delete(
   adminOnly,
   deleteCategoryController,
 );
+route.get("/category/:id", protect, getCategoryByIdController);
 route.put("/category/update/:id", protect, adminOnly, updateCategoryController);
 export default route;

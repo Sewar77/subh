@@ -89,7 +89,18 @@ export default function AddCategory() {
         }}
         elevation={3}
       >
-        <Typography fontWeight={700} color="text.primary">
+        <Typography
+          fontWeight={700}
+          sx={{
+            bgcolor: "primary.main",
+            width: "fit-content",
+            p: 3,
+            borderRadius: 3,
+            textAlign: "center",
+            alignSelf: "center",
+            color: "background.paper",
+          }}
+        >
           English
         </Typography>
 
@@ -120,7 +131,18 @@ export default function AddCategory() {
         <Divider />
 
         {/* ARABIC */}
-        <Typography fontWeight={700} textAlign="right" color="text.secondary">
+        <Typography
+          fontWeight={700}
+          sx={{
+            bgcolor: "primary.main",
+            width: "fit-content",
+            p: 3,
+            borderRadius: 3,
+            textAlign: "center",
+            alignSelf: "center",
+            color: "background.paper",
+          }}
+        >
           العربية
         </Typography>
 
