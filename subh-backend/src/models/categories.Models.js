@@ -26,6 +26,14 @@ export const getAllCategories = async () => {
   return result.rows;
 };
 
+export const getCategoryById = async (catId) => {
+  const result = await pool.query(`SELECT * FROM categories where id = $1`, [
+    catId,
+  ]);
+
+  return result.rows[0];
+};
+
 export const deleteCategory = async (catId) => {
   const result = await pool.query(
     `DELETE FROM categories WHERE id = $1 RETURNING *`,
@@ -34,7 +42,6 @@ export const deleteCategory = async (catId) => {
 
   return result.rows[0];
 };
-
 export const updateCategory = async (catId, catData) => {
   const result = await pool.query(
     `UPDATE categories 
@@ -43,8 +50,8 @@ export const updateCategory = async (catId, catData) => {
          description_en = $3,
          description_ar = $4,
          image = $5
-     WHERE id = $6
-     RETURNING *`,
+         WHERE id = $6
+         RETURNING *`,
     [
       catData.name_en,
       catData.name_ar,

@@ -19,16 +19,29 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { useTheme } from "@mui/material/styles";
 import { useCategories } from "../../../../Hooks/useCategories";
-import AddCategoriesBtn from "./AddCategoriesBtn";
 import { useEffect, useState } from "react";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
+import { useNavigate } from "react-router-dom";
+import DeleteButton from "../../Buttons/DeleteBtn";
+import ViewButton from "../../Buttons/ViewBtn";
+import AddButton from "../../Buttons/AddBtn";
+import UpdateCategory from "./UpdateCategory";
+import UpdateBtn from "../../Buttons/UpdateBtn";
 
 export default function DisplayCategories() {
-  const { categories, loadCategories, deleteCategoryById } = useCategories();
+  const { categories, loadCategories, deleteCategoryById, getCategory } =
+    useCategories();
   const theme = useTheme();
+  const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-
+  const [selectedViewId, setSelectedViewId] = useState(null);
+  const [selectedUpdateId, setSelectedUpdateId] = useState(null);
+  const handleViewCategory = (catId) => {
+    navigate(`/admin/view/category/${catId}`);
+  };
+  const handleUpdateCategory = (catId) => {
+    navigate(`/admin/category/update/${catId}`);
+  };
   return (
     <Box sx={{ color: "text.primary", p: 2 }}>
       <Box
@@ -49,7 +62,7 @@ export default function DisplayCategories() {
         >
           Categories
         </Typography>
-        <AddCategoriesBtn />
+        <AddButton label={"Category"} to={"/admin/new-category"} />
       </Box>
 
       <TableContainer
@@ -65,15 +78,58 @@ export default function DisplayCategories() {
             sx={{
               bgcolor: "primary.main",
               color: "primary.contrastText",
+              fontWeight: 900,
             }}
           >
             <TableRow>
-              <TableCell sx={{ width: 360 }}>Category</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell sx={{ width: 160, textAlign: "center" }}>
+              <TableCell
+                sx={{
+                  width: 100,
+                  textAlign: "center",
+                  color: "primary.contrastText",
+                  fontWeight: 700,
+                }}
+              >
+                Category
+              </TableCell>
+              <TableCell
+                sx={{
+                  width: 340,
+                  textAlign: "center",
+                  color: "primary.contrastText",
+                  fontWeight: 700,
+                }}
+              >
+                Description
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Typography sx={{ fontSize: 14 }}>En</Typography>
+                  <Typography sx={{ fontSize: 14 }}>Ar</Typography>
+                </Box>
+              </TableCell>
+              <TableCell
+                sx={{
+                  width: 100,
+                  textAlign: "center",
+                  color: "primary.contrastText",
+                  fontWeight: 700,
+                }}
+              >
                 Created
               </TableCell>
-              <TableCell sx={{ width: 160, textAlign: "center" }}>
+              <TableCell
+                sx={{
+                  width: 100,
+                  textAlign: "center",
+                  color: "primary.contrastText",
+                  fontWeight: 700,
+                }}
+              >
                 Actions
               </TableCell>
             </TableRow>
@@ -90,129 +146,108 @@ export default function DisplayCategories() {
                   "&:last-child td": { borderBottom: 0 },
                 }}
               >
+                {/* CATEGORY (IMAGE + BASIC INFO) */}
+                <TableCell>
+                  <Avatar
+                    src={category.image}
+                    variant="rounded"
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: 2,
+                      border: `1px solid ${theme.palette.divider}`,
+                      flexShrink: 0,
+                    }}
+                  />
+                </TableCell>
+                {/* DESCRIPTION (GROUPED BY LANGUAGE) */}
                 <TableCell>
                   <Stack
                     direction="row"
-                    spacing={2}
-                    sx={{ alignItems: "center" }}
+                    spacing={1}
+                    sx={{ alignItems: "center", justifyContent: "center" }}
                   >
-                    <Avatar
-                      src={category.image}
-                      variant="rounded"
-                      sx={{
-                        width: 100,
-                        height: 100,
-                        borderRadius: 2,
-                        border: `1px solid ${theme.palette.divider}`,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontWeight: 700,
-                          color: "text.primary",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          maxWidth: { xs: 180, sm: 260 },
-                        }}
-                        title={`${category.name_en} || ${category.name_ar}`}
-                      >
-                        {category.name_en} {" || "} {category.name_ar}
+                    {/* ENGLISH */}
+                    <Box sx={{ flex: 1 }}>
+                      <Typography sx={{ fontSize: 14 }}>
+                        {category.name_en || "—"}
                       </Typography>
 
                       <Typography
-                        variant="caption"
+                        sx={{ fontSize: 13, color: "text.secondary" }}
+                      >
+                        {category.description_en || "—"}
+                      </Typography>
+                    </Box>
+
+                    {/* DIVIDER */}
+                    <Divider
+                      orientation="vertical"
+                      flexItem
+                      sx={{ bgcolor: "text.secondary" }}
+                    />
+
+                    {/* ARABIC */}
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
                         sx={{
-                          display: "inline-block",
-                          color: "text.primary",
-                          mt: 0.5,
+                          fontSize: 14,
+                          direction: "rtl",
+                          textAlign: "right",
                         }}
                       >
-                        ID: {category.id}
+                        {category.name_ar || "—"}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          fontSize: 13,
+                          color: "text.secondary",
+                          direction: "rtl",
+                          textAlign: "right",
+                        }}
+                      >
+                        {category.description_ar || "—"}
                       </Typography>
                     </Box>
                   </Stack>
                 </TableCell>
 
-                <TableCell>
-                  <Box
-                    sx={{
-                      color: "text.primary",
-                      fontSize: 14,
-                      lineHeight: 1.4,
-                      maxWidth: { xs: 220, sm: 520 },
-                      overflow: "hidden",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: "vertical",
-                      textOverflow: "ellipsis",
-                    }}
-                    title={`${category.description_en || ""}\n${category.description_ar || ""}`}
-                  >
-                    <Typography component="div" sx={{ color: "text.primary" }}>
-                      {category.description_en || "—"}
-                    </Typography>
-                    <Typography
-                      component="div"
-                      sx={{
-                        color: "text.primary",
-                        direction: "rtl",
-                        mt: 0.5,
-                      }}
-                    >
-                      {category.description_ar || "—"}
-                    </Typography>
-                  </Box>
-                </TableCell>
-
+                {/* CREATED DATE */}
                 <TableCell align="center">
-                  <Typography variant="body2" sx={{ color: "text.primary" }}>
+                  <Typography variant="body2">
                     {new Date(category.created_at).toLocaleDateString()}
                   </Typography>
+
                   <Divider sx={{ my: 1 }} />
-                  <Typography variant="caption" sx={{ color: "text.primary" }}>
+
+                  <Typography variant="caption">
                     {new Date(category.created_at).toLocaleTimeString()}
                   </Typography>
                 </TableCell>
 
+                {/* ACTIONS */}
                 <TableCell align="center">
                   <Stack
                     direction="row"
                     spacing={1}
-                    sx={{ justifyContent: "center", alignItems: "center" }}
+                    justifyContent="center"
+                    alignItems="center"
                   >
-                    <Tooltip title="Edit">
-                      <IconButton size="small" color="primary">
-                        <EditOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <UpdateBtn
+                      onClick={() => handleUpdateCategory(category.id)}
+                    />
 
-                    <Tooltip title="Delete">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => {
-                          (setConfirmDelete(true), setSelectedId(category.id));
-                        }}
-                      >
-                        <DeleteOutlineOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: "none",
-                        display: { xs: "none", sm: "inline-flex" },
+                    <DeleteButton
+                      onClick={() => {
+                        setSelectedViewId(category.id);
+                        setConfirmDelete(true);
                       }}
-                    >
-                      View
-                    </Button>
+                    />
+
+                    <ViewButton
+                      onClick={() => handleViewCategory(category.id)}
+                    />
                   </Stack>
                 </TableCell>
               </TableRow>
@@ -225,7 +260,7 @@ export default function DisplayCategories() {
           open={confirmDelete}
           onClose={() => setConfirmDelete(false)}
           onConfirm={() => (
-            deleteCategoryById(selectedId),
+            deleteCategoryById(selectedViewId),
             setConfirmDelete(false)
           )}
           label={"Category"}

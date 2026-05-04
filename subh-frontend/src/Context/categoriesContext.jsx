@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 export const categoriesContext = createContext();
 export default function CategoriesProvider({ children }) {
   const [categories, setCategories] = useState([]);
-
+  const [category, setCategory] = useState({});
   const loadCategories = async () => {
     try {
       const res = await api.get("/categories/all");
@@ -18,7 +18,13 @@ export default function CategoriesProvider({ children }) {
 
   return (
     <categoriesContext.Provider
-      value={{ categories, setCategories, loadCategories }}
+      value={{
+        categories,
+        setCategories,
+        loadCategories,
+        category,
+        setCategory,
+      }}
     >
       {children}
     </categoriesContext.Provider>

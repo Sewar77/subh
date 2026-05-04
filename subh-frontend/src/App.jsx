@@ -12,7 +12,11 @@ import ManageUsers from "./components/Admin/Manage/ManageUsers/ManageUsers.jsx";
 import AddUser from "./components/Admin/Manage/ManageUsers/AddUser.jsx";
 import DisplayCategories from "./components/Admin/Manage/ManageCategories/DisplayCategories.jsx";
 import AddCategory from "./components/Admin/Manage/ManageCategories/AddCategory.jsx";
+import { useParams } from "react-router-dom";
+import ViewCategory from "./components/Admin/Manage/ManageCategories/ViewCategory.jsx";
+import UpdateCategory from "./components/Admin/Manage/ManageCategories/UpdateCategory.jsx";
 function App() {
+  const { id } = useParams();
   return (
     <>
       <Toaster position="top-center" />
@@ -30,6 +34,8 @@ function App() {
           <Route path="add/user" element={<AddUser />} />
           <Route path="categories" element={<DisplayCategories />} />
           <Route path="new-category" element={<AddCategory />} />
+          <Route path="view/category/:id" element={<ViewCategory />} />
+          <Route path="category/update/:id" element={<UpdateCategory />} />
         </Route>
       </Routes>
     </>
