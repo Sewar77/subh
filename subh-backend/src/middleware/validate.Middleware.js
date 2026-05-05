@@ -6,7 +6,7 @@ export const validate = (schema) => {
       return res.status(400).json({ success: false, errors });
     }
 
-    req.validateData = value;
+    req.body = value;
     next();
   };
 };

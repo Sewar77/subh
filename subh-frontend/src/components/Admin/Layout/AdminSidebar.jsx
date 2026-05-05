@@ -27,7 +27,7 @@ export default function AdminSidebar() {
     {
       title: "Text Books",
       items: [
-        { label: "View Books", path: "/admin" },
+        { label: "View Books", path: "/admin/books" },
         { label: "Add Book", path: "/admin" },
         { label: "Edit Book", path: "/admin" },
       ],
