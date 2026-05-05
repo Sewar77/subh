@@ -5,7 +5,7 @@ export default function UpdateBtn({ onClick }) {
   return (
     <Tooltip title="Edit">
       <IconButton size="small" color="primary" onClick={onClick}>
-        <EditOutlinedIcon fontSize="small" />
+        <EditOutlinedIcon fontSize="large" />
       </IconButton>
     </Tooltip>
   );

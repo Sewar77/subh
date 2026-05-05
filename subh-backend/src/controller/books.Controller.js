@@ -1,8 +1,10 @@
 import {
   createAuthor,
   createBook,
+  deleteBook,
   findAuthorByName,
   getAllBooks,
+  getBookById,
   linkBookAuthor,
 } from "../models/books.Models.js";
 import pool from "../config/db.js";
@@ -86,6 +88,36 @@ export const getAllBooksController = async (req, res) => {
       message: "books fetched",
       books,
     });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteBookController = async (req, res) => {
+  const bookId = req.params.id;
+  try {
+    await deleteBook(bookId);
+    return res.status(200).json({ message: "deleted" });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+export const getBookByIdController = async (req, res) => {
+  const bookId = req.params.id;
+  console.log("bookId", bookId);
+  try {
+    const book = await getBookById(bookId);
+    if (!book) {
+      return res.status(404).json({ message: "book not found" });
+    }
+    return res.status(200).json({ message: "gets", book: book });
   } catch (error) {
     return res.status(500).json({
       message: "Internal server error",

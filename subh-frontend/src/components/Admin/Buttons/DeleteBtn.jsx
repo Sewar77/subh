@@ -5,7 +5,7 @@ export default function DeleteButton({ onClick }) {
   return (
     <Tooltip title="Delete">
       <IconButton size="small" color="error" onClick={onClick}>
-        <DeleteOutlineOutlinedIcon fontSize="small" />
+        <DeleteOutlineOutlinedIcon fontSize="large" />
       </IconButton>
     </Tooltip>
   );

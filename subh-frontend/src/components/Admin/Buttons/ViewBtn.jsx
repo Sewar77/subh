@@ -10,6 +10,7 @@ export default function ViewButton({ onClick }) {
         borderRadius: 2,
         textTransform: "none",
         display: { xs: "none", sm: "inline-flex" },
+        fontSize: 18,
       }}
     >
       View

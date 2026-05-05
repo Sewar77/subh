@@ -11,9 +11,9 @@ import {
 } from "@mui/material";
 import toast from "react-hot-toast";
 import { useState } from "react";
-import { useUpload } from "../../Hooks/useUpload";
-import { useBooks } from "../../Hooks/useBooks";
-import { useCategories } from "../../Hooks/useCategories";
+import { useUpload } from "../../../../Hooks/useUpload";
+import { useBooks } from "../../../../Hooks/useBooks";
+import { useCategories } from "../../../../Hooks/useCategories";
 
 export default function AddBook() {
   const { createBooks } = useBooks();
@@ -98,7 +98,7 @@ export default function AddBook() {
   };
 
   return (
-    <Container maxWidth="md">
+    <Container>
       <Typography variant="h4" sx={{ mt: 4, fontWeight: 700 }}>
         Add Book
       </Typography>
@@ -162,7 +162,7 @@ export default function AddBook() {
           value={bookData.author_name_ar}
           onChange={handleChange}
           fullWidth
-          InputProps={{ dir: "rtl" }}
+          inputprops={{ dir: "rtl" }}
         />
         <Divider />
 
@@ -234,39 +234,100 @@ export default function AddBook() {
         <Divider />
 
         {/* IMAGE UPLOAD */}
-        <Box sx={{ p: 3, border: "1px dashed #ccc", borderRadius: 3 }}>
-          <Typography fontWeight={600}>Image Upload</Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            flexWrap: { xs: "wrap", sm: "wrap", md: "nowrap", lg: "nowrap" },
+            gap: { sm: 3, md: 4 },
+          }}
+        >
+          <Box
+            sx={{
+              p: { sm: 2, md: 4 },
+              border: "1px dashed #ccc",
+              borderRadius: 3,
+              width: { sm: "100", md: "140" },
+              m: 1,
+            }}
+          >
+            <Typography fontWeight={600}>Book Image Upload</Typography>
 
-          <input type="file" onChange={handleFileChange} />
+            <input type="file" onChange={handleFileChange} />
 
-          {preview && (
-            <Box sx={{ mt: 2 }}>
-              <img
-                src={preview}
-                alt="preview"
-                width="140"
-                style={{ borderRadius: 12 }}
-              />
-            </Box>
-          )}
+            {preview && (
+              <Box sx={{ mt: 2 }}>
+                <img
+                  src={preview}
+                  alt="preview"
+                  width={{ sm: "100", md: "140" }}
+                  style={{ borderRadius: 12 }}
+                />
+              </Box>
+            )}
 
-          <Button onClick={handleUpload} disabled={loading} sx={{ mt: 2 }}>
-            Upload Image
-          </Button>
+            <Button
+              variant="contained"
+              onClick={handleUpload}
+              disabled={loading}
+              sx={{ mt: 2 }}
+            >
+              Upload Image
+            </Button>
 
-          {loading && <CircularProgress size={18} sx={{ ml: 2 }} />}
+            {loading && <CircularProgress size={18} sx={{ ml: 2 }} />}
 
-          {uploadedUrl && (
-            <Typography sx={{ mt: 1, color: "green" }}>
-              Image uploaded ✔
-            </Typography>
-          )}
+            {uploadedUrl && (
+              <Typography sx={{ mt: 1, color: "green" }}>
+                Image uploaded ✔
+              </Typography>
+            )}
 
-          {error && (
-            <Typography sx={{ mt: 1, color: "red" }}>{error}</Typography>
-          )}
+            {error && (
+              <Typography sx={{ mt: 1, color: "red" }}>{error}</Typography>
+            )}
+          </Box>
+          <Box
+            sx={{
+              p: { sm: 3, md: 4 },
+              border: "1px dashed #ccc",
+              borderRadius: 3,
+              m: 1,
+            }}
+          >
+            <Typography fontWeight={600}>Barcode Image Upload</Typography>
+            <input type="file" onChange={handleFileChange} />
+            {preview && (
+              <Box sx={{ mt: 2 }}>
+                <img
+                  src={preview}
+                  alt="preview"
+                  width="140"
+                  style={{ borderRadius: 12 }}
+                />
+              </Box>
+            )}
+
+            <Button
+              variant="contained"
+              onClick={handleUpload}
+              disabled={loading}
+              sx={{ mt: 2 }}
+            >
+              Upload Image
+            </Button>
+            {loading && <CircularProgress size={18} sx={{ ml: 2 }} />}
+            {uploadedUrl && (
+              <Typography sx={{ mt: 1, color: "green" }}>
+                Image uploaded ✔
+              </Typography>
+            )}
+            {error && (
+              <Typography sx={{ mt: 1, color: "red" }}>{error}</Typography>
+            )}
+          </Box>
         </Box>
-
         <Button
           variant="contained"
           size="large"

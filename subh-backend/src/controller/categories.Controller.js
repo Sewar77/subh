@@ -52,7 +52,7 @@ export const getAllCategoriesController = async (req, res) => {
 
 export const getCategoryByIdController = async (req, res) => {
   const catId = req.params.id;
-  console.log(catId);
+  console.log("catId", catId);
 
   try {
     const category = await getCategoryById(catId);
