@@ -21,15 +21,13 @@ export default function AdminSidebar() {
       items: [
         { label: "Users", path: "/admin/users" },
         { label: "Add User", path: "/admin/add/user" },
-        { label: "Delete Users", path: "/admin/users/delete" },
       ],
     },
     {
       title: "Text Books",
       items: [
         { label: "View Books", path: "/admin/books" },
-        { label: "Add Book", path: "/admin" },
-        { label: "Edit Book", path: "/admin" },
+        { label: "Add Book", path: "/admin/book/new" },
       ],
     },
     {
@@ -100,6 +98,7 @@ export default function AdminSidebar() {
               color: "primary.contrastText",
               borderRadius: 1,
               textAlign: "center",
+              fontSize: 25,
             }}
           >
             {section.title}
@@ -118,7 +117,12 @@ export default function AdminSidebar() {
                   },
                 }}
               >
-                <ListItemText primary={item.label} />
+                <ListItemText
+                  primary={item.label}
+                  sx={{
+                    fontSize: 18,
+                  }}
+                />
               </ListItemButton>
             ))}
           </List>

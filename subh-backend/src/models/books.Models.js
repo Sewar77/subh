@@ -123,3 +123,42 @@ export const getAllBooks = async () => {
 
   return result.rows;
 };
+
+export const deleteBook = async (bookId) => {
+  await pool.query(`delete from books where id = $1`, [bookId]);
+};
+
+export const getBookById = async (bookId) => {
+  const result = await pool.query(
+    ` SELECT 
+      b.id,
+      b.name_en,
+      b.name_ar,
+      b.description_en,
+      b.description_ar,
+      b.barcode_image,
+      b.price,
+      b.length_cm,
+      b.width_cm,
+      b.height_cm,
+      b.weight_kg,
+      b.shipping_cost,
+      b.created_at,
+
+      c.name_en AS category_name_en,
+      c.name_ar AS category_name_ar,
+
+      a.name_en AS author_name_en,
+      a.name_ar AS author_name_ar
+
+    FROM books b
+    LEFT JOIN categories c ON b.category_id = c.id
+    LEFT JOIN book_authors ba ON b.id = ba.book_id
+    LEFT JOIN authors a ON ba.author_id = a.id
+    where b.id = $1
+    ORDER BY b.id DESC`,
+    [bookId],
+  );
+
+  return result.rows[0];
+};

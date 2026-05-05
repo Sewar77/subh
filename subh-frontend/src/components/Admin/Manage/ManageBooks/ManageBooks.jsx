@@ -18,15 +18,17 @@ import AddButton from "../../Buttons/AddBtn";
 import DeleteButton from "../../Buttons/DeleteBtn";
 import ViewButton from "../../Buttons/ViewBtn";
 import UpdateBtn from "../../Buttons/UpdateBtn";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
 
 export default function ManageBooks() {
-  const { books } = useBooks();
+  const { books, deleteBook } = useBooks();
   const theme = useTheme();
   const navigate = useNavigate();
 
   const handleView = (id) => navigate(`/admin/view/book/${id}`);
   const handleUpdate = (id) => navigate(`/admin/book/update/${id}`);
+  const handleDelete = (id) => deleteBook(id);
 
   return (
     <Box sx={{ color: "text.primary", p: 2 }}>
@@ -77,6 +79,7 @@ export default function ManageBooks() {
                   color: "primary.contrastText",
                   fontWeight: 700,
                   width: 100,
+                  fontSize: 25,
                 }}
               >
                 Image
@@ -89,6 +92,7 @@ export default function ManageBooks() {
                   color: "primary.contrastText",
                   fontWeight: 700,
                   width: 140,
+                  fontSize: 25,
                 }}
               >
                 Name (EN / AR)
@@ -106,6 +110,7 @@ export default function ManageBooks() {
                     md: 200,
                     lg: 200,
                   },
+                  fontSize: 25,
                 }}
               >
                 Description (EN / AR)
@@ -117,6 +122,7 @@ export default function ManageBooks() {
                   color: "primary.contrastText",
                   fontWeight: 700,
                   width: 100,
+                  fontSize: 25,
                 }}
               >
                 Category
@@ -128,6 +134,7 @@ export default function ManageBooks() {
                   color: "primary.contrastText",
                   fontWeight: 700,
                   width: 100,
+                  fontSize: 25,
                 }}
               >
                 Author Name (EN / AR)
@@ -139,6 +146,7 @@ export default function ManageBooks() {
                   textAlign: "center",
                   color: "primary.contrastText",
                   fontWeight: 700,
+                  fontSize: 25,
                   width: 100,
                 }}
               >
@@ -151,6 +159,7 @@ export default function ManageBooks() {
                   textAlign: "center",
                   color: "primary.contrastText",
                   fontWeight: 700,
+                  fontSize: 25,
                   width: 140,
                 }}
               >
@@ -167,20 +176,24 @@ export default function ManageBooks() {
                   <Avatar
                     src={book.barcode_image}
                     variant="rounded"
-                    sx={{ width: 80, height: 80 }}
+                    sx={{
+                      width: 80,
+                      height: 80,
+                    }}
                   />
                 </TableCell>
-
                 {/* NAME GROUPED */}
+
                 <TableCell align="center">
                   <Stack spacing={0.5}>
-                    <Typography fontWeight={600}>{book.name_en}</Typography>
-                    <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                    <Typography sx={{ fontSize: 20 }}>
+                      {book.name_en}
+                    </Typography>
+                    <Typography sx={{ fontSize: 20 }}>
                       {book.name_ar}
                     </Typography>
                   </Stack>
                 </TableCell>
-
                 {/* DESCRIPTION GROUPED */}
                 <TableCell align="center">
                   <Stack
@@ -192,12 +205,11 @@ export default function ManageBooks() {
                       overflow: "hidden",
                     }}
                   >
-                    <Typography noWrap>{book.description_en}</Typography>
+                    <Typography sx={{ fontSize: 20 }}>
+                      {book.description_en}
+                    </Typography>
 
-                    <Typography
-                      noWrap
-                      sx={{ fontSize: 12, color: "text.secondary" }}
-                    >
+                    <Typography sx={{ fontSize: 20 }}>
                       {book.description_ar}
                     </Typography>
                   </Stack>
@@ -205,36 +217,38 @@ export default function ManageBooks() {
                 {/* CATEGORY */}
                 <TableCell align="center">
                   <Stack spacing={0.5}>
-                    <Typography>{book.category_name_en}</Typography>
-                    <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                    <Typography sx={{ fontSize: 20 }}>
+                      {book.category_name_en}
+                    </Typography>
+                    <Typography sx={{ fontSize: 20 }}>
                       {book.category_name_ar}
                     </Typography>
                   </Stack>
                 </TableCell>
-
                 {/* AUTHER NAME */}
                 <TableCell align="center">
                   <Stack spacing={0.5}>
-                    <Typography>{book.author_name_en}</Typography>
-                    <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                    <Typography sx={{ fontSize: 20 }}>
+                      {book.author_name_en}
+                    </Typography>
+                    <Typography sx={{ fontSize: 20 }}>
+                      {" "}
                       {book.author_name_ar || "-"}
                     </Typography>
                   </Stack>
                 </TableCell>
-
                 {/* CREATED */}
                 <TableCell align="center">
-                  <Typography variant="body2">
+                  <Typography sx={{ fontSize: 18 }}>
                     {new Date(book.created_at).toLocaleDateString()}
                   </Typography>
 
                   <Divider sx={{ my: 1 }} />
 
-                  <Typography variant="caption">
+                  <Typography variant="caption" sx={{ fontSize: 18 }}>
                     {new Date(book.created_at).toLocaleTimeString()}
                   </Typography>
                 </TableCell>
-
                 {/* ACTIONS */}
                 <TableCell align="center">
                   <Stack
@@ -243,7 +257,7 @@ export default function ManageBooks() {
                     sx={{ justifyContent: "center", flexWrap: "wrap" }}
                   >
                     <UpdateBtn onClick={() => handleUpdate(book.id)} />
-                    <DeleteButton />
+                    <DeleteButton onClick={() => handleDelete(book.id)} />
                     <ViewButton onClick={() => handleView(book.id)} />
                   </Stack>
                 </TableCell>

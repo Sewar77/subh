@@ -16,14 +16,15 @@ export default function BooksProvider({ children }) {
       toast.error(err);
     }
   };
-  useEffect(() => {
-    loadBooks();
-  }, []);
+
   return (
     <booksContext.Provider
       value={{
         books,
         setBooks,
+        loadBooks,
+        setBook,
+        book,
       }}
     >
       {children}
