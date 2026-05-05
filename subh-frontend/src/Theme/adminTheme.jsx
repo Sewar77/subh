@@ -15,7 +15,7 @@ export const adminTheme = createTheme({
 
     background: {
       default: "#f1f5f9",
-      paper: "#ded0d0",
+      paper: "#fff",
     },
 
     text: {

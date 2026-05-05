@@ -15,6 +15,8 @@ import AddCategory from "./components/Admin/Manage/ManageCategories/AddCategory.
 import { useParams } from "react-router-dom";
 import ViewCategory from "./components/Admin/Manage/ManageCategories/ViewCategory.jsx";
 import UpdateCategory from "./components/Admin/Manage/ManageCategories/UpdateCategory.jsx";
+import ManageBooks from "./components/Admin/Manage/ManageBooks/ManageBooks.jsx";
+import AddBook from "./components/Books/AddBook.jsx";
 function App() {
   const { id } = useParams();
   return (
@@ -35,6 +37,8 @@ function App() {
           <Route path="categories" element={<DisplayCategories />} />
           <Route path="new-category" element={<AddCategory />} />
           <Route path="view/category/:id" element={<ViewCategory />} />
+          <Route path="books" element={<ManageBooks />} />
+          <Route path="book/new" element={<AddBook />} />
           <Route path="category/update/:id" element={<UpdateCategory />} />
         </Route>
       </Routes>

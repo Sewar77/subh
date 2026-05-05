@@ -6,7 +6,7 @@ import {
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 export const registerUserController = async (req, res) => {
-  const { name, password, confirmPassword, email } = req.validateData;
+  const { name, password, confirmPassword, email } = req.body;
 
   try {
     if (!name || !email || !confirmPassword || !password) {
@@ -36,7 +36,7 @@ export const registerUserController = async (req, res) => {
 };
 
 export const loginUserController = async (req, res) => {
-  const { password, email } = req.validateData;
+  const { password, email } = req.body;
 
   try {
     if (!email || !password) {
