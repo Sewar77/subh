@@ -2,6 +2,8 @@ import Joi from "joi";
 
 export const registerUserSchema = Joi.object({
   name: Joi.string().alphanum().min(3).max(30).required(),
+  address: Joi.string().alphanum().min(3),
+  userType: Joi.string().valid("individual", "company").default("individual"),
   password: Joi.string()
     .pattern(
       new RegExp(
@@ -11,6 +13,7 @@ export const registerUserSchema = Joi.object({
     .required(),
   confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
   email: Joi.string().email().required(),
+  phone_Number: Joi.number().allow(null),
   role: Joi.string().valid("user", "admin").default("user"),
 });
 

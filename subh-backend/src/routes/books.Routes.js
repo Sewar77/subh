@@ -6,6 +6,7 @@ import {
   deleteBookController,
   getAllBooksController,
   getBookByIdController,
+  updateBookByIdController,
 } from "../controller/books.Controller.js";
 import { validate } from "../middleware/validate.Middleware.js";
 import { createBookSchema } from "../validation/books.Validation.js";
@@ -22,4 +23,6 @@ route.post(
   validate(createBookSchema),
   createBookController,
 );
+route.put("/book/update/:id", protect, adminOnly, updateBookByIdController);
+
 export default route;

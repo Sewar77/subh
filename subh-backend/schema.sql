@@ -33,9 +33,10 @@ CREATE TABLE books (
         ON DELETE SET NULL
 );
 
+ALTER TABLE books
+ADD COLUMN cover_image VARCHAR(500);
 
-
-
+`````````
 CREATE TABLE authors (
     id SERIAL PRIMARY KEY,
 

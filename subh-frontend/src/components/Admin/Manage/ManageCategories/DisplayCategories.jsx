@@ -88,6 +88,7 @@ export default function DisplayCategories() {
                   textAlign: "center",
                   color: "primary.contrastText",
                   fontWeight: 700,
+                  fontSize: 24,
                 }}
               >
                 Category
@@ -98,8 +99,13 @@ export default function DisplayCategories() {
                   textAlign: "center",
                   color: "primary.contrastText",
                   fontWeight: 700,
+                  fontSize: 24,
                 }}
               >
+                Name
+                <br />
+                &
+                <br />
                 Description
                 <Box
                   sx={{
@@ -108,8 +114,8 @@ export default function DisplayCategories() {
                     justifyContent: "space-between",
                   }}
                 >
-                  <Typography sx={{ fontSize: 14 }}>En</Typography>
-                  <Typography sx={{ fontSize: 14 }}>Ar</Typography>
+                  <Typography sx={{ fontSize: 20 }}>En</Typography>
+                  <Typography sx={{ fontSize: 20 }}>Ar</Typography>
                 </Box>
               </TableCell>
               <TableCell
@@ -118,6 +124,7 @@ export default function DisplayCategories() {
                   textAlign: "center",
                   color: "primary.contrastText",
                   fontWeight: 700,
+                  fontSize: 25,
                 }}
               >
                 Created
@@ -165,16 +172,19 @@ export default function DisplayCategories() {
                   <Stack
                     direction="row"
                     spacing={1}
-                    sx={{ alignItems: "center", justifyContent: "center" }}
+                    sx={{
+                      alignItems: "center",
+                      justifyContent: "left",
+                    }}
                   >
                     {/* ENGLISH */}
                     <Box sx={{ flex: 1 }}>
-                      <Typography sx={{ fontSize: 14 }}>
+                      <Typography sx={{ fontSize: 25 }}>
                         {category.name_en || "—"}
                       </Typography>
 
                       <Typography
-                        sx={{ fontSize: 13, color: "text.secondary" }}
+                        sx={{ fontSize: 23, color: "text.secondary" }}
                       >
                         {category.description_en || "—"}
                       </Typography>
@@ -191,7 +201,7 @@ export default function DisplayCategories() {
                     <Box sx={{ flex: 1 }}>
                       <Typography
                         sx={{
-                          fontSize: 14,
+                          fontSize: 25,
                           direction: "rtl",
                           textAlign: "right",
                         }}
@@ -201,7 +211,7 @@ export default function DisplayCategories() {
 
                       <Typography
                         sx={{
-                          fontSize: 13,
+                          fontSize: 23,
                           color: "text.secondary",
                           direction: "rtl",
                           textAlign: "right",
@@ -215,13 +225,13 @@ export default function DisplayCategories() {
 
                 {/* CREATED DATE */}
                 <TableCell align="center">
-                  <Typography variant="body2">
+                  <Typography variant="body1">
                     {new Date(category.created_at).toLocaleDateString()}
                   </Typography>
 
                   <Divider sx={{ my: 1 }} />
 
-                  <Typography variant="caption">
+                  <Typography variant="body1">
                     {new Date(category.created_at).toLocaleTimeString()}
                   </Typography>
                 </TableCell>
@@ -231,8 +241,11 @@ export default function DisplayCategories() {
                   <Stack
                     direction="row"
                     spacing={1}
-                    justifyContent="center"
-                    alignItems="center"
+                    sx={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      textAlign: "center",
+                    }}
                   >
                     <UpdateBtn
                       onClick={() => handleUpdateCategory(category.id)}

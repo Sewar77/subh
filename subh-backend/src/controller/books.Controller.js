@@ -6,8 +6,11 @@ import {
   getAllBooks,
   getBookById,
   linkBookAuthor,
+  updateBookById,
 } from "../models/books.Models.js";
 import pool from "../config/db.js";
+import { getCategoryById } from "../models/categories.Models.js";
+
 export const createBookController = async (req, res) => {
   const client = await pool.connect();
 
@@ -20,6 +23,7 @@ export const createBookController = async (req, res) => {
       description_en,
       description_ar,
       weight_kg,
+      cover_image,
       barcode_image,
       category_id,
       price,
@@ -30,25 +34,21 @@ export const createBookController = async (req, res) => {
       author_name_en,
       author_name_ar,
     } = req.body;
-    console.log(req.body);
+    console.log("books===:  ", req.body);
 
-    // 1. find author
     let author = await findAuthorByName(client, author_name_en, author_name_ar);
-    console.log(1);
 
-    // 2. create author if not exists
     if (!author) {
       author = await createAuthor(client, author_name_en, author_name_ar);
     }
-    console.log(2);
 
-    // 3. create book
     const book = await createBook(client, {
       name_en,
       name_ar,
       description_en,
       description_ar,
       weight_kg,
+      cover_image,
       barcode_image,
       category_id,
       price,
@@ -57,12 +57,11 @@ export const createBookController = async (req, res) => {
       width_cm,
       height_cm,
     });
-    console.log(3);
-    // 4. link book + author
+
     await linkBookAuthor(client, book.id, author.id);
-    console.log(4);
+
     await client.query("COMMIT");
-    console.log(5);
+
     return res.status(201).json({
       message: "Book created successfully",
       book,
@@ -79,7 +78,6 @@ export const createBookController = async (req, res) => {
     client.release();
   }
 };
-
 export const getAllBooksController = async (req, res) => {
   try {
     const books = await getAllBooks();
@@ -118,6 +116,65 @@ export const getBookByIdController = async (req, res) => {
       return res.status(404).json({ message: "book not found" });
     }
     return res.status(200).json({ message: "gets", book: book });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+export const updateBookByIdController = async (req, res) => {
+  const bookId = req.params.id;
+
+  try {
+    const {
+      name_en,
+      name_ar,
+      description_en,
+      description_ar,
+      weight_kg,
+      cover_image,
+      barcode_image,
+      category_id,
+      price,
+      shipping_cost,
+      length_cm,
+      width_cm,
+      height_cm,
+    } = req.body;
+
+    if (category_id) {
+      const categoryCheck = await getCategoryById(category_id);
+      if (categoryCheck.rowCount === 0) {
+        return res.status(400).json({
+          message: "Invalid category_id - category does not exist",
+        });
+      }
+    }
+    const updated = await updateBookById(
+      {
+        name_en,
+        name_ar,
+        description_en,
+        description_ar,
+        weight_kg,
+        cover_image,
+        barcode_image,
+        category_id,
+        price,
+        shipping_cost,
+        length_cm,
+        width_cm,
+        height_cm,
+      },
+      bookId,
+    );
+
+    return res.status(200).json({
+      message: "Book updated",
+      book: updated,
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Internal server error",

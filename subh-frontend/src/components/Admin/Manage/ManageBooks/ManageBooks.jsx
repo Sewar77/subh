@@ -11,6 +11,7 @@ import {
   Stack,
   Divider,
   Paper,
+  Tooltip,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useBooks } from "../../../../Hooks/useBooks";
@@ -20,6 +21,7 @@ import ViewButton from "../../Buttons/ViewBtn";
 import UpdateBtn from "../../Buttons/UpdateBtn";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 
 export default function ManageBooks() {
   const { books, deleteBook } = useBooks();
@@ -30,6 +32,8 @@ export default function ManageBooks() {
   const handleUpdate = (id) => navigate(`/admin/book/update/${id}`);
   const handleDelete = (id) => deleteBook(id);
 
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedViewId, setSelectedViewId] = useState(null);
   return (
     <Box sx={{ color: "text.primary", p: 2 }}>
       {/* HEADER */}
@@ -173,14 +177,16 @@ export default function ManageBooks() {
               <TableRow key={book.id} hover>
                 {/* IMAGE */}
                 <TableCell>
-                  <Avatar
-                    src={book.barcode_image}
-                    variant="rounded"
-                    sx={{
-                      width: 80,
-                      height: 80,
-                    }}
-                  />
+                  <Tooltip title="book cover" describeChild arrow>
+                    <Avatar
+                      src={book.cover_image}
+                      variant="rounded"
+                      sx={{
+                        width: 80,
+                        height: 80,
+                      }}
+                    />
+                  </Tooltip>
                 </TableCell>
                 {/* NAME GROUPED */}
 
@@ -257,7 +263,12 @@ export default function ManageBooks() {
                     sx={{ justifyContent: "center", flexWrap: "wrap" }}
                   >
                     <UpdateBtn onClick={() => handleUpdate(book.id)} />
-                    <DeleteButton onClick={() => handleDelete(book.id)} />
+                    <DeleteButton
+                      onClick={() => {
+                        setSelectedViewId(book.id);
+                        setConfirmDelete(true);
+                      }}
+                    />
                     <ViewButton onClick={() => handleView(book.id)} />
                   </Stack>
                 </TableCell>
@@ -266,6 +277,17 @@ export default function ManageBooks() {
           </TableBody>
         </Table>
       </TableContainer>
+      {confirmDelete && (
+        <ConfirmDeleteModal
+          open={confirmDelete}
+          onClose={() => setConfirmDelete(false)}
+          onConfirm={() => (
+            deleteBook(selectedViewId),
+            setConfirmDelete(false)
+          )}
+          label={"Book"}
+        />
+      )}
     </Box>
   );
 }
