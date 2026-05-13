@@ -5,6 +5,7 @@ import {
   Box,
   IconButton,
   InputBase,
+  Tooltip,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -76,13 +77,19 @@ export default function AdminNavbar() {
           }}
         >
           <IconButton color="inherit">
-            <NotificationsIcon />
+            <Tooltip title="Notifications" arrow describeChild>
+              <NotificationsIcon />
+            </Tooltip>
           </IconButton>
           <IconButton color="inherit">
-            <AccountCircle />
+            <Tooltip title="Account" arrow describeChild>
+              <AccountCircle />
+            </Tooltip>
           </IconButton>
           <IconButton color="inherit" onClick={handleLogout}>
-            <LogoutIcon />
+            <Tooltip title="Logout" arrow describeChild>
+              <LogoutIcon />
+            </Tooltip>
           </IconButton>
         </Box>
       </Toolbar>

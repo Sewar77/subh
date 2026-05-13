@@ -18,6 +18,7 @@ import UpdateCategory from "./components/Admin/Manage/ManageCategories/UpdateCat
 import ManageBooks from "./components/Admin/Manage/ManageBooks/ManageBooks.jsx";
 import AddBook from "./components/Admin/Manage/ManageBooks/AddBook.jsx";
 import ViewBook from "./components/Admin/Manage/ManageBooks/ViewBook.jsx";
+import UpdateBook from "./components/Admin/Manage/ManageBooks/UpdateBook.jsx";
 function App() {
   const { id } = useParams();
   return (
@@ -42,6 +43,7 @@ function App() {
           <Route path="book/new" element={<AddBook />} />
           <Route path="view/book/:id" element={<ViewBook />} />
           <Route path="category/update/:id" element={<UpdateCategory />} />
+          <Route path="book/update/:id" element={<UpdateBook />} />
         </Route>
       </Routes>
     </>

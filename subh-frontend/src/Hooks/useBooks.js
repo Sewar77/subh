@@ -46,5 +46,24 @@ export const useBooks = () => {
     }
   };
 
-  return { books, setBooks, createBooks, deleteBook, book, getBook };
+  const updateBook = async (bookId, bookData) => {
+    try {
+      const res = await api.put(`/book/update/${bookId}`, bookData);
+      console.log(res);
+      
+      setBook(res.data.book);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  return {
+    books,
+    setBooks,
+    createBooks,
+    deleteBook,
+    book,
+    getBook,
+    updateBook,
+  };
 };

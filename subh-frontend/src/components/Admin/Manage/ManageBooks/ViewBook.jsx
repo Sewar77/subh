@@ -12,6 +12,8 @@ import {
   Stack,
   Box,
   Divider,
+  Paper,
+  Tooltip,
 } from "@mui/material";
 import UpdateBtn from "../../Buttons/UpdateBtn.jsx";
 import DeleteButton from "../../Buttons/DeleteBtn.jsx";
@@ -39,17 +41,18 @@ export default function ViewBook() {
           <Divider sx={{ width: "100%" }} />
 
           {/* IMAGE */}
-          <Avatar
-            src={book?.barcode_image}
-            variant="rounded"
-            sx={{
-              width: 200,
-              height: 200,
-              objectFit: "contain",
-              borderRadius: 6,
-            }}
-          />
-
+          <Tooltip describeChild title="cover book" arrow>
+            <Avatar
+              src={book?.cover_image}
+              variant="rounded"
+              sx={{
+                width: 200,
+                height: 200,
+                objectFit: "contain",
+                borderRadius: 6,
+              }}
+            />
+          </Tooltip>
           {/* MAIN INFO */}
           <CardContent
             sx={{
@@ -102,48 +105,171 @@ export default function ViewBook() {
 
           <Divider sx={{ width: "100%" }} />
           <Typography variant="h6">Extra Book Details</Typography>
-          {/* EXTRA DETAILS GRID */}
+
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "1fr 1fr",
+              },
               gap: 2,
-              width: "100%",
-              textAlign: "left",
-              alignContent: "center",
+              mt: 3,
             }}
           >
-            <Typography>
-              <b>ID:</b> {book?.id}
-            </Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Book ID
+              </Typography>
 
-            <Typography>
-              <b>Category Name:</b> {book?.category_name_ar}
-            </Typography>
-            <Typography>
-              <b>Category Name:</b> {book?.category_name_en}
-            </Typography>
+              <Typography fontWeight={700}>#{book?.id}</Typography>
+            </Paper>
 
-            <Typography>
-              <b>Price:</b> ${book?.price}
-            </Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Author Name (EN)
+              </Typography>
 
-            <Typography>
-              <b>Shipping Cost:</b> ${book?.shipping_cost}
-            </Typography>
+              <Typography fontWeight={700}>{book?.author_name_en}</Typography>
+            </Paper>
 
-            <Typography>
-              <b>Weight:</b> {book?.weight_kg} kg
-            </Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                اسم المؤلف
+              </Typography>
 
-            <Typography>
-              <b>Dimensions:</b> {book.length_cm} × {book?.width_cm} ×{" "}
-              {book?.height_cm} cm
-            </Typography>
+              <Typography fontWeight={700}>{book?.author_name_ar}</Typography>
+            </Paper>
 
-            <Typography>
-              <b>Created:</b> {new Date(book?.created_at).toLocaleString()}
-            </Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Category (EN)
+              </Typography>
+
+              <Typography fontWeight={700}>{book?.category_name_en}</Typography>
+            </Paper>
+
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                التصنيف
+              </Typography>
+
+              <Typography fontWeight={700}>{book?.category_name_ar}</Typography>
+            </Paper>
+
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Price
+              </Typography>
+
+              <Typography fontWeight={700}>${book?.price}</Typography>
+            </Paper>
+
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Shipping Cost
+              </Typography>
+
+              <Typography fontWeight={700}>${book?.shipping_cost}</Typography>
+            </Paper>
+
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Weight
+              </Typography>
+
+              <Typography fontWeight={700}>{book?.weight_kg} kg</Typography>
+            </Paper>
+
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Dimensions
+              </Typography>
+
+              <Typography fontWeight={700}>
+                {book?.length_cm} × {book?.width_cm} × {book?.height_cm} cm
+              </Typography>
+            </Paper>
+
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Created At
+              </Typography>
+
+              <Typography fontWeight={700}>
+                {new Date(book?.created_at).toLocaleString()}
+              </Typography>
+            </Paper>
           </Box>
 
           <Divider sx={{ width: "100%" }} />

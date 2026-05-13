@@ -3,11 +3,20 @@ import { api } from "../../api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { usersContext } from "../Context/usersContext";
-
 export const useUser = () => {
   const { users, loadUsers } = useContext(usersContext);
   const navigate = useNavigate();
 
+  const addUser = async (userData) => {
+    const res = await api.post(`/user/add`, userData);
+    try {
+      toast.success("User Added successfully");
+      setUsers(res.data.user);
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
   const deleteUserById = async (userId) => {
     const res = await api.delete(`/user/delete/${userId}`);
     try {
@@ -18,5 +27,5 @@ export const useUser = () => {
       toast.error(error);
     }
   };
-  return { deleteUserById, users };
+  return { deleteUserById, users, addUser };
 };

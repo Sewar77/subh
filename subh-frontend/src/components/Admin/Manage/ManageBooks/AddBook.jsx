@@ -19,25 +19,30 @@ export default function AddBook() {
   const { createBooks } = useBooks();
   const { categories } = useCategories();
 
+  const coverUpload = useUpload();
+  const barcodeUpload = useUpload();
+
   const [bookData, setBookData] = useState({
     name_en: "",
     name_ar: "",
     description_en: "",
     description_ar: "",
-    weight_kg: "",
-    barcode_image: "",
+    author_name_en: "",
+    author_name_ar: "",
     category_id: "",
     price: "",
     shipping_cost: "",
+    weight_kg: "",
     length_cm: "",
     width_cm: "",
     height_cm: "",
   });
 
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState("");
+  const [coverFile, setCoverFile] = useState(null);
+  const [barcodeFile, setBarcodeFile] = useState(null);
 
-  const { uploadImage, uploadedUrl, loading, error } = useUpload();
+  const [coverPreview, setCoverPreview] = useState("");
+  const [barcodePreview, setBarcodePreview] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,68 +53,147 @@ export default function AddBook() {
     }));
   };
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
+  const validateImage = (file) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files allowed");
+      return false;
+    }
 
-    if (!selectedFile.type.startsWith("image/")) {
-      toast.error("Only images allowed");
+    return true;
+  };
+
+  const handleCoverChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    if (!validateImage(file)) return;
+
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  };
+
+  const handleBarcodeChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    if (!validateImage(file)) return;
+
+    setBarcodeFile(file);
+    setBarcodePreview(URL.createObjectURL(file));
+  };
+
+  const handleCoverUpload = async () => {
+    if (!coverFile) {
+      toast.error("Select cover image first");
       return;
     }
 
-    setFile(selectedFile);
-    setPreview(URL.createObjectURL(selectedFile));
+    await coverUpload.uploadImage(coverFile);
   };
 
-  const handleUpload = () => {
-    if (!file) return toast.error("Select image first");
-    uploadImage(file);
+  const handleBarcodeUpload = async () => {
+    if (!barcodeFile) {
+      toast.error("Select barcode image first");
+      return;
+    }
+
+    await barcodeUpload.uploadImage(barcodeFile);
   };
 
-  const handleSubmit = () => {
-    if (!uploadedUrl) return toast.error("Upload image first");
-    if (!bookData.name_en || !bookData.name_ar)
-      return toast.error("Fill required fields");
-
-    createBooks({
-      ...bookData,
-      barcode_image: uploadedUrl,
-    });
-
+  const resetForm = () => {
     setBookData({
       name_en: "",
       name_ar: "",
       description_en: "",
       description_ar: "",
-      weight_kg: "",
-      barcode_image: "",
-      category_id: "",
       author_name_en: "",
       author_name_ar: "",
+      category_id: "",
       price: "",
       shipping_cost: "",
+      weight_kg: "",
       length_cm: "",
       width_cm: "",
       height_cm: "",
     });
 
-    setFile(null);
-    setPreview("");
+    setCoverFile(null);
+    setBarcodeFile(null);
+
+    setCoverPreview("");
+    setBarcodePreview("");
+  };
+
+  const handleSubmit = async () => {
+    if (!coverUpload.uploadedUrl) {
+      toast.error("Upload cover image");
+      return;
+    }
+
+    if (!barcodeUpload.uploadedUrl) {
+      toast.error("Upload barcode image");
+      return;
+    }
+
+    if (
+      !bookData.name_en ||
+      !bookData.name_ar ||
+      !bookData.author_name_en ||
+      !bookData.author_name_ar ||
+      !bookData.category_id ||
+      !bookData.price
+    ) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    const payload = {
+      ...bookData,
+      category_id: Number(bookData.category_id),
+      price: Number(bookData.price),
+      shipping_cost: Number(bookData.shipping_cost || 0),
+      weight_kg: Number(bookData.weight_kg || 0),
+      length_cm: Number(bookData.length_cm || 0),
+      width_cm: Number(bookData.width_cm || 0),
+      height_cm: Number(bookData.height_cm || 0),
+      cover_image: coverUpload.uploadedUrl,
+      barcode_image: barcodeUpload.uploadedUrl,
+    };
+
+    await createBooks(payload);
+
+    resetForm();
+
+    toast.success("Book created successfully");
   };
 
   return (
-    <Container>
-      <Typography variant="h4" sx={{ mt: 4, fontWeight: 700 }}>
+    <Container maxWidth="lg">
+      <Typography
+        variant="h4"
+        sx={{
+          mt: 4,
+          fontWeight: 700,
+        }}
+      >
         Add Book
       </Typography>
 
       <Paper
-        sx={{ mt: 3, p: 4, display: "flex", flexDirection: "column", gap: 3 }}
+        sx={{
+          mt: 3,
+          p: 4,
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
       >
-        <Typography fontWeight={700}>English</Typography>
+        <Typography fontWeight={700}>English Information</Typography>
 
         <TextField
-          label="Name (English)"
+          label="Book Name"
           name="name_en"
           value={bookData.name_en}
           onChange={handleChange}
@@ -117,16 +201,17 @@ export default function AddBook() {
         />
 
         <TextField
-          label="Description (English)"
+          label="Description"
           name="description_en"
           value={bookData.description_en}
           onChange={handleChange}
-          fullWidth
           multiline
-          rows={2}
+          rows={4}
+          fullWidth
         />
+
         <TextField
-          label="Author Name (English)"
+          label="Author Name"
           name="author_name_en"
           value={bookData.author_name_en}
           onChange={handleChange}
@@ -135,10 +220,10 @@ export default function AddBook() {
 
         <Divider />
 
-        <Typography fontWeight={700}>العربية</Typography>
+        <Typography fontWeight={700}>المعلومات العربية</Typography>
 
         <TextField
-          label="الاسم"
+          label="اسم الكتاب"
           name="name_ar"
           value={bookData.name_ar}
           onChange={handleChange}
@@ -151,11 +236,12 @@ export default function AddBook() {
           name="description_ar"
           value={bookData.description_ar}
           onChange={handleChange}
-          fullWidth
           multiline
-          rows={2}
+          rows={4}
+          fullWidth
           inputprops={{ dir: "rtl" }}
         />
+
         <TextField
           label="اسم المؤلف"
           name="author_name_ar"
@@ -164,9 +250,9 @@ export default function AddBook() {
           fullWidth
           inputprops={{ dir: "rtl" }}
         />
+
         <Divider />
 
-        {/* CATEGORY DROPDOWN */}
         <TextField
           select
           label="Category"
@@ -175,14 +261,13 @@ export default function AddBook() {
           onChange={handleChange}
           fullWidth
         >
-          {categories?.map((cat) => (
-            <MenuItem key={cat.id} value={cat.id}>
-              {cat.name_en + " - " + cat.name_ar}
+          {categories?.map((category) => (
+            <MenuItem key={category.id} value={category.id}>
+              {category.name_en} - {category.name_ar}
             </MenuItem>
           ))}
         </TextField>
 
-        {/* PRODUCT DETAILS */}
         <TextField
           label="Price"
           name="price"
@@ -233,111 +318,156 @@ export default function AddBook() {
 
         <Divider />
 
-        {/* IMAGE UPLOAD */}
         <Box
           sx={{
             display: "flex",
-            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 3,
             justifyContent: "center",
-            flexWrap: { xs: "wrap", sm: "wrap", md: "nowrap", lg: "nowrap" },
-            gap: { sm: 3, md: 4 },
           }}
         >
-          <Box
+          <Paper
+            elevation={0}
             sx={{
-              p: { sm: 2, md: 4 },
+              p: 3,
               border: "1px dashed #ccc",
               borderRadius: 3,
-              width: { sm: "100", md: "140" },
-              m: 1,
+              width: 320,
             }}
           >
-            <Typography fontWeight={600}>Book Image Upload</Typography>
+            <Typography fontWeight={700}>Cover Image</Typography>
 
-            <input type="file" onChange={handleFileChange} />
+            <Box sx={{ mt: 2 }}>
+              <input type="file" onChange={handleCoverChange} />
+            </Box>
 
-            {preview && (
+            {coverPreview && (
               <Box sx={{ mt: 2 }}>
                 <img
-                  src={preview}
-                  alt="preview"
-                  width={{ sm: "100", md: "140" }}
-                  style={{ borderRadius: 12 }}
+                  src={coverPreview}
+                  alt="cover-preview"
+                  width="100%"
+                  style={{
+                    borderRadius: 12,
+                    objectFit: "cover",
+                  }}
                 />
               </Box>
             )}
 
             <Button
               variant="contained"
-              onClick={handleUpload}
-              disabled={loading}
               sx={{ mt: 2 }}
+              onClick={handleCoverUpload}
+              disabled={coverUpload.loading}
+              fullWidth
             >
-              Upload Image
+              Upload Cover
             </Button>
 
-            {loading && <CircularProgress size={18} sx={{ ml: 2 }} />}
+            {coverUpload.loading && (
+              <Box sx={{ mt: 2 }}>
+                <CircularProgress size={22} />
+              </Box>
+            )}
 
-            {uploadedUrl && (
-              <Typography sx={{ mt: 1, color: "green" }}>
-                Image uploaded ✔
+            {coverUpload.uploadedUrl && (
+              <Typography
+                sx={{
+                  mt: 2,
+                  color: "green",
+                }}
+              >
+                Cover uploaded successfully ✔
               </Typography>
             )}
 
-            {error && (
-              <Typography sx={{ mt: 1, color: "red" }}>{error}</Typography>
+            {coverUpload.error && (
+              <Typography
+                sx={{
+                  mt: 2,
+                  color: "red",
+                }}
+              >
+                {coverUpload.error}
+              </Typography>
             )}
-          </Box>
-          <Box
+          </Paper>
+
+          <Paper
+            elevation={0}
             sx={{
-              p: { sm: 3, md: 4 },
+              p: 3,
               border: "1px dashed #ccc",
               borderRadius: 3,
-              m: 1,
+              width: 320,
             }}
           >
-            <Typography fontWeight={600}>Barcode Image Upload</Typography>
-            <input type="file" onChange={handleFileChange} />
-            {preview && (
+            <Typography fontWeight={700}>Barcode Image</Typography>
+
+            <Box sx={{ mt: 2 }}>
+              <input type="file" onChange={handleBarcodeChange} />
+            </Box>
+
+            {barcodePreview && (
               <Box sx={{ mt: 2 }}>
                 <img
-                  src={preview}
-                  alt="preview"
-                  width="140"
-                  style={{ borderRadius: 12 }}
+                  src={barcodePreview}
+                  alt="barcode-preview"
+                  width="100%"
+                  style={{
+                    borderRadius: 12,
+                    objectFit: "cover",
+                  }}
                 />
               </Box>
             )}
 
             <Button
               variant="contained"
-              onClick={handleUpload}
-              disabled={loading}
               sx={{ mt: 2 }}
+              onClick={handleBarcodeUpload}
+              disabled={barcodeUpload.loading}
+              fullWidth
             >
-              Upload Image
+              Upload Barcode
             </Button>
-            {loading && <CircularProgress size={18} sx={{ ml: 2 }} />}
-            {uploadedUrl && (
-              <Typography sx={{ mt: 1, color: "green" }}>
-                Image uploaded ✔
+
+            {barcodeUpload.loading && (
+              <Box sx={{ mt: 2 }}>
+                <CircularProgress size={22} />
+              </Box>
+            )}
+
+            {barcodeUpload.uploadedUrl && (
+              <Typography
+                sx={{
+                  mt: 2,
+                  color: "green",
+                }}
+              >
+                Barcode uploaded successfully ✔
               </Typography>
             )}
-            {error && (
-              <Typography sx={{ mt: 1, color: "red" }}>{error}</Typography>
+
+            {barcodeUpload.error && (
+              <Typography
+                sx={{
+                  mt: 2,
+                  color: "red",
+                }}
+              >
+                {barcodeUpload.error}
+              </Typography>
             )}
-          </Box>
+          </Paper>
         </Box>
+
         <Button
           variant="contained"
           size="large"
           onClick={handleSubmit}
-          disabled={
-            !uploadedUrl ||
-            !bookData.name_en ||
-            !bookData.name_ar ||
-            !bookData.category_id
-          }
+          disabled={!coverUpload.uploadedUrl || !barcodeUpload.uploadedUrl}
         >
           Create Book
         </Button>

@@ -14,6 +14,7 @@ export const createBookSchema = Joi.object({
   author_name_en: Joi.string().allow("", null),
   author_name_ar: Joi.string().pattern(arabicRegex).allow("", null),
   barcode_image: Joi.string().uri().required(),
+  cover_image: Joi.string().uri().required(),
 
   category_id: Joi.number().integer().positive().allow(null),
 

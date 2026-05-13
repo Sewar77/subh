@@ -67,10 +67,11 @@ export default function ManageUsers() {
           <TableHead
             sx={{
               bgcolor: "primary.main",
-              color: "primary.contrastText",
               alignItems: "center",
               alignContent: "center",
               p: 2,
+              justifyContent: "center",
+              textAlign: "center",
             }}
           >
             <TableRow>
@@ -78,14 +79,35 @@ export default function ManageUsers() {
                 sx={{
                   width: 360,
                   alignItems: "center",
+                  color: "primary.contrastText",
+                  fontSize: 25,
                 }}
               >
                 User
               </TableCell>
-              <TableCell sx={{ width: 360 }}>Email</TableCell>
-              <TableCell sx={{ width: 360 }}>Role</TableCell>
-              <TableCell sx={{ width: 360 }}>Status</TableCell>
-              <TableCell sx={{ width: 360, textAlign: "center" }}>
+              <TableCell
+                sx={{ width: 360, color: "primary.contrastText", fontSize: 25 }}
+              >
+                Email
+              </TableCell>
+              <TableCell
+                sx={{ width: 360, color: "primary.contrastText", fontSize: 25 }}
+              >
+                Role
+              </TableCell>
+              <TableCell
+                sx={{ width: 360, color: "primary.contrastText", fontSize: 25 }}
+              >
+                Status
+              </TableCell>
+              <TableCell
+                sx={{
+                  width: 360,
+                  textAlign: "center",
+                  color: "primary.contrastText",
+                  fontSize: 25,
+                }}
+              >
                 Actions
               </TableCell>
             </TableRow>
@@ -111,31 +133,32 @@ export default function ManageUsers() {
                     alignItems="center"
                     sx={{
                       alignItems: "center",
+                      fontSize: 23,
                     }}
                   >
                     <Avatar sx={{ bgcolor: "primary.main" }}>
                       {user.email?.charAt(0).toUpperCase()}
                     </Avatar>
 
-                    <Typography fontWeight={600}>
+                    <Typography fontWeight={600} sx={{ fontSize: 23 }}>
                       {user.name || "User"}
                     </Typography>
                   </Stack>
                 </TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
+                <TableCell sx={{ fontSize: 23 }}>{user.email}</TableCell>
+                <TableCell sx={{ fontSize: 23 }}>
                   <Chip
                     label={user.user_type}
-                    size="small"
+                    size="large"
                     color="primary"
                     variant="outlined"
                   />
                 </TableCell>
 
-                <TableCell>
+                <TableCell sx={{ fontSize: 23 }}>
                   <Chip
                     label={user.is_active ? "Active" : "Inactive"}
-                    size="small"
+                    size="large"
                     color={user.is_active ? "success" : "error"}
                   />
                 </TableCell>
