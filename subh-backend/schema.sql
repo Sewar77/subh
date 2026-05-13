@@ -1,10 +1,15 @@
 create table categories (
-id serial primary key, 
-name text unique not null, 
-description text, 
-created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-image text
+    id serial primary key, 
+
+    name text unique not null, 
+
+    description text, 
+
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    image text
 )
+
 CREATE TABLE books (
     id SERIAL PRIMARY KEY,
 
@@ -24,7 +29,9 @@ CREATE TABLE books (
     shipping_cost DECIMAL(10,2),
 
     length_cm DECIMAL(6,2),
+
     width_cm DECIMAL(6,2),
+
     height_cm DECIMAL(6,2),
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -36,7 +43,6 @@ CREATE TABLE books (
 ALTER TABLE books
 ADD COLUMN cover_image VARCHAR(500);
 
-`````````
 CREATE TABLE authors (
     id SERIAL PRIMARY KEY,
 

@@ -20,6 +20,7 @@ import AddBook from "./components/Admin/Manage/ManageBooks/AddBook.jsx";
 import ViewBook from "./components/Admin/Manage/ManageBooks/ViewBook.jsx";
 import UpdateBook from "./components/Admin/Manage/ManageBooks/UpdateBook.jsx";
 import ViewUser from "./components/Admin/Manage/ManageUsers/ViewUser.jsx";
+import NotFound from "./components/NotFound/NotFound.jsx";
 function App() {
   const { id } = useParams();
   return (
@@ -47,6 +48,8 @@ function App() {
           <Route path="category/update/:id" element={<UpdateCategory />} />
           <Route path="book/update/:id" element={<UpdateBook />} />
         </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

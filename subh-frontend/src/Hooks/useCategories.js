@@ -3,13 +3,10 @@ import { api } from "../../api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { categoriesContext } from "../Context/categoriesContext";
-
 export const useCategories = () => {
   const { categories, setCategories, loadCategories, category, setCategory } =
     useContext(categoriesContext);
-
   const navigate = useNavigate();
-
   const createCategories = async (catData) => {
     if (!catData.name_en || !catData.name_ar) {
       toast.error("Name is required feild");
@@ -24,7 +21,6 @@ export const useCategories = () => {
       toast.error(error);
     }
   };
-
   const updateCategory = async (id, catData) => {
     try {
       const res = await api.put(`/category/update/${id}`, catData);
@@ -37,7 +33,6 @@ export const useCategories = () => {
       toast.error(error?.response?.data?.message || "Update failed");
     }
   };
-
   const getCategory = async (catId) => {
     try {
       const res = await api.get(`/category/${catId}`);
@@ -47,7 +42,6 @@ export const useCategories = () => {
       toast.error(error);
     }
   };
-
   const deleteCategoryById = async (catId) => {
     const res = await api.delete(`/category/delete/${catId}`);
     try {

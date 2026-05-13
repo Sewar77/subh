@@ -8,9 +8,17 @@ import {
   getCategoryByIdController,
   updateCategoryController,
 } from "../controller/categories.Controller.js";
+import { validate } from "../middleware/validate.Middleware.js";
+import { createCategorySchema } from "../validation/category.Validation.js";
 const route = express.Router();
 
-route.post("/categories/create", protect, adminOnly, createCategoryController);
+route.post(
+  "/categories/create",
+  protect,
+  adminOnly,
+  validate(createCategorySchema),
+  createCategoryController,
+);
 route.get("/categories/all", getAllCategoriesController);
 route.delete(
   "/category/delete/:id",
