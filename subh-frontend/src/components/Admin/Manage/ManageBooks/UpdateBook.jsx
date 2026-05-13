@@ -54,7 +54,6 @@ export default function UpdateBook() {
     if (id) getBook(id);
   }, [id]);
 
-  // SYNC BOOK → FORM
   useEffect(() => {
     if (!book) return;
 
@@ -87,7 +86,6 @@ export default function UpdateBook() {
     }));
   };
 
-  // COVER
   const handleCoverChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -105,8 +103,6 @@ export default function UpdateBook() {
     if (!coverFile) return toast.error("Select cover image");
     coverUpload.uploadImage(coverFile);
   };
-
-  // BARCODE
   const handleBarcodeChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -124,8 +120,6 @@ export default function UpdateBook() {
     if (!barcodeFile) return toast.error("Select barcode image");
     barcodeUpload.uploadImage(barcodeFile);
   };
-
-  // UPDATE
   const handleUpdate = async () => {
     if (!bookData.name_en || !bookData.name_ar) {
       toast.error("Name fields are required");

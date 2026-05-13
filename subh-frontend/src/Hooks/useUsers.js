@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { usersContext } from "../Context/usersContext";
 export const useUser = () => {
   const { users, loadUsers } = useContext(usersContext);
+  const [user, setUser] = useState([]);
   const navigate = useNavigate();
 
   const addUser = async (userData) => {
@@ -17,6 +18,15 @@ export const useUser = () => {
       toast.error(error.message);
     }
   };
+  const getUserById = async (userId) => {
+    const res = await api.get(`/user/${userId}`);
+    try {
+      setUser(res.data.user);
+    } catch (error) {
+      console.log(error);
+      toast.error(error);
+    }
+  };
   const deleteUserById = async (userId) => {
     const res = await api.delete(`/user/delete/${userId}`);
     try {
@@ -27,5 +37,5 @@ export const useUser = () => {
       toast.error(error);
     }
   };
-  return { deleteUserById, users, addUser };
+  return { deleteUserById, users, addUser, getUserById, user };
 };
