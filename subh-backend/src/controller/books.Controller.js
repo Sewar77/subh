@@ -126,7 +126,6 @@ export const getBookByIdController = async (req, res) => {
 
 export const updateBookByIdController = async (req, res) => {
   const bookId = req.params.id;
-
   try {
     const {
       name_en,
@@ -143,7 +142,7 @@ export const updateBookByIdController = async (req, res) => {
       width_cm,
       height_cm,
     } = req.body;
-
+    console.log(req.body);
     if (category_id) {
       const categoryCheck = await getCategoryById(category_id);
       if (categoryCheck.rowCount === 0) {
@@ -170,7 +169,7 @@ export const updateBookByIdController = async (req, res) => {
       },
       bookId,
     );
-
+    console.log(updated);
     return res.status(200).json({
       message: "Book updated",
       book: updated,

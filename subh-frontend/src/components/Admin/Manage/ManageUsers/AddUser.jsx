@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useUser } from "../../../../Hooks/useUsers";
+import toast from "react-hot-toast";
 export default function AddUser() {
   const { addUser } = useUser();
   const [newUser, setNewUser] = useState({
@@ -26,8 +27,38 @@ export default function AddUser() {
     userType: "",
     phone_Number: "",
   });
+
   const handleAddUser = () => {
+    if (
+      !newUser.name ||
+      !newUser.email ||
+      !newUser.password ||
+      !newUser.confirmPassword ||
+      !newUser.role ||
+      !newUser.userType
+    ) {
+      toast("Should fill all feilds! \n \n يجب ملء جميع الحقول ", {
+        style: {
+          border: "1px solid #6366f1",
+          padding: "16px",
+          color: "#000",
+          fontWeight: 500,
+        },
+      });
+      return;
+    }
     addUser(newUser);
+  };
+
+  const handleClearForm = () => {
+    setNewUser({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      address: "",
+      phone_Number: "",
+    });
   };
   return (
     <Container maxWidth="md">
@@ -192,6 +223,13 @@ export default function AddUser() {
           onClick={() => handleAddUser()}
         >
           Add User
+        </Button>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={() => handleClearForm()}
+        >
+          Clear
         </Button>
       </Paper>
     </Container>

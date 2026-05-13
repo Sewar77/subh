@@ -25,13 +25,16 @@ import { useUser } from "../../../../Hooks/useUsers";
 import DeleteButton from "../../Buttons/DeleteBtn";
 import ViewButton from "../../Buttons/ViewBtn";
 import AddButton from "../../Buttons/AddBtn";
-
+import { useNavigate } from "react-router-dom";
 export default function ManageUsers() {
   const { users, deleteUserById } = useUser();
   const theme = useTheme();
+  const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
+  const handleViewUser = (userId) => {
+    navigate(`/admin/view/user/${userId}`);
+  };
   return (
     <Box sx={{ color: "text.primary", p: 2 }}>
       <Box
@@ -175,14 +178,12 @@ export default function ManageUsers() {
                         <EditOutlinedIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-
                     <DeleteButton
                       onClick={() => {
                         (setConfirmDelete(true), setSelectedId(user.id));
                       }}
                     />
-
-                    <ViewButton />
+                    <ViewButton onClick={() => handleViewUser(user.id)} />
                   </Stack>
                 </TableCell>
               </TableRow>

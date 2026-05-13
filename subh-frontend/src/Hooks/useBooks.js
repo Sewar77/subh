@@ -47,10 +47,10 @@ export const useBooks = () => {
   };
 
   const updateBook = async (bookId, bookData) => {
+    console.log(bookId, bookData);
+    const res = await api.put(`/book/update/${bookId}`, bookData);
+    console.log(res.data);
     try {
-      const res = await api.put(`/book/update/${bookId}`, bookData);
-      console.log(res);
-      
       setBook(res.data.book);
     } catch (error) {
       console.log(error.message);
