@@ -28,7 +28,6 @@ export const registerUserController = async (req, res) => {
     });
     return res.status(201).json({ message: "registered", user: user });
   } catch (err) {
-    console.error(err);
     return res
       .status(500)
       .json({ message: "Internal server error in register", err });

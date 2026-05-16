@@ -165,8 +165,6 @@ export default function AddBook() {
     await createBooks(payload);
 
     resetForm();
-
-    toast.success("Book created successfully");
   };
 
   return (

@@ -13,16 +13,18 @@ export const useBooks = () => {
   }, []);
   const createBooks = async (bookData) => {
     try {
-      console.log(bookData);
       const res = await api.post("/book/create", bookData);
-      console.log(res);
       const createdBook = res.data.book;
       setBooks((prev) => [createdBook, ...prev]);
-      toast.success("Book Created Successfully");
       navigate("/admin/books");
+      toast.success("Book Created Successfully");
     } catch (error) {
-      console.log(error);
-      toast.error("Error creating book");
+      const errors = error.response?.data?.errors;
+      if (Array.isArray(errors)) {
+        toast.error(errors.join("\n"));
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 
@@ -32,8 +34,7 @@ export const useBooks = () => {
       loadBooks();
       toast.success("deleted");
     } catch (error) {
-      console.log(error);
-      toast.error("Error deleteing  book");
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -42,18 +43,16 @@ export const useBooks = () => {
       const res = await api.get(`/book/${bookId}`);
       setBook(res.data.book);
     } catch (error) {
-      console.log(error.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
   const updateBook = async (bookId, bookData) => {
-    console.log(bookId, bookData);
     const res = await api.put(`/book/update/${bookId}`, bookData);
-    console.log(res.data);
     try {
       setBook(res.data.book);
     } catch (error) {
-      console.log(error.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 

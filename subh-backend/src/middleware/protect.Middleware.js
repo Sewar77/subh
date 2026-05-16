@@ -1,9 +1,7 @@
 import jwt from "jsonwebtoken";
 
 export const protect = (req, res, next) => {
-  let token = req?.cookies?.token;
-  console.log(token);
-  
+  let token = req?.cookies?.token;  
   if (!token) {
     return res.status(401).json({
       message: "unautherized!",

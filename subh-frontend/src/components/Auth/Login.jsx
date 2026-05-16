@@ -19,7 +19,6 @@ export default function Login() {
     email: "",
     password: "",
   });
-  console.log(userData);
   const navigate = useNavigate();
   const { login } = useAuth();
   const handleLogin = () => {
