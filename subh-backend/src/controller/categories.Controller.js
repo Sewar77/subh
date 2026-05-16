@@ -9,7 +9,6 @@ import {
 export const createCategoryController = async (req, res) => {
   const { name_en, name_ar, description_en, description_ar, image } = req.body;
   try {
-    console.log(req.body);
     if (!name_en || !name_ar) {
       return res.status(400).json({
         message: "English and Arabic names are required",
@@ -52,11 +51,9 @@ export const getAllCategoriesController = async (req, res) => {
 
 export const getCategoryByIdController = async (req, res) => {
   const catId = req.params.id;
-  console.log("catId", catId);
 
   try {
     const category = await getCategoryById(catId);
-    console.log("category", category);
 
     if (!category) {
       return res.status(400).json({

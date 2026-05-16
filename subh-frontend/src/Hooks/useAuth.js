@@ -20,9 +20,8 @@ export const useAuth = () => {
       if (role === "user") navigate("/");
       toast.success(res.data.message);
       setUser(res.data.user);
-    } catch (err) {
-      console.log(err);
-      toast.error(res.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   const logout = async () => {
@@ -31,9 +30,8 @@ export const useAuth = () => {
       setUser(null);
       toast.success("Logout Successfully");
       navigate("/");
-    } catch (err) {
-      console.log(err);
-      toast.error(err.response?.data?.message || "Logout failed");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   return { login, user, logout };

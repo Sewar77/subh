@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api.js";
+import toast from "react-hot-toast";
 export const useUpload = () => {
   const [uploadedUrl, setUploadedUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,20 +15,14 @@ export const useUpload = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log(formData);
-      console.log(file);
-
       const res = await api.post("/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log("res", res);
-
       setUploadedUrl(res.data.url);
-    } catch (err) {
-      setError("Upload failed");
-      console.log(err);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }

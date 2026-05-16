@@ -18,7 +18,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { usersContext } from "../../../../Context/usersContext";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 import { useUser } from "../../../../Hooks/useUsers";
@@ -27,8 +27,11 @@ import ViewButton from "../../Buttons/ViewBtn";
 import AddButton from "../../Buttons/AddBtn";
 import { useNavigate } from "react-router-dom";
 export default function ManageUsers() {
-  const { users, deleteUserById } = useUser();
+  const { users, deleteUserById, loadUsers } = useUser();
   const theme = useTheme();
+  useEffect(() => {
+    loadUsers();
+  }, []);
   const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -96,6 +99,11 @@ export default function ManageUsers() {
               <TableCell
                 sx={{ width: 360, color: "primary.contrastText", fontSize: 25 }}
               >
+                Type
+              </TableCell>
+              <TableCell
+                sx={{ width: 360, color: "primary.contrastText", fontSize: 25 }}
+              >
                 Role
               </TableCell>
               <TableCell
@@ -149,6 +157,7 @@ export default function ManageUsers() {
                   </Stack>
                 </TableCell>
                 <TableCell sx={{ fontSize: 23 }}>{user.email}</TableCell>
+
                 <TableCell sx={{ fontSize: 23 }}>
                   <Chip
                     label={user.user_type}
@@ -157,7 +166,14 @@ export default function ManageUsers() {
                     variant="outlined"
                   />
                 </TableCell>
-
+                <TableCell sx={{ fontSize: 23 }}>
+                  <Chip
+                    label={user.role}
+                    size="large"
+                    color="primary"
+                    variant="contained"
+                  />
+                </TableCell>
                 <TableCell sx={{ fontSize: 23 }}>
                   <Chip
                     label={user.is_active ? "Active" : "Inactive"}

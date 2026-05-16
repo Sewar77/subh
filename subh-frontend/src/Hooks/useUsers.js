@@ -9,13 +9,12 @@ export const useUser = () => {
   const navigate = useNavigate();
 
   const addUser = async (userData) => {
-    const res = await api.post(`/user/add`, userData);
     try {
+      const res = await api.post(`/user/add`, userData);
       toast.success("User Added successfully");
-      setUsers(res.data.user);
+      setUser(res.data.user);
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   const getUserById = async (userId) => {
@@ -23,8 +22,7 @@ export const useUser = () => {
     try {
       setUser(res.data.user);
     } catch (error) {
-      console.log(error);
-      toast.error(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   const deleteUserById = async (userId) => {
@@ -33,9 +31,8 @@ export const useUser = () => {
       toast.success("delete user!");
       loadUsers();
     } catch (error) {
-      console.log(error);
-      toast.error(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
-  return { deleteUserById, users, addUser, getUserById, user };
+  return { deleteUserById, users, addUser, getUserById, user, loadUsers };
 };

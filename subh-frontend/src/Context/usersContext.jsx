@@ -10,9 +10,8 @@ export default function UsersProvider({ children }) {
     try {
       const res = await api.get("/users");
       setUsers(res.data.users);
-    } catch (err) {
-      console.log(err);
-      toast.error(err);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   return (
