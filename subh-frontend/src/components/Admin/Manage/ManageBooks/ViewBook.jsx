@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useBooks } from "../../../../Hooks/useBooks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Avatar,
   Button,
@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import UpdateBtn from "../../Buttons/UpdateBtn.jsx";
 import DeleteButton from "../../Buttons/DeleteBtn.jsx";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal.jsx";
 export default function ViewBook() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,7 +27,8 @@ export default function ViewBook() {
     deleteBook(id);
     navigate("/admin/books");
   };
-
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedViewId, setSelectedViewId] = useState(null);
   useEffect(() => {
     if (id) getBook(id);
   }, [id]);
@@ -275,13 +277,29 @@ export default function ViewBook() {
           {/* ACTIONS */}
           <CardActions>
             <UpdateBtn onClick={() => handleUpdate(book.id)} />
-            <DeleteButton onClick={() => handleDelete(book.id)} />
+            <DeleteButton
+              onClick={() => {
+                setSelectedViewId(book.id);
+                setConfirmDelete(true);
+              }}
+            />
           </CardActions>
           <Button variant="contained" onClick={() => navigate(-1)}>
             Go Back
           </Button>
         </Stack>
       </Card>
+      {confirmDelete && (
+        <ConfirmDeleteModal
+          open={confirmDelete}
+          onClose={() => setConfirmDelete(false)}
+          onConfirm={() => (
+            handleDelete(selectedViewId),
+            setConfirmDelete(false)
+          )}
+          label={"Book"}
+        />
+      )}
     </Container>
   );
 }

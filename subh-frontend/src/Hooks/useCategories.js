@@ -43,6 +43,7 @@ export const useCategories = () => {
     const res = await api.delete(`/category/delete/${catId}`);
     try {
       toast.success("delete categoery!");
+      navigate("/admin/categories");
       loadCategories();
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");

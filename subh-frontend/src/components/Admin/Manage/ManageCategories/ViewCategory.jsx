@@ -12,13 +12,27 @@ import {
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCategories } from "../../../../Hooks/useCategories";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import UpdateBtn from "../../Buttons/UpdateBtn";
+import DeleteButton from "../../Buttons/DeleteBtn";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 
 export default function ViewCategory() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { category, getCategory } = useCategories();
-
+  const {
+    category,
+    categories,
+    loadCategories,
+    deleteCategoryById,
+    getCategory,
+  } = useCategories();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedViewId, setSelectedViewId] = useState(null);
+  const [selectedUpdateId, setSelectedUpdateId] = useState(null);
+  const handleUpdateCategory = (catId) => {
+    navigate(`/admin/category/update/${catId}`);
+  };
   useEffect(() => {
     if (id) getCategory(id);
   }, [id]);
@@ -97,18 +111,31 @@ export default function ViewCategory() {
           </CardContent>
           <Divider sx={{ my: 1 }} />
           <CardActions>
-            <Button variant="outlined" color="error">
-              Delete
-            </Button>
-            <Button variant="contained" color="warning">
-              Edit
-            </Button>
+            <UpdateBtn onClick={() => handleUpdateCategory(category.id)} />
+
+            <DeleteButton
+              onClick={() => {
+                setSelectedViewId(category.id);
+                setConfirmDelete(true);
+              }}
+            />
           </CardActions>
         </Stack>
         <Button variant="text" onClick={() => navigate(-1)}>
           Go Back
         </Button>
       </Card>
+      {confirmDelete && (
+        <ConfirmDeleteModal
+          open={confirmDelete}
+          onClose={() => setConfirmDelete(false)}
+          onConfirm={() => (
+            deleteCategoryById(selectedViewId),
+            setConfirmDelete(false)
+          )}
+          label={"Category"}
+        />
+      )}
     </Container>
   );
 }
