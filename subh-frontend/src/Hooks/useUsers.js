@@ -34,5 +34,24 @@ export const useUser = () => {
       toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
-  return { deleteUserById, users, addUser, getUserById, user, loadUsers };
+  const updateUserData = async (userId, newUserData) => {
+    console.log(userId);
+
+    const res = await api.put(`/user/update/${userId}`, newUserData);
+    try {
+      toast.success(" user updated!");
+      loadUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  };
+  return {
+    deleteUserById,
+    users,
+    addUser,
+    getUserById,
+    user,
+    loadUsers,
+    updateUserData,
+  };
 };

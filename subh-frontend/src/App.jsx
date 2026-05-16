@@ -47,8 +47,8 @@ function App() {
           <Route path="view/book/:id" element={<ViewBook />} />
           <Route path="category/update/:id" element={<UpdateCategory />} />
           <Route path="book/update/:id" element={<UpdateBook />} />
+          <Route path="user/update/:id" element={<UpdateBook />} />
         </Route>
-
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

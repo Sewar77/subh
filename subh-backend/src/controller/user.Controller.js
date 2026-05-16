@@ -4,7 +4,7 @@ import {
   getUserById,
   registerUserModel,
 } from "../models/auth.Models.js";
-import { deleteUser } from "../models/user.Model.js";
+import { deleteUser, updateUser } from "../models/user.Model.js";
 import bcrypt from "bcryptjs";
 export const getAllUsersController = async (req, res) => {
   try {
@@ -101,5 +101,54 @@ export const addNewUserController = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Internal server error in register", err });
+  }
+};
+export const updateUserController = async (req, res) => {
+  const userId = req.params.id;
+  const { userType, userRole } = req.body;
+
+  try {
+    console.log("body:", req.body);
+    console.log("userId:", userId);
+
+    const existingUser = await getUserById(userId);
+
+    if (!existingUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const updateFields = {};
+
+    if (userType !== undefined && userType !== "") {
+      updateFields.user_type = userType;
+    }
+
+    if (userRole !== undefined && userRole !== "") {
+      updateFields.role = userRole;
+    }
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({
+        message: "No fields provided to update",
+      });
+    }
+
+    const updatedUser = await updateUser(
+      userId,
+      updateFields.user_type,
+      updateFields.role,
+    );
+    console.log("updated===", updatedUser);
+
+    return res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Internal server error",
+      err,
+    });
   }
 };
