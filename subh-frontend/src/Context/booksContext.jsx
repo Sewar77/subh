@@ -11,9 +11,8 @@ export default function BooksProvider({ children }) {
     try {
       const res = await api.get("/books");
       setBooks(res.data.books);
-    } catch (err) {
-      console.log(err);
-      toast.error(err);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 

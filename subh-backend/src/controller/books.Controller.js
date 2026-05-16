@@ -34,14 +34,10 @@ export const createBookController = async (req, res) => {
       author_name_en,
       author_name_ar,
     } = req.body;
-    console.log("books===:  ", req.body);
-
     let author = await findAuthorByName(client, author_name_en, author_name_ar);
-
     if (!author) {
       author = await createAuthor(client, author_name_en, author_name_ar);
     }
-
     const book = await createBook(client, {
       name_en,
       name_ar,
@@ -63,7 +59,6 @@ export const createBookController = async (req, res) => {
     await client.query("COMMIT");
 
     return res.status(201).json({
-      message: "Book created successfully",
       book,
       author,
     });
@@ -78,6 +73,7 @@ export const createBookController = async (req, res) => {
     client.release();
   }
 };
+
 export const getAllBooksController = async (req, res) => {
   try {
     const books = await getAllBooks();
@@ -109,7 +105,6 @@ export const deleteBookController = async (req, res) => {
 
 export const getBookByIdController = async (req, res) => {
   const bookId = req.params.id;
-  console.log("bookId", bookId);
   try {
     const book = await getBookById(bookId);
     if (!book) {
@@ -142,7 +137,6 @@ export const updateBookByIdController = async (req, res) => {
       width_cm,
       height_cm,
     } = req.body;
-    console.log(req.body);
     if (category_id) {
       const categoryCheck = await getCategoryById(category_id);
       if (categoryCheck.rowCount === 0) {
@@ -169,7 +163,6 @@ export const updateBookByIdController = async (req, res) => {
       },
       bookId,
     );
-    console.log(updated);
     return res.status(200).json({
       message: "Book updated",
       book: updated,

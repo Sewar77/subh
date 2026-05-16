@@ -17,8 +17,7 @@ export const useCategories = () => {
       setCategories(res.data.categories);
       toast.success("created categories ! ");
     } catch (error) {
-      console.log(error);
-      toast.error(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   const updateCategory = async (id, catData) => {
@@ -29,8 +28,7 @@ export const useCategories = () => {
       );
       toast.success("Category updated!");
     } catch (error) {
-      console.log(error);
-      toast.error(error?.response?.data?.message || "Update failed");
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   const getCategory = async (catId) => {
@@ -38,8 +36,7 @@ export const useCategories = () => {
       const res = await api.get(`/category/${catId}`);
       setCategory(res.data.category);
     } catch (error) {
-      console.log(error);
-      toast.error(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   const deleteCategoryById = async (catId) => {
@@ -48,8 +45,7 @@ export const useCategories = () => {
       toast.success("delete categoery!");
       loadCategories();
     } catch (error) {
-      console.log(error);
-      toast.error(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   useEffect(() => {

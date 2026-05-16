@@ -9,9 +9,8 @@ export default function AuthProvider({ children }) {
     try {
       const res = await api.get("/auth/me");
       setUser(res.data.user);
-    } catch (err) {
-      console.log("Auth check failed:", err.response?.data || err.message);
-      setUser(null);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   return (

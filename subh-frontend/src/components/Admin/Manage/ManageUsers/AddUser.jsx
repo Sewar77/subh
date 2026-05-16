@@ -22,9 +22,9 @@ export default function AddUser() {
     password: "",
     confirmPassword: "",
     email: "",
-    role: "",
+    userRole: "user",
     address: "",
-    userType: "",
+    userType: "individual",
     phone_Number: "",
   });
 
@@ -34,7 +34,7 @@ export default function AddUser() {
       !newUser.email ||
       !newUser.password ||
       !newUser.confirmPassword ||
-      !newUser.role ||
+      !newUser.userRole ||
       !newUser.userType
     ) {
       toast("Should fill all feilds! \n \n يجب ملء جميع الحقول ", {
@@ -46,7 +46,7 @@ export default function AddUser() {
         },
       });
       return;
-    }
+    }    
     addUser(newUser);
   };
 
@@ -57,6 +57,7 @@ export default function AddUser() {
       password: "",
       confirmPassword: "",
       address: "",
+      role: "",
       phone_Number: "",
     });
   };
@@ -112,11 +113,24 @@ export default function AddUser() {
           value={newUser.password}
           onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
         />
+        <TextField
+          label="Confirm Password"
+          type="password"
+          fullWidth
+          sx={{
+            input: { color: "text.primary" },
+            label: { color: "text.primary" },
+          }}
+          value={newUser.confirmPassword}
+          onChange={(e) =>
+            setNewUser({ ...newUser, confirmPassword: e.target.value })
+          }
+        />
         <Divider />
         <FormControl>
           <FormLabel sx={{ color: "text.primary" }}>User Type</FormLabel>
           <RadioGroup
-            value={newUser.userType || "individual"}
+            value={newUser.userType}
             onChange={(e) =>
               setNewUser({ ...newUser, userType: e.target.value })
             }
@@ -155,7 +169,7 @@ export default function AddUser() {
         <FormControl>
           <FormLabel sx={{ color: "text.primary" }}>User Role</FormLabel>
           <RadioGroup
-            value={newUser.userRole || "user"}
+            value={newUser.userRole}
             onChange={(e) =>
               setNewUser({ ...newUser, userRole: e.target.value })
             }

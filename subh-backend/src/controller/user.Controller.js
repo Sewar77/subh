@@ -5,11 +5,10 @@ import {
   registerUserModel,
 } from "../models/auth.Models.js";
 import { deleteUser } from "../models/user.Model.js";
-
+import bcrypt from "bcryptjs";
 export const getAllUsersController = async (req, res) => {
   try {
     const users = await getAllUsers();
-    console.log(users);
     if (users.length === 0) {
       return res.status(200).json({ message: "No users yert", users: [] });
     }
@@ -64,7 +63,7 @@ export const addNewUserController = async (req, res) => {
     password,
     confirmPassword,
     email,
-    role,
+    userRole,
     phone_Number,
     userType,
     address,
@@ -75,7 +74,7 @@ export const addNewUserController = async (req, res) => {
       !email ||
       !confirmPassword ||
       !password ||
-      !role ||
+      !userRole ||
       !userType
     ) {
       return res.status(400).json({ message: "Should fill all info" });
@@ -95,11 +94,10 @@ export const addNewUserController = async (req, res) => {
       phone_Number,
       address,
       userType: userType,
-      role: role,
+      role: userRole,
     });
     return res.status(201).json({ message: "user added", user: user });
   } catch (err) {
-    console.error(err);
     return res
       .status(500)
       .json({ message: "Internal server error in register", err });

@@ -173,7 +173,6 @@ export const getBookById = async (bookId) => {
 };
 
 export const updateBookById = async (bookData, bookId) => {
-  console.log("bookData", bookData);
   const result = await pool.query(
     `
     UPDATE books 
@@ -210,6 +209,5 @@ export const updateBookById = async (bookData, bookId) => {
       bookId,
     ],
   );
-  console.log("result", result.rows[0]);
   return result.rows[0];
 };

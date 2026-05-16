@@ -21,7 +21,6 @@ export default function ViewBook() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { book, getBook, deleteBook } = useBooks();
-  console.log(book);
   const handleUpdate = (id) => navigate(`/admin/book/update/${id}`);
   const handleDelete = (id) => {
     deleteBook(id);

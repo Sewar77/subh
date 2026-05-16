@@ -10,9 +10,8 @@ export default function CategoriesProvider({ children }) {
     try {
       const res = await api.get("/categories/all");
       setCategories(res.data.categories);
-    } catch (err) {
-      console.log(err);
-      toast.error(err);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
