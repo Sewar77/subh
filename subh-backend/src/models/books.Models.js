@@ -113,6 +113,11 @@ export const getAllBooks = async () => {
       b.barcode_image,
       b.cover_image,
       b.price,
+      b.length_cm,
+      b.width_cm,
+      b.height_cm,
+      b.weight_kg,
+      b.shipping_cost,
       b.created_at,
 
       c.name_en AS category_name_en,

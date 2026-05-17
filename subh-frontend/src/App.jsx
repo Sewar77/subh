@@ -21,6 +21,9 @@ import ViewBook from "./components/Admin/Manage/ManageBooks/ViewBook.jsx";
 import UpdateBook from "./components/Admin/Manage/ManageBooks/UpdateBook.jsx";
 import ViewUser from "./components/Admin/Manage/ManageUsers/ViewUser.jsx";
 import NotFound from "./components/NotFound/NotFound.jsx";
+import LandingPage from "./Pages/Landing/LandingPage.jsx";
+import DisplayBooks from "./components/Books/DisplayBooks.jsx";
+import UserLayout from "./Layout/UserLayout.jsx";
 function App() {
   const { id } = useParams();
   return (
@@ -33,6 +36,11 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/educational/courses" element={<EducationalPrograms />} />
+        {/* User routes */}
+        <Route path="/user" element={<UserLayout />}>
+          <Route index element={<LandingPage />} />
+          <Route path="books" element={<DisplayBooks />} />
+        </Route>
         {/* admin routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
