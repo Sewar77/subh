@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { authContext } from "../Context/authContext";
 import { api } from "../../api";
 import toast from "react-hot-toast";
@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 export const useAuth = () => {
   const { user, setUser } = useContext(authContext);
   const navigate = useNavigate();
-
   const register = async (userData) => {
     if (
       !userData.email ||
@@ -47,9 +46,8 @@ export const useAuth = () => {
       const res = await api.post("/auth/login", userData);
       const role = res.data.user.role;
       if (role === "admin") navigate("/admin");
-      if (role === "user") navigate("/");
+      if (role === "user") navigate("/user");
       toast.success(res.data.message);
-      setUser(res.data.user);
     } catch (error) {
       const data = error.response?.data;
       if (data?.errors && Array.isArray(data.errors)) {
@@ -59,7 +57,6 @@ export const useAuth = () => {
         return;
       }
       toast.error(data?.message || "Something went wrong");
-
       console.log(error);
     }
   };

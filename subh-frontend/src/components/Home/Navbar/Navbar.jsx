@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
@@ -11,11 +11,13 @@ import {
   ListItem,
   ListItemButton,
 } from "@mui/material";
-
 import MenuIcon from "@mui/icons-material/Menu";
 import TranslateIcon from "@mui/icons-material/Translate";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../Hooks/useAuth";
+import { usersContext } from "../../../Context/usersContext";
+import { authContext } from "../../../Context/authContext";
 export default function Navbar() {
   const pages = [
     {
@@ -28,14 +30,18 @@ export default function Navbar() {
   ];
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-
+  const { logout } = useAuth();
+  const { user, loadUser } = useContext(authContext);
+  useEffect(() => {
+    loadUser();
+  }, []);
+  console.log(user);
   return (
     <AppBar
       position="sticky"
       sx={{
         mb: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
         width: "100%",
-        // maxWidth: "1400px",
         mx: "auto",
         p: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
         borderRadius: 5,
@@ -82,28 +88,50 @@ export default function Navbar() {
           <IconButton sx={{ bgcolor: "secondary.main" }}>
             <TranslateIcon sx={{ color: "text.secondary" }} />
           </IconButton>
-
-          <IconButton>
-            <PersonOutlinedIcon sx={{ color: "text.secondary" }} />
-          </IconButton>
-
-          <Button
-            variant="contained"
-            sx={{
-              background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
-              color: "#fff",
-              fontWeight: 600,
-              borderRadius: 3,
-              textTransform: "none",
-              display: { xs: "none", sm: "flex" },
-              "&:hover": {
-                background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
-              },
-            }}
-            onClick={() => navigate("/login")}
-          >
-            Login
-          </Button>
+          {user ? (
+            <>
+              <IconButton>
+                <PersonOutlinedIcon sx={{ color: "text.secondary" }} />
+              </IconButton>
+              <Button
+                variant="contained"
+                sx={{
+                  background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
+                  color: "#fff",
+                  fontWeight: 600,
+                  borderRadius: 3,
+                  textTransform: "none",
+                  display: { xs: "none", sm: "flex" },
+                  "&:hover": {
+                    background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
+                  },
+                }}
+                onClick={() => logout()}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="contained"
+                sx={{
+                  background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
+                  color: "#fff",
+                  fontWeight: 600,
+                  borderRadius: 3,
+                  textTransform: "none",
+                  display: { xs: "none", sm: "flex" },
+                  "&:hover": {
+                    background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
+                  },
+                }}
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
+            </>
+          )}
           <IconButton
             onClick={() => setOpen(true)}
             sx={{ display: { xs: "flex", md: "none" }, color: "white" }}

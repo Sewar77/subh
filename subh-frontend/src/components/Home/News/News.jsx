@@ -2,9 +2,11 @@ import { Button, Stack, Typography, Paper, Box } from "@mui/material";
 import NewsCarousel from "./NewsCarousel";
 import About from "../About/About";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../Hooks/useAuth";
 
 export default function News() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   return (
     <Box
       sx={{
@@ -44,27 +46,49 @@ export default function News() {
               background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
             },
           }}
-          onClick={() => navigate("/register")}
+          onClick={() => navigate("/news")}
         >
           Discover More
         </Button>
-        <Button
-          variant="contained"
-          sx={{
-            color: "#fff",
-            fontWeight: 600,
-            background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
-            borderRadius: 3,
-            textTransform: "none",
-            display: { xs: "none", sm: "flex" },
-            "&:hover": {
-              background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
-            },
-          }}
-          onClick={() => navigate("register")}
-        >
-          Sign Up Now
-        </Button>
+        {user ? (
+          <>
+            <Button
+              variant="contained"
+              sx={{
+                color: "#fff",
+                fontWeight: 600,
+                background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
+                borderRadius: 3,
+                textTransform: "none",
+                display: { xs: "none", sm: "flex" },
+                "&:hover": {
+                  background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
+                },
+              }}
+              onClick={() => navigate("/user/books")}
+            >
+              Explore Books
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="contained"
+            sx={{
+              color: "#fff",
+              fontWeight: 600,
+              background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
+              borderRadius: 3,
+              textTransform: "none",
+              display: { xs: "none", sm: "flex" },
+              "&:hover": {
+                background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
+              },
+            }}
+            onClick={() => navigate("/register")}
+          >
+            Sign Up Now
+          </Button>
+        )}
       </Stack>
 
       <Paper

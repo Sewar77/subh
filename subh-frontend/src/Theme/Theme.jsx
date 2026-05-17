@@ -72,6 +72,7 @@ export const theme = createTheme({
           backgroundImage: "none",
           border: "1px solid rgba(255,255,255,0.05)",
           boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+          color: "white",
         },
       },
     },

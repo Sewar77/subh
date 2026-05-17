@@ -81,6 +81,7 @@ export const currentUser = async (req, res) => {
   try {
     const me = req.user.id;
     const user = await getUserById(me);
+    console.log("logged as: ", user);
 
     if (!user) {
       return res.status(401).json({ message: "unautherzed", err });

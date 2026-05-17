@@ -1,6 +1,8 @@
 import { Button, Box, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function Questions() {
+  const navigate = useNavigate();
   return (
     <>
       <Box
@@ -34,7 +36,7 @@ export default function Questions() {
             },
           }}
         >
-          Do You Hvae a Question?
+          Any Questions?
         </Typography>
         <Typography variant="h5">Feel Free to Reach out</Typography>
         <Button
@@ -51,6 +53,7 @@ export default function Questions() {
               background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
             },
           }}
+          onClick={() => navigate("/contact")}
         >
           Contact Now
         </Button>
