@@ -5,32 +5,40 @@ import {
 } from "../models/auth.Models.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-export const registerUserController = async (req, res) => {
-  const { name, password, confirmPassword, email } = req.body;
 
+export const registerUserController = async (req, res) => {
   try {
-    if (!name || !email || !confirmPassword || !password) {
-      return res.status(400).json({ message: "Should fill all info" });
-    }
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: "passwords should match" });
-    }
+    const { name, email, password, userType, phoneNumber, role } = req.body;
     const isUserExist = await getUserByEmail(email);
+
     if (isUserExist) {
-      return res.status(400).json({ message: "email registed already" });
+      return res.status(409).json({
+        success: false,
+        message: "Email already exists",
+      });
     }
+
     const hashed_password = await bcrypt.hash(password, 10);
+
     const user = await registerUserModel({
       name,
       email,
       hashed_password,
-      role: "user",
+      userType,
+      phoneNumber,
+      role,
     });
-    return res.status(201).json({ message: "registered", user: user });
+
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      user,
+    });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Internal server error in register", err });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
