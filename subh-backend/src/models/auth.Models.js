@@ -6,10 +6,11 @@ export const registerUserModel = async ({
   hashed_password,
   role,
   userType,
+  phoneNumber,
 }) => {
   const result = await pool.query(
-    `insert into users(name, email, hashed_password, role, user_type) values($1, $2, $3, $4, $5)`,
-    [name, email, hashed_password, role, userType],
+    `insert into users(name, email, hashed_password, role, user_type, phoneNumber) values($1, $2, $3, $4, $5, $6)`,
+    [name, email, hashed_password, role, userType, phoneNumber],
   );
   return result.rows[0];
 };
