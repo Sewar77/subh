@@ -15,6 +15,7 @@ export const createBook = async (client, data) => {
     barcode_image,
     category_id,
     price,
+    isbn,
     shipping_cost,
     length_cm,
     width_cm,
@@ -33,13 +34,14 @@ export const createBook = async (client, data) => {
       barcode_image,
       category_id,
       price,
+isbn, 
       shipping_cost,
       length_cm,
       width_cm,
       height_cm
     )
     VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
+      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13, $14
     )
     RETURNING *
     `,
@@ -53,6 +55,7 @@ export const createBook = async (client, data) => {
       barcode_image,
       category_id,
       price,
+      isbn,
       shipping_cost,
       length_cm,
       width_cm,
@@ -108,6 +111,7 @@ export const getAllBooks = async () => {
       b.id,
       b.name_en,
       b.name_ar,
+      b.isbn,
       b.description_en,
       b.description_ar,
       b.barcode_image,
@@ -147,6 +151,7 @@ export const getBookById = async (bookId) => {
       b.id,
       b.name_en,
       b.name_ar,
+      b.isbn,
       b.description_en,
       b.description_ar,
       b.barcode_image,

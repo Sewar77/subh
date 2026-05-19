@@ -65,7 +65,7 @@ export default function News() {
                   background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
                 },
               }}
-              onClick={() => navigate("/user/books")}
+              onClick={() => navigate("/subh/books")}
             >
               Explore Books
             </Button>

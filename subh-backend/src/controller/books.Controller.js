@@ -27,6 +27,7 @@ export const createBookController = async (req, res) => {
       barcode_image,
       category_id,
       price,
+      isbn,
       shipping_cost,
       length_cm,
       width_cm,
@@ -34,6 +35,8 @@ export const createBookController = async (req, res) => {
       author_name_en,
       author_name_ar,
     } = req.body;
+    console.log(req.body);
+
     let author = await findAuthorByName(client, author_name_en, author_name_ar);
     if (!author) {
       author = await createAuthor(client, author_name_en, author_name_ar);
@@ -48,6 +51,7 @@ export const createBookController = async (req, res) => {
       barcode_image,
       category_id,
       price,
+      isbn,
       shipping_cost,
       length_cm,
       width_cm,
@@ -131,6 +135,7 @@ export const updateBookByIdController = async (req, res) => {
       cover_image,
       barcode_image,
       category_id,
+      isbn,
       price,
       shipping_cost,
       length_cm,
@@ -156,6 +161,7 @@ export const updateBookByIdController = async (req, res) => {
         barcode_image,
         category_id,
         price,
+        isbn,
         shipping_cost,
         length_cm,
         width_cm,
