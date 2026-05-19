@@ -50,6 +50,7 @@ export const createBookSchema = Joi.object({
   }),
 
   category_id: Joi.number().integer().positive().allow(null),
+  isbn: Joi.string().min(13).max(26).required(),
 
   price: Joi.number().positive().required().messages({
     "number.positive": "Price must be greater than 0",

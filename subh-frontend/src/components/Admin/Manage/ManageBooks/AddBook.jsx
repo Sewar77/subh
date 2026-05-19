@@ -31,6 +31,7 @@ export default function AddBook() {
     author_name_ar: "",
     category_id: "",
     price: "",
+    isbn: "",
     shipping_cost: "",
     weight_kg: "",
     length_cm: "",
@@ -112,6 +113,7 @@ export default function AddBook() {
       author_name_ar: "",
       category_id: "",
       price: "",
+      isbn: "",
       shipping_cost: "",
       weight_kg: "",
       length_cm: "",
@@ -143,7 +145,8 @@ export default function AddBook() {
       !bookData.author_name_en ||
       !bookData.author_name_ar ||
       !bookData.category_id ||
-      !bookData.price
+      !bookData.price ||
+      !bookData.isbn
     ) {
       toast.error("Please fill all required fields");
       return;
@@ -153,18 +156,20 @@ export default function AddBook() {
       ...bookData,
       category_id: Number(bookData.category_id),
       price: Number(bookData.price),
+      isbn: bookData.isbn,
       shipping_cost: Number(bookData.shipping_cost || 0),
       weight_kg: Number(bookData.weight_kg || 0),
       length_cm: Number(bookData.length_cm || 0),
       width_cm: Number(bookData.width_cm || 0),
       height_cm: Number(bookData.height_cm || 0),
       cover_image: coverUpload.uploadedUrl,
+
       barcode_image: barcodeUpload.uploadedUrl,
     };
 
     await createBooks(payload);
 
-    resetForm();
+    // resetForm();
   };
 
   return (
@@ -265,6 +270,13 @@ export default function AddBook() {
             </MenuItem>
           ))}
         </TextField>
+        <TextField
+          label="ISBN"
+          name="isbn"
+          value={bookData.isbn}
+          onChange={handleChange}
+          fullWidth
+        />
 
         <TextField
           label="Price"

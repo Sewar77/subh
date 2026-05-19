@@ -37,7 +37,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/educational/courses" element={<EducationalPrograms />} />
         {/* User routes */}
-        <Route path="/user" element={<UserLayout />}>
+        <Route path="/subh" element={<UserLayout />}>
           <Route index element={<LandingPage />} />
           <Route path="books" element={<DisplayBooks />} />
         </Route>
@@ -47,6 +47,7 @@ function App() {
           <Route path="users" element={<ManageUsers />} />
           <Route path="add/user" element={<AddUser />} />
           <Route path="categories" element={<DisplayCategories />} />
+          <Route path="workshops" element={<DisplayWorkshops />} />
           <Route path="new-category" element={<AddCategory />} />
           <Route path="view/category/:id" element={<ViewCategory />} />
           <Route path="view/user/:id" element={<ViewUser />} />

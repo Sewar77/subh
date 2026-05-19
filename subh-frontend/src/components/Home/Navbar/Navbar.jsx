@@ -24,7 +24,9 @@ export default function Navbar() {
       name: "Home",
       path: "/",
     },
-    { name: "Educational Resources", path: "/educational/courses" },
+    { name: "Training Courses", path: "/courses" },
+    { name: "Books", path: "/subh/books" },
+    { name: "WorkShops", path: "/subh/books" },
     { name: "Who We Are", path: "/about" },
     { name: "Contact Us", path: "/contact" },
   ];

@@ -5,7 +5,11 @@ import {
   Card,
   CardActions,
   CardContent,
+  CardHeader,
+  CardMedia,
+  Chip,
   Divider,
+  Grid,
   Stack,
   Tooltip,
   Typography,
@@ -17,211 +21,126 @@ export default function DisplayBooks() {
   useEffect(() => {
     loadBooks();
   }, []);
+  console.log(books);
   return (
-    <Box
+    <Grid
+      container
+      spacing={3}
       sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 3,
         justifyContent: "center",
-        alignItems: "stretch",
       }}
     >
       {books.map((book) => (
-        <Card
+        <Grid
+          xs={12}
+          sm={12}
+          md={6}
           key={book.id}
           sx={{
-            width: 280,
-            minHeight: 520,
-            borderRadius: 3,
-            bgcolor: "primary.secondary",
-            color: "black",
             display: "flex",
-            flexDirection: "column",
-            p: 2,
-            alignItems: "center",
-            textAlign: "center",
+            width: 350,
+            height: "600",
           }}
         >
-          <Box
+          <Card
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              mb: 2,
               width: "100%",
-            }}
-          >
-            <Tooltip title="Book Cover" arrow>
-              <Avatar
-                src={book?.cover_image}
-                variant="rounded"
-                sx={{
-                  width: 120,
-                  height: 160,
-                  borderRadius: 3,
-                }}
-              />
-            </Tooltip>
-          </Box>
-          <CardContent
-            sx={{
-              flexGrow: 1,
+              minHeight: 600,
+              borderRadius: 3,
+              bgcolor: "primary.secondary",
+              color: "black",
+              overflow: "hidden",
               display: "flex",
               flexDirection: "column",
+              p: 2,
               alignItems: "center",
-              justifyContent: "center",
               textAlign: "center",
-              gap: 2,
-              width: "100%",
             }}
           >
-            <Typography
-              variant="h6"
-              fontWeight={700}
-              sx={{
-                textAlign: "center",
+            <CardHeader
+              title={"ISBN: " + book.isbn}
+              slotProps={{
+                title: {
+                  sx: {
+                    fontSize: "14px",
+                    fontWeight: 900,
+                  },
+                },
               }}
-            >
-              {book?.name_en}
-            </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
+            />
+
+            <CardMedia
+              component="img"
+              src={book.cover_image}
               sx={{
-                textAlign: "center",
-              }}
-            >
-              {book?.category_name_en}
-            </Typography>
-            <Divider sx={{ width: "100%" }} />
-            {/* ENGLISH */}
-            <Box
-              sx={{
-                width: "100%",
-                textAlign: "center",
-              }}
-            >
-              <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
-                English
-              </Typography>
-
-              <Typography
-                variant="body2"
-                sx={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-
-                  whiteSpace: "pre-line",
-                  wordBreak: "break-word",
-
-                  textAlign: "center",
-                }}
-              >
-                {book?.description_en}
-              </Typography>
-            </Box>
-
-            {/* ARABIC */}
-            <Box
-              sx={{
-                width: "100%",
-                textAlign: "center",
-              }}
-            >
-              <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
-                العربية
-              </Typography>
-
-              <Typography
-                variant="body2"
-                sx={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-
-                  whiteSpace: "pre-line",
-                  wordBreak: "break-word",
-
-                  direction: "rtl",
-                  textAlign: "center",
-                }}
-              >
-                {book?.description_ar}
-              </Typography>
-            </Box>
-
-            <Divider sx={{ width: "100%" }} />
-
-            {/* LESS DETAILS */}
-            <Stack
-              direction="column"
-              sx={{
-                width: "100%",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 5,
-                textAlign: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                <Typography variant="caption" color="text.secondary">
-                  Price
-                </Typography>
-
-                <Typography fontWeight={700}>${book?.price}</Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="caption" color="text.secondary">
-                  Author
-                </Typography>
-
-                <Typography fontWeight={700}>{book?.author_name_en}</Typography>
-              </Box>
-            </Stack>
-          </CardContent>
-
-          {/* ACTIONS */}
-          <CardActions
-            sx={{
-              width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              pt: 0,
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{
+                width: 250,
+                height: 250,
                 borderRadius: 2,
-                px: 4,
+                objectFit: "cover",
+              }}
+            />
+
+            <CardContent
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                flexGrow: 1,
               }}
             >
-              View
-            </Button>
-          </CardActions>
-        </Card>
+              <Typography sx={{ my: 3 }}>
+                <b>Name:</b>
+                <br />
+                {book.name_en} || {book.name_ar}
+              </Typography>
+
+              <Typography
+                sx={{
+                  my: 3,
+                  overflow: "hidden",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 4,
+                  WebkitBoxOrient: "vertical",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                <b>Category:</b>
+                <br />
+                {book.category_name_en} - {book.category_name_ar}
+              </Typography>
+
+              <Box sx={{ mt: "auto" }}>
+                <Typography
+                  sx={{
+                    mt: 3,
+                    overflow: "hidden",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: "vertical",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  <b>Price:</b>
+                </Typography>
+                <Chip
+                  label={`$ ${book.price}`}
+                  size="large"
+                  sx={{
+                    p: 2,
+                    mt: 1,
+                    bgcolor: "background.paper",
+                    color: "primary.secondary",
+                  }}
+                />
+              </Box>
+            </CardContent>
+            <CardActions>
+              <Button variant="contained">View</Button>
+              <Button variant="contained">Request</Button>
+            </CardActions>
+          </Card>
+        </Grid>
       ))}
-    </Box>
+    </Grid>
   );
 }

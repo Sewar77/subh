@@ -28,14 +28,15 @@ export default function AdminSidebar() {
       items: [
         { label: "View Books", path: "/admin/books" },
         { label: "Add Book", path: "/admin/book/new" },
+        { label: "Books Requests", path: "/admin/book/new" },
       ],
     },
     {
       title: "Work Shops",
       items: [
-        { label: "View Categories", path: "" },
-        { label: "Add Category", path: "" },
-        { label: "Edit Category", path: "" },
+        { label: "View WorkShops", path: "/admin/workshops" },
+        { label: "Add Workshops", path: "" },
+        { label: "Manage Appoientments", path: "" },
       ],
     },
     {
