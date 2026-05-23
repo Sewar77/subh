@@ -46,7 +46,7 @@ export const useAuth = () => {
       const res = await api.post("/auth/login", userData);
       const role = res.data.user.role;
       if (role === "admin") navigate("/admin");
-      if (role === "user") navigate("/user");
+      if (role === "user") navigate("/subh");
       toast.success(res.data.message);
     } catch (error) {
       const data = error.response?.data;

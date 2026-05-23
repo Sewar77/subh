@@ -163,3 +163,118 @@ CREATE TABLE workshops (
 
 
 select * from workshops
+
+
+CREATE TABLE pages (
+    id BIGSERIAL PRIMARY KEY,
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    seo_title VARCHAR(255),
+    seo_description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE media (
+    id BIGSERIAL PRIMARY KEY,
+    url TEXT NOT NULL,
+    type VARCHAR(50),
+    alt_text VARCHAR(255),
+    uploaded_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE media
+ADD COLUMN public_id VARCHAR(255),
+ADD COLUMN format VARCHAR(50),
+ADD COLUMN size_kb INTEGER,
+ADD COLUMN width INTEGER,
+ADD COLUMN height INTEGER,
+ADD COLUMN folder VARCHAR(100);
+
+CREATE TABLE page_sections (
+    id BIGSERIAL PRIMARY KEY,
+    page_id BIGINT NOT NULL REFERENCES pages(id) ON DELETE CASCADE,
+
+    type VARCHAR(100) NOT NULL,
+
+    title VARCHAR(255),
+    content TEXT,
+
+    media_id BIGINT REFERENCES media(id) ON DELETE SET NULL,
+
+    order_number INTEGER DEFAULT 0,
+
+    is_visible BOOLEAN DEFAULT TRUE,
+
+    settings_json JSONB DEFAULT '{}'::jsonb,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE news (
+    id BIGSERIAL PRIMARY KEY,
+
+    title VARCHAR(255) NOT NULL,
+
+    slug VARCHAR(255) UNIQUE NOT NULL,
+
+    description TEXT NOT NULL,
+
+    media_id BIGINT REFERENCES media(id) ON DELETE SET NULL,
+
+    published BOOLEAN DEFAULT FALSE,
+
+    seo_title VARCHAR(255),
+    seo_description TEXT,
+
+    created_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE contact_page (
+    id BIGSERIAL PRIMARY KEY,
+
+    title VARCHAR(255) NOT NULL,
+
+    image_media_id BIGINT REFERENCES media(id) ON DELETE SET NULL,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE contact_submissions (
+    id BIGSERIAL PRIMARY KEY,
+
+    name VARCHAR(255) NOT NULL,
+
+    email VARCHAR(255) NOT NULL,
+
+    phone VARCHAR(50),
+
+    message TEXT NOT NULL,
+
+    status VARCHAR(50) DEFAULT 'new',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO pages (slug, title)
+VALUES
+('about', 'About Us'),
+('contact', 'Contact Us');
+
+
+CREATE INDEX idx_page_sections_page_id
+ON page_sections(page_id);
+
+CREATE INDEX idx_news_slug
+ON news(slug);
+
+CREATE INDEX idx_pages_slug
+ON pages(slug);
+
+CREATE INDEX idx_contact_submissions_status
+ON contact_submissions(status);
