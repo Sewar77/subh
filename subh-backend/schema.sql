@@ -164,33 +164,66 @@ CREATE TABLE workshops (
 
 select * from workshops
 
+-- =========================
+-- DROP TABLES (SAFE ORDER)
+-- =========================
+
+DROP TABLE IF EXISTS contact_submissions CASCADE;
+DROP TABLE IF EXISTS contact_page CASCADE;
+DROP TABLE IF EXISTS news CASCADE;
+DROP TABLE IF EXISTS page_sections CASCADE;
+DROP TABLE IF EXISTS media CASCADE;
+DROP TABLE IF EXISTS pages CASCADE;
+
+-- =========================
+-- PAGES
+-- =========================
 
 CREATE TABLE pages (
     id BIGSERIAL PRIMARY KEY,
     slug VARCHAR(100) UNIQUE NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    seo_title VARCHAR(255),
-    seo_description TEXT,
+
+    title_en VARCHAR(255) NOT NULL,
+    title_ar VARCHAR(255) NOT NULL,
+
+    seo_title_en VARCHAR(255),
+    seo_title_ar VARCHAR(255),
+
+    seo_description_en TEXT,
+    seo_description_ar TEXT,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- =========================
+-- MEDIA
+-- =========================
+
 CREATE TABLE media (
     id BIGSERIAL PRIMARY KEY,
     url TEXT NOT NULL,
+
+    public_id VARCHAR(255),
     type VARCHAR(50),
+    format VARCHAR(50),
+    mime_type TEXT,
+
+    size_kb INTEGER,
+    width INTEGER,
+    height INTEGER,
+
+    folder VARCHAR(100),
     alt_text VARCHAR(255),
+
     uploaded_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE media
-ADD COLUMN public_id VARCHAR(255),
-ADD COLUMN format VARCHAR(50),
-ADD COLUMN size_kb INTEGER,
-ADD COLUMN width INTEGER,
-ADD COLUMN height INTEGER,
-ADD COLUMN folder VARCHAR(100);
+-- =========================
+-- PAGE SECTIONS
+-- =========================
 
 CREATE TABLE page_sections (
     id BIGSERIAL PRIMARY KEY,
@@ -198,13 +231,15 @@ CREATE TABLE page_sections (
 
     type VARCHAR(100) NOT NULL,
 
-    title VARCHAR(255),
-    content TEXT,
+    title_en VARCHAR(255),
+    title_ar VARCHAR(255),
+
+    content_en TEXT,
+    content_ar TEXT,
 
     media_id BIGINT REFERENCES media(id) ON DELETE SET NULL,
 
     order_number INTEGER DEFAULT 0,
-
     is_visible BOOLEAN DEFAULT TRUE,
 
     settings_json JSONB DEFAULT '{}'::jsonb,
@@ -213,21 +248,30 @@ CREATE TABLE page_sections (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- =========================
+-- NEWS
+-- =========================
+
 CREATE TABLE news (
     id BIGSERIAL PRIMARY KEY,
 
-    title VARCHAR(255) NOT NULL,
+    title_en VARCHAR(255) NOT NULL,
+    title_ar VARCHAR(255) NOT NULL,
 
     slug VARCHAR(255) UNIQUE NOT NULL,
 
-    description TEXT NOT NULL,
+    description_en TEXT NOT NULL,
+    description_ar TEXT NOT NULL,
 
     media_id BIGINT REFERENCES media(id) ON DELETE SET NULL,
 
     published BOOLEAN DEFAULT FALSE,
 
-    seo_title VARCHAR(255),
-    seo_description TEXT,
+    seo_title_en VARCHAR(255),
+    seo_title_ar VARCHAR(255),
+
+    seo_description_en TEXT,
+    seo_description_ar TEXT,
 
     created_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
 
@@ -235,37 +279,52 @@ CREATE TABLE news (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- =========================
+-- CONTACT PAGE
+-- =========================
 
 CREATE TABLE contact_page (
     id BIGSERIAL PRIMARY KEY,
 
-    title VARCHAR(255) NOT NULL,
+    title_en VARCHAR(255) NOT NULL,
+    title_ar VARCHAR(255) NOT NULL,
 
     image_media_id BIGINT REFERENCES media(id) ON DELETE SET NULL,
 
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- =========================
+-- CONTACT SUBMISSIONS
+-- =========================
+
 CREATE TABLE contact_submissions (
     id BIGSERIAL PRIMARY KEY,
 
     name VARCHAR(255) NOT NULL,
-
     email VARCHAR(255) NOT NULL,
-
     phone VARCHAR(50),
 
     message TEXT NOT NULL,
 
     status VARCHAR(50) DEFAULT 'new',
+    message_language VARCHAR(10) DEFAULT 'en',
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO pages (slug, title)
-VALUES
-('about', 'About Us'),
-('contact', 'Contact Us');
 
+-- =========================
+-- INSERT DEFAULT PAGES
+-- =========================
+
+INSERT INTO pages (slug, title_en, title_ar)
+VALUES
+('about', 'About Us', 'من نحن'),
+('contact', 'Contact Us', 'اتصل بنا');
+
+-- =========================
+-- INDEXES
+-- =========================
 
 CREATE INDEX idx_page_sections_page_id
 ON page_sections(page_id);
