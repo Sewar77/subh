@@ -24,6 +24,7 @@ import NotFound from "./components/NotFound/NotFound.jsx";
 import LandingPage from "./Pages/Landing/LandingPage.jsx";
 import DisplayBooks from "./components/Books/DisplayBooks.jsx";
 import UserLayout from "./Layout/UserLayout.jsx";
+import ManageWorkshops from "./components/Admin/Manage/ManageWorkshops/ManageWorkshops.jsx";
 function App() {
   const { id } = useParams();
   return (
@@ -47,7 +48,7 @@ function App() {
           <Route path="users" element={<ManageUsers />} />
           <Route path="add/user" element={<AddUser />} />
           <Route path="categories" element={<DisplayCategories />} />
-          <Route path="workshops" element={<DisplayWorkshops />} />
+          <Route path="workshops" element={<ManageWorkshops />} />
           <Route path="new-category" element={<AddCategory />} />
           <Route path="view/category/:id" element={<ViewCategory />} />
           <Route path="view/user/:id" element={<ViewUser />} />

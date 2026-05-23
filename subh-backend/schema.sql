@@ -43,6 +43,13 @@ CREATE TABLE books (
 ALTER TABLE books
 ADD COLUMN cover_image VARCHAR(500);
 
+ALTER TABLE books 
+ADD COLUMN isbn TEXT UNIQUE 
+CHECK (LENGTH(isbn) >= 13 AND LENGTH(isbn) <= 26);   
+
+ALTER TABLE books 
+ALTER COLUMN isbn SET NOT NULL;   
+
 CREATE TABLE authors (
     id SERIAL PRIMARY KEY,
 
@@ -70,3 +77,89 @@ CREATE TABLE book_authors (
     FOREIGN KEY (author_id) REFERENCES authors(id)
         ON DELETE CASCADE
 );
+
+CREATE TABLE workshops (
+    id SERIAL PRIMARY KEY,
+
+    name_en VARCHAR(255) NOT NULL,
+    name_ar VARCHAR(255),
+
+    gender VARCHAR(10) DEFAULT 'both'
+    CHECK (gender IN ('male', 'female', 'both')),
+
+    min_age INT,
+    max_age INT,
+
+    start_time TIME NOT NULL,
+
+    workshop_date DATE NOT NULL,
+
+    trainer_name_en VARCHAR(255) NOT NULL,
+    trainer_name_ar VARCHAR(255),
+
+    description_en TEXT NOT NULL,
+    description_ar TEXT,
+
+    duration_h INT NOT NULL,
+
+    price NUMERIC(10,2)
+    CHECK (price IS NULL OR price >= 0),
+
+    trainer_description_en TEXT,
+    trainer_description_ar TEXT,
+
+    is_online BOOLEAN DEFAULT FALSE,
+
+    meeting_link TEXT,
+    location_googlemap_link TEXT,
+
+    is_user_paid BOOLEAN DEFAULT FALSE,
+
+    is_free BOOLEAN DEFAULT FALSE,
+
+    status VARCHAR(20)
+    DEFAULT 'available'
+    CHECK (status IN ('available', 'not_available')),
+
+    image TEXT NOT NULL,
+
+    seats_number INT NOT NULL
+    CHECK (seats_number > 0),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    -- AGE VALIDATION
+    CONSTRAINT age_range_check
+    CHECK (
+        (min_age IS NULL AND max_age IS NULL)
+        OR
+        (min_age >= 0 AND max_age >= min_age)
+    ),
+
+    -- ONLINE / OFFLINE RULE
+    CONSTRAINT online_offline_check
+    CHECK (
+        (
+            is_online = TRUE
+            AND meeting_link IS NOT NULL
+            AND location_googlemap_link IS NULL
+        )
+        OR
+        (
+            is_online = FALSE
+            AND location_googlemap_link IS NOT NULL
+            AND meeting_link IS NULL
+        )
+    ),
+
+    -- FREE WORKSHOP RULE
+    CONSTRAINT free_price_check
+    CHECK (
+        (is_free = TRUE AND price IS NULL)
+        OR
+        (is_free = FALSE)
+    )
+);
+
+
+select * from workshops
