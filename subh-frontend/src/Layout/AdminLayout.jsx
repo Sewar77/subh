@@ -20,6 +20,10 @@ export default function AdminLayout() {
           sx={{
             top: 0,
             left: 0,
+            height: "100vh",
+            position: "sticky",
+            overflowY: "scroll",
+            width: { md: "270px", lg: "350px" },
           }}
         >
           <AdminSidebar />

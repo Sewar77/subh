@@ -40,10 +40,10 @@ export default function AdminSidebar() {
       ],
     },
     {
-      title: "News",
+      title: "Pages",
       items: [
-        { label: "View Categories", path: "" },
-        { label: "Add Category", path: "" },
+        { label: "Craete New Page", path: "/admin/new-page" },
+        { label: "View Pages", path: "/admin/view-pages" },
         { label: "Edit Category", path: "" },
       ],
     },
@@ -58,7 +58,7 @@ export default function AdminSidebar() {
     {
       title: "About Us",
       items: [
-        { label: "View Categories", path: "" },
+        { label: "Manage About", path: "/admin/manage/about" },
         { label: "Add Category", path: "" },
         { label: "Edit Category", path: "" },
       ],
@@ -78,13 +78,11 @@ export default function AdminSidebar() {
     <Box
       sx={{
         bgcolor: "primary.contrastText",
-        width: { md: "270px", lg: "350px" },
         color: "text.primary",
         p: 2,
         display: { xs: "none", md: "block" },
         borderRight: "1px solid",
         borderColor: "divider",
-        minHeight: "100vh",
       }}
     >
       {sections.map((section, index) => (

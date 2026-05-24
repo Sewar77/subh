@@ -1,121 +1,79 @@
 import pool from "../config/db.js";
 
-export const createPage = async ({
-  slug,
+export const insertPage = async (key, userId) => {
+  try {
+    const result = await pool.query(
+      `INSERT INTO pages (key, created_by, updated_by) VALUES ($1, $2 , $3) RETURNING *`,
+      [key, userId, userId],
+    );
 
-  title_en,
-  title_ar,
+    return result.rows[0];
+  } catch (err) {
+    if (err.code === "23505") {
+      throw new Error("Page key already exists");
+    }
 
-  seo_title_en,
-  seo_title_ar,
-
-  seo_description_en,
-  seo_description_ar,
-}) => {
-  const result = await pool.query(
-    `
-    INSERT INTO pages (
-      slug,
-      title_en,
-      title_ar,
-      seo_title_en,
-      seo_title_ar,
-      seo_description_en,
-      seo_description_ar
-    )
-    VALUES ($1,$2,$3,$4,$5,$6,$7)
-    RETURNING *;
-    `,
-    [
-      slug,
-      title_en,
-      title_ar,
-      seo_title_en || null,
-      seo_title_ar || null,
-      seo_description_en || null,
-      seo_description_ar || null,
-    ],
-  );
-
-  return result.rows[0];
+    throw new Error("Failed to create page");
+  }
 };
 
 export const getAllPages = async () => {
-  const result = await pool.query(`
-    SELECT *
-    FROM pages
-    ORDER BY created_at DESC;
-  `);
+  try {
+    const result = await pool.query(`
+      SELECT 
+        p.*,
+        u1.name AS created_by_name,
+        u2.name AS updated_by_name
+      FROM pages p
+      LEFT JOIN users u1 ON p.created_by = u1.id
+      LEFT JOIN users u2 ON p.updated_by = u2.id
+    `);
 
-  return result.rows;
+    return result.rows;
+  } catch (error) {
+    throw new Error("Failed to get pages");
+  }
+};
+export const getPageByKey = async (key) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT 
+        p.*,
+        u1.name AS created_by_name,
+        u2.name AS updated_by_name
+      FROM pages p
+      LEFT JOIN users u1 ON p.created_by = u1.id
+      LEFT JOIN users u2 ON p.updated_by = u2.id
+      WHERE p.key = $1
+      `,
+      [key],
+    );
+
+    return result.rows[0];
+  } catch (error) {
+    throw new Error("Failed to get page by key");
+  }
 };
 
-export const getPageBySlug = async (slug) => {
-  const result = await pool.query(
-    `
-    SELECT *
-    FROM pages
-    WHERE slug = $1;
-    `,
-    [slug],
-  );
+export const getPageById = async (id) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT 
+        p.*,
+        u1.name AS created_by_name,
+        u2.name AS updated_by_name
+      FROM pages p
+      LEFT JOIN users u1 ON p.created_by = u1.id
+      LEFT JOIN users u2 ON p.updated_by = u2.id
+      WHERE p.id = $1
+      `,
+      [id],
+    );
 
-  return result.rows[0];
-};
-
-export const updatePage = async (
-  id,
-  {
-    title_en,
-    title_ar,
-
-    seo_title_en,
-    seo_title_ar,
-
-    seo_description_en,
-    seo_description_ar,
-  },
-) => {
-  const result = await pool.query(
-    `
-    UPDATE pages
-    SET
-      title_en = COALESCE($1, title_en),
-      title_ar = COALESCE($2, title_ar),
-
-      seo_title_en = COALESCE($3, seo_title_en),
-      seo_title_ar = COALESCE($4, seo_title_ar),
-
-      seo_description_en = COALESCE($5, seo_description_en),
-      seo_description_ar = COALESCE($6, seo_description_ar),
-
-      updated_at = NOW()
-    WHERE id = $7
-    RETURNING *;
-    `,
-    [
-      title_en,
-      title_ar,
-      seo_title_en,
-      seo_title_ar,
-      seo_description_en,
-      seo_description_ar,
-      id,
-    ],
-  );
-
-  return result.rows[0];
-};
-
-export const deletePage = async (id) => {
-  const result = await pool.query(
-    `
-    DELETE FROM pages
-    WHERE id = $1
-    RETURNING *;
-    `,
-    [id],
-  );
-
-  return result.rows[0];
+    return result.rows[0];
+  } catch (error) {
+    throw new Error("Failed to get page by id");
+  }
 };
