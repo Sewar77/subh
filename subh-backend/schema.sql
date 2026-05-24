@@ -337,3 +337,200 @@ ON pages(slug);
 
 CREATE INDEX idx_contact_submissions_status
 ON contact_submissions(status);
+
+
+
+
+-- new version
+-- DROP TABLE IF EXISTS contact_submissions CASCADE;
+-- DROP TABLE IF EXISTS contact_page CASCADE;
+-- DROP TABLE IF EXISTS news CASCADE;
+-- DROP TABLE IF EXISTS page_sections CASCADE;
+-- DROP TABLE IF EXISTS media CASCADE;
+-- DROP TABLE IF EXISTS pages CASCADE;
+
+-- CREATE TABLE media (
+--     id BIGSERIAL PRIMARY KEY,
+--     url TEXT NOT NULL,
+
+--     public_id VARCHAR(255),
+--     type VARCHAR(50),
+--     format VARCHAR(50),
+--     mime_type TEXT,
+
+--     size_kb INTEGER,
+--     width INTEGER,
+--     height INTEGER,
+
+--     folder VARCHAR(100),
+--     alt_text VARCHAR(255),
+
+--     uploaded_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- PAGES
+CREATE TABLE pages (
+  id BIGSERIAL PRIMARY KEY,
+  key VARCHAR(150) UNIQUE NOT NULL,        -- internal key e.g. "about", "home"
+  status VARCHAR(30) NOT NULL DEFAULT 'draft',
+  default_locale CHAR(2) NOT NULL DEFAULT 'en',
+  created_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  updated_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- PAGE TRANSLATIONS (one row per locale)
+CREATE TABLE page_translations (
+  id BIGSERIAL PRIMARY KEY,
+  page_id BIGINT NOT NULL REFERENCES pages(id) ON DELETE CASCADE,
+  locale CHAR(2) NOT NULL,
+  title TEXT,
+  slug VARCHAR(255),
+  seo_title TEXT,
+  seo_description TEXT,
+  content JSONB,                            -- optional structured content for whole page
+  published BOOLEAN DEFAULT FALSE,
+  published_at TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (page_id, locale)
+);
+
+-- SECTIONS (ordered building blocks of a page)
+CREATE TABLE sections (
+  id BIGSERIAL PRIMARY KEY,
+  page_id BIGINT NOT NULL REFERENCES pages(id) ON DELETE CASCADE,
+  type VARCHAR(100) NOT NULL,               -- e.g., hero, text_block, gallery, form
+  position INTEGER NOT NULL DEFAULT 0,      -- ordering within page
+  settings JSONB DEFAULT '{}'::jsonb,       -- layout/settings common to all locales
+  is_visible BOOLEAN DEFAULT TRUE,
+  created_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  updated_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- SECTION TRANSLATIONS (locale specific content)
+CREATE TABLE section_translations (
+  id BIGSERIAL PRIMARY KEY,
+  section_id BIGINT NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
+  locale CHAR(2) NOT NULL,
+  title TEXT,
+  content JSONB,                            -- structured content: blocks, rich text, lists
+  is_visible BOOLEAN DEFAULT TRUE,          -- per-locale visibility
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (section_id, locale)
+);
+
+-- -- MEDIA store metadata only; actual files in S3/CDN
+-- CREATE TABLE media (
+--   id BIGSERIAL PRIMARY KEY,
+--   provider VARCHAR(50),                      -- e.g., s3, cloudinary
+--   public_id VARCHAR(255),                    -- provider id
+--   url TEXT NOT NULL,
+--   type VARCHAR(50),                          -- image, video, file
+--   mime_type VARCHAR(100),
+--   format VARCHAR(50),
+--   size_bytes BIGINT,
+--   width INTEGER,
+--   height INTEGER,
+--   metadata JSONB DEFAULT '{}'::jsonb,        -- variants, thumbnails, focal point
+--   uploaded_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+--   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- RELATION between sections and media (supports multiple media per section)
+CREATE TABLE section_media (
+  section_id BIGINT NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
+  media_id BIGINT NOT NULL REFERENCES media(id) ON DELETE CASCADE,
+  role VARCHAR(50) DEFAULT 'attachment',     -- hero, gallery_item, thumbnail, file
+  position INTEGER DEFAULT 0,
+  alt_text JSONB DEFAULT '{}'::jsonb,       -- { "en":"", "ar":"" }
+  PRIMARY KEY (section_id, media_id)
+);
+
+-- NEWS / BLOG as content type (re-uses media and translations pattern)
+CREATE TABLE posts (
+  id BIGSERIAL PRIMARY KEY,
+  key VARCHAR(150) UNIQUE,
+  status VARCHAR(30) DEFAULT 'draft',
+  created_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  updated_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE post_translations (
+  id BIGSERIAL PRIMARY KEY,
+  post_id BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  locale CHAR(2) NOT NULL,
+  title TEXT,
+  slug VARCHAR(255),
+  excerpt TEXT,
+  body JSONB,
+  seo_title TEXT,
+  seo_description TEXT,
+  published BOOLEAN DEFAULT FALSE,
+  published_at TIMESTAMP,
+  UNIQUE (post_id, locale)
+);
+
+CREATE TABLE post_media (
+  post_id BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  media_id BIGINT NOT NULL REFERENCES media(id) ON DELETE CASCADE,
+  role VARCHAR(50) DEFAULT 'cover',
+  position INTEGER DEFAULT 0,
+  PRIMARY KEY (post_id, media_id)
+);
+
+-- CONTACT PAGE configuration (single row per site or per locale)
+CREATE TABLE contact_pages (
+  id BIGSERIAL PRIMARY KEY,
+  key VARCHAR(150) UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE contact_page_translations (
+  id BIGSERIAL PRIMARY KEY,
+  contact_page_id BIGINT NOT NULL REFERENCES contact_pages(id) ON DELETE CASCADE,
+  locale CHAR(2) NOT NULL,
+  title TEXT,
+  description TEXT,
+  image_media_id BIGINT REFERENCES media(id) ON DELETE SET NULL,
+  form_settings JSONB DEFAULT '{}'::jsonb,
+  UNIQUE (contact_page_id, locale)
+);
+
+-- CONTACT SUBMISSIONS
+CREATE TABLE contact_submissions (
+  id BIGSERIAL PRIMARY KEY,
+  contact_page_id BIGINT REFERENCES contact_pages(id) ON DELETE SET NULL,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(50),
+  message TEXT NOT NULL,
+  message_locale CHAR(2) DEFAULT 'en',
+  status VARCHAR(50) DEFAULT 'new',
+  assigned_to BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- AUDIT / VERSIONING for pages and sections (simple append-only)
+CREATE TABLE content_versions (
+  id BIGSERIAL PRIMARY KEY,
+  entity_type VARCHAR(50) NOT NULL,          -- page, section, post
+  entity_id BIGINT NOT NULL,
+  locale CHAR(2),
+  data JSONB NOT NULL,
+  created_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- SEARCH helper columns (optional denormalized tsvector per locale)
+ALTER TABLE page_translations ADD COLUMN tsv tsvector;
+ALTER TABLE post_translations ADD COLUMN tsv tsvector;
+ALTER TABLE section_translations ADD COLUMN tsv tsvector;
+
