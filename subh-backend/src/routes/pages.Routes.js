@@ -19,8 +19,8 @@ router.post(
   validate(pagesSchema),
   insertPageController,
 );
-router.get("/pages", protect, getAllPagesController);
-router.get("/page-id/:id", protect, adminOnly, getPageByIdController);
-router.get("/page-key/:key", protect, adminOnly, getPageByKeyController);
+router.get("/pages", getAllPagesController);
+router.get("/page-id/:id", getPageByIdController);
+router.get("/page-key/:key", getPageByKeyController);
 router.delete("/page/:id", protect, adminOnly, deletePageByIdController);
 export default router;

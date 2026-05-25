@@ -35,6 +35,7 @@ export const useSections = () => {
     try {
       const res = await api.get(`/all-sections/${pageId}`);
       setSections(res.data.sections);
+      console.log(res);
     } catch (error) {
       const errors = error.response?.data?.errors;
 
