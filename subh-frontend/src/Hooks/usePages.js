@@ -39,5 +39,20 @@ export const usePages = () => {
       }
     }
   };
-  return { page, createNewPage, fetchPages, pages };
+  const deletePage = async (id) => {
+    try {
+      const res = await api.delete(`/page/${id}`);
+      fetchPages();
+      toast.success(res.data.message || "deleted successfully");
+    } catch (error) {
+      const errors = error.response?.data?.errors;
+      if (Array.isArray(errors)) {
+        toast.error(errors.map((err) => err.message).join("\n"));
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong");
+      }
+    }
+  };
+
+  return { page, createNewPage, fetchPages, pages, deletePage };
 };

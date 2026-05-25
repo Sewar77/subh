@@ -3,6 +3,7 @@ import {
   getPageById,
   getAllPages,
   getPageByKey,
+  deletePageById,
 } from "../models/pages.Models.js";
 
 export const insertPageController = async (req, res) => {
@@ -85,6 +86,20 @@ export const getPageByKeyController = async (req, res) => {
     return res
       .status(200)
       .json({ message: "Fetshced pages successfully", page });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "internal sevrer error",
+      error,
+    });
+  }
+};
+
+export const deletePageByIdController = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const page = await deletePageById(id);
+    return res.status(200).json({ message: "deleted successfully" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
