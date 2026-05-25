@@ -10,6 +10,7 @@ import uploadRoutes from "./src/routes/uploadImage.Routes.js";
 import booksRoutes from "./src/routes/books.Routes.js";
 import mediaRoutes from "./src/routes/media.Routes.js";
 import pagesRoutes from "./src/routes/pages.Routes.js";
+import pagesTranslationsRoutes from "./src/routes/pageTranslations.Routes.js";
 dotenv.config();
 const app = express();
 const port = process.env.PORT;
@@ -31,6 +32,7 @@ app.use("/api", uploadRoutes);
 app.use("/api", booksRoutes);
 app.use("/api", mediaRoutes);
 app.use("/api", pagesRoutes);
+app.use("/api", pagesTranslationsRoutes);
 
 app.listen(port, () => {
   console.log("server runs on port: ", port);
