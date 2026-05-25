@@ -3,6 +3,7 @@ import express from "express";
 import { protect } from "../middleware/protect.Middleware.js";
 import { adminOnly } from "../middleware/adminOnly.Middleware.js";
 import {
+  deletePageByIdController,
   getAllPagesController,
   getPageByIdController,
   getPageByKeyController,
@@ -21,5 +22,5 @@ router.post(
 router.get("/pages", protect, getAllPagesController);
 router.get("/page-id/:id", protect, adminOnly, getPageByIdController);
 router.get("/page-key/:key", protect, adminOnly, getPageByKeyController);
-
+router.delete("/page/:id", protect, adminOnly, deletePageByIdController);
 export default router;

@@ -77,3 +77,15 @@ export const getPageById = async (id) => {
     throw new Error("Failed to get page by id");
   }
 };
+
+export const deletePageById = async (id) => {
+  try {
+    await pool.query(`delete from pages where id = $1`, [id]);
+  } catch (err) {
+    if (err.code === "23505") {
+      throw new Error("Page key already exists");
+    }
+
+    throw new Error("Failed to create page");
+  }
+};

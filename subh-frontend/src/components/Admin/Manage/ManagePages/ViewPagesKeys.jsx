@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -14,14 +14,22 @@ import { usePages } from "../../../../Hooks/usePages";
 import DeleteButton from "../../Buttons/DeleteBtn";
 import UpdateBtn from "../../Buttons/UpdateBtn";
 import AddButton from "../../Buttons/AddBtn";
+import ViewButton from "../../Buttons/ViewBtn";
+import { useNavigate, useParams } from "react-router-dom";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 
 export default function ViewPagesKeys() {
-  const { pages, fetchPages } = usePages();
-  console.log(pages);
-
+  const { pages, fetchPages, deletePage } = usePages();
+  const navigate = useNavigate();
+  const { pageId } = useParams();
   useEffect(() => {
     fetchPages();
   }, []);
+  const handleViewSections = (pageId) => {
+    navigate(`/admin/sections/page/${pageId}`);
+  };
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   return (
     <>
@@ -139,26 +147,41 @@ export default function ViewPagesKeys() {
                       justifyContent: "center",
                     }}
                   >
-                    <DeleteButton />
+                    <DeleteButton
+                      onClick={() => {
+                        (setConfirmDelete(true), setSelectedId(page.id));
+                      }}
+                    />
                     <UpdateBtn />
                   </Stack>
                 </CardContent>
 
                 {/* ACTIONS */}
                 <Stack direction="row" spacing={1} sx={{ px: 2, pb: 2 }}>
-                  <Button variant="contained" size="small" fullWidth>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    fullWidth
+                    onClick={() => navigate(`/admin/create-section/${page.id}`)}
+                  >
                     Create Section
                   </Button>
 
-                  <Button variant="outlined" size="small" fullWidth>
-                    View Sections
-                  </Button>
+                  <ViewButton onClick={() => handleViewSections(page.id)} />
                 </Stack>
               </Card>
             </Grid>
           ))}
         </Grid>
       </Box>
+      {confirmDelete && (
+        <ConfirmDeleteModal
+          open={confirmDelete}
+          onClose={() => setConfirmDelete(false)}
+          onConfirm={() => (deletePage(selectedId), setConfirmDelete(false))}
+          label={"Page Key"}
+        />
+      )}
     </>
   );
 }
