@@ -1,100 +1,270 @@
-import { Box, Container, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { Box, Container, Divider, Typography, useTheme } from "@mui/material";
+import { useSections } from "../../Hooks/useSections";
+import { usePages } from "../../Hooks/usePages";
 
-const sections = [
-  {
-    title: "Our Vision",
-    text: "Providing curricula and learning resources to help those in charge of the educational and pedagogical process.",
-    img: "/vision.png",
-    reverse: false,
-  },
-  {
-    title: "Who Are We?",
-    text: "Enhancing the educational and pedagogical process with resources and curricula, making it more flexible and professional.",
-    img: "/girl.png",
-    reverse: true,
-  },
-  {
-    title: "Our Team",
-    text: "Our platform was established to provide a modern learning experience that combines fun and knowledge.",
-    img: "/whiteLogo.png",
-    reverse: false,
-  },
-  {
-    title: "When was Subh Founded?",
-    text: "Our team consists of experts in education and technology working together to provide outstanding educational content.",
-    img: "/people.svg",
-    reverse: true,
-  },
-];
+function renderMedia(media) {
+  if (!media) return null;
 
-export default function About() {
+  // IMAGE
+  if (
+    media.match(/\.(jpeg|jpg|png|gif|webp|svg)$/i) ||
+    media.includes("image")
+  ) {
+    return (
+      <Box
+        component="img"
+        src={media}
+        sx={{
+          width: "100%",
+          maxHeight: 500,
+          objectFit: "cover",
+          borderRadius: 3,
+          mt: 3,
+        }}
+      />
+    );
+  }
+
+  // VIDEO
+  if (media.match(/\.(mp4|webm|ogg)$/i) || media.includes("video")) {
+    return (
+      <Box
+        component="video"
+        controls
+        src={media}
+        sx={{
+          width: "100%",
+          borderRadius: 3,
+          mt: 3,
+        }}
+      />
+    );
+  }
+
+  // FILE
   return (
-    <Container
+    <Typography
+      component="a"
+      href={media}
+      target="_blank"
       sx={{
-        minHeight: "100vh",
-        mt: 5,
+        display: "inline-block",
+        mt: 2,
+        fontWeight: 700,
+        textDecoration: "none",
       }}
     >
-      {sections.map((section, index) => (
+      Open File
+    </Typography>
+  );
+}
+
+function renderSection(section) {
+  const settings = section.settings || {};
+  const theme = useTheme();
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        py: { xs: 10, md: 16 },
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        backgroundColor: "background.default",
+        transition: "0.3s ease",
+      }}
+    >
+      <Container maxWidth="lg">
         <Box
-          key={index}
           sx={{
             display: "flex",
             flexDirection: {
               xs: "column",
-              md: section.reverse ? "row-reverse" : "row",
+              md: settings.media ? "row" : "column",
             },
+
             alignItems: "center",
-            justifyContent: "space-evenly",
-            gap: 6,
-            py: 6,
-            textAlign: "center",
+            justifyContent: "space-between",
+
+            gap: { xs: 5, md: 10 },
           }}
         >
-          {/* Image */}
+          {/* CONTENT */}
           <Box
-            component="img"
-            src={section.img}
             sx={{
-              width: { xs: "70%", md: "30%" },
-              transition: "all 0.4s ease",
-              filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.3))",
-              "&:hover": {
-                transform: "scale(1.08) rotate(2deg)",
-              },
-            }}
-          />
+              flex: 1,
+              width: "100%",
 
-          {/* Content */}
-          <Box
-            sx={{
-              width: { xs: "90%", md: "40%" },
-              p: 5,
-              borderRadius: 3,
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",
 
-              background: "linear-gradient(135deg, #613389, #bb40bf)",
-              color: "white",
-
-              transition: "all 0.4s ease",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-
-              "&:hover": {
-                transform: "translateY(-10px) scale(1.02)",
-                boxShadow: "0 20px 50px rgba(0,0,0,0.4)",
+              alignItems: {
+                xs: "center",
+                md: settings.media ? "flex-start" : "center",
               },
+
+              textAlign: {
+                xs: "center",
+                md: settings.media ? "left" : "center",
+              },
+
+              gap: 3,
             }}
           >
-            <Typography variant="h5" sx={{ fontWeight: 900, mb: 3 }}>
-              {section.title}
-            </Typography>
+            {/* TITLE */}
+            {settings.title && (
+              <Typography
+                variant="h2"
+                sx={{
+                  fontWeight: 900,
+                  lineHeight: 1.1,
 
-            <Typography variant="body1">{section.text}</Typography>
+                  fontSize: {
+                    xs: "2.3rem",
+                    md: "4rem",
+                  },
+
+                  maxWidth: 800,
+
+                  color: "text.primary",
+                }}
+              >
+                {settings.title}
+              </Typography>
+            )}
+
+            {/* SUBTITLE */}
+            {settings.subtitle && (
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 500,
+                  lineHeight: 1.8,
+                  color: "text.primary",
+                  maxWidth: 700,
+                }}
+              >
+                {settings.subtitle}
+              </Typography>
+            )}
+
+            {/* DIVIDER */}
+            {(settings.title || settings.subtitle) && (
+              <Box
+                sx={{
+                  width: 100,
+                  height: 4,
+                  borderRadius: 999,
+                  background: theme.palette.primary.main,
+                }}
+              />
+            )}
+
+            {/* PARAGRAPH */}
+            {settings.paragraph && (
+              <Typography
+                variant="body1"
+                sx={{
+                  lineHeight: 2.1,
+                  fontSize: "1.05rem",
+                  color: "text.primary",
+                  maxWidth: 800,
+                }}
+              >
+                {settings.paragraph}
+              </Typography>
+            )}
           </Box>
+
+          {/* MEDIA */}
+          {settings.media && (
+            <Box
+              sx={{
+                flex: 1,
+                width: "100%",
+
+                display: "flex",
+                justifyContent: "center",
+
+                "& img, & video": {
+                  width: "100%",
+                  maxWidth: 550,
+                  maxHeight: 500,
+
+                  objectFit: "cover",
+
+                  borderRadius: 5,
+
+                  border: `1px solid ${theme.palette.divider}`,
+
+                  boxShadow: theme.shadows[10],
+
+                  transition: "0.4s ease",
+
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                  },
+                },
+              }}
+            >
+              {renderMedia(settings.media)}
+            </Box>
+          )}
         </Box>
-      ))}
+      </Container>
+    </Box>
+  );
+}
+
+export default function About() {
+  const pageKey = "home";
+
+  const { getPageByKey, page } = usePages();
+  const { fetchSectionsPage, sections } = useSections();
+  useEffect(() => {
+    const loadPage = async () => {
+      try {
+        const pageData = await getPageByKey(pageKey);
+
+        if (pageData?.id) {
+          await fetchSectionsPage(pageData.id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    loadPage();
+  }, []);
+
+  return (
+    <Container
+      maxWidth="lg"
+      sx={{
+        minHeight: "100vh",
+      }}
+    >
+      {sections?.length === 0 ? (
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 10,
+          }}
+        >
+          <Typography variant="h4" fontWeight={800}>
+            No Sections Yet
+          </Typography>
+
+          <Typography sx={{ mt: 2 }}>
+            Admin still building the page. The classic “works on my machine”
+            phase.
+          </Typography>
+        </Box>
+      ) : (
+        sections.map((section) => (
+          <Box key={section.id}>{renderSection(section)}</Box>
+        ))
+      )}
     </Container>
   );
 }

@@ -53,6 +53,28 @@ export const usePages = () => {
       }
     }
   };
+  const getPageByKey = async (key) => {
+    try {
+      const res = await api.get(`/page-key/${key}`);
+      setPage(res.data.page);
+      toast.success(res.data.message || "gets successfully");
+    } catch (error) {
+      const errors = error.response?.data?.errors;
+      if (Array.isArray(errors)) {
+        toast.error(errors.map((err) => err.message).join("\n"));
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong");
+      }
+    }
+  };
 
-  return { page, createNewPage, fetchPages, pages, deletePage };
+  return {
+    page,
+    createNewPage,
+    fetchPages,
+    pages,
+    deletePage,
+    getPageByKey,
+    page,
+  };
 };

@@ -21,13 +21,7 @@ router.post(
   createSectionController,
 );
 router.put("/sections/:id", protect, adminOnly, updateSectionController);
-
-router.get(
-  "/all-sections/:id",
-  protect,
-  adminOnly,
-  getSectionsByPageController,
-);
-router.get("/section/:id", protect, adminOnly, getSectionByIdController);
+router.get("/all-sections/:id", getSectionsByPageController);
+router.get("/section/:id", protect, getSectionByIdController);
 router.delete("/sections/:id", protect, adminOnly, deleteSectionController);
 export default router;
