@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { api } from "../../api";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export const usePages = () => {
   const [page, setPage] = useState(null);
   const [pages, setPages] = useState([]);
+  const navigate = useNavigate();
   const createNewPage = async (key) => {
     try {
       const res = await api.post("/page", { key });
       setPage(res.data.page);
       toast.success(res.data.message || "Created successfully");
+      navigate("/admin/view-pages");
     } catch (error) {
       const errors = error.response?.data?.errors;
 
