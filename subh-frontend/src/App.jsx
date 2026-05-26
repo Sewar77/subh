@@ -24,13 +24,8 @@ import NotFound from "./components/NotFound/NotFound.jsx";
 import LandingPage from "./Pages/Landing/LandingPage.jsx";
 import DisplayBooks from "./components/Books/DisplayBooks.jsx";
 import UserLayout from "./Layout/UserLayout.jsx";
-import CreatePage from "./components/Admin/Manage/ManagePages/CreatePage.jsx";
 import ManageWorkshops from "./components/Admin/Manage/ManageWorkshops/ManageWorkshops.jsx";
-import ManageAboutPage from "./components/Admin/Manage/ManagePages/AboutPage/ManageAboutPage.jsx";
-import ViewPagesKeys from "./components/Admin/Manage/ManagePages/ViewPagesKeys.jsx";
-import ViewSectionsPage from "./components/Admin/Manage/ManagePages/Sections/ViewSectionsPage.jsx";
-import UpdateSectionPage from "./components/Admin/Manage/ManagePages/Sections/UpdateSectionPage.jsx";
-import CreateSectionPage from "./components/Admin/Manage/ManagePages/Sections/CreateSectionPage.jsx";
+
 function App() {
   const { id } = useParams();
   return (
@@ -66,17 +61,6 @@ function App() {
           <Route path="user/update/:id" element={<UpdateBook />} />
 
           {/* manage pages */}
-          <Route path="new-page" element={<CreatePage />} />
-          <Route path="view-pages" element={<ViewPagesKeys />} />
-          <Route path="sections/page/:pageId" element={<ViewSectionsPage />} />
-          <Route
-            path="update-section/:pageId/:sectionId"
-            element={<UpdateSectionPage />}
-          />
-          <Route
-            path="create-section/:pageId"
-            element={<CreateSectionPage />}
-          />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
