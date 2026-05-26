@@ -330,3 +330,133 @@ CREATE TABLE content_versions (
   data JSONB NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+CREATE INDEX idx_sections_page_position
+ON sections(page_id, position);
+
+-- SELECT * FROM page_templates 
+-- select * from page_translations
+
+-- =========================
+-- PAGE TEMPLATES
+-- =========================
+CREATE INDEX idx_page_templates_key
+ON page_templates(key);
+
+-- =========================
+-- PAGES
+-- =========================
+CREATE INDEX idx_pages_template_id
+ON pages(template_id);
+
+CREATE INDEX idx_pages_key
+ON pages(key);
+
+CREATE INDEX idx_pages_status
+ON pages(status);
+
+-- =========================
+-- PAGE TRANSLATIONS
+-- =========================
+CREATE INDEX idx_page_trans_page_id
+ON page_translations(page_id);
+
+CREATE INDEX idx_page_trans_locale
+ON page_translations(locale);
+
+CREATE INDEX idx_page_trans_page_locale
+ON page_translations(page_id, locale);
+
+CREATE INDEX idx_page_trans_slug
+ON page_translations(slug);
+
+-- =========================
+-- SECTIONS
+-- =========================
+CREATE INDEX idx_sections_page_id
+ON sections(page_id);
+
+CREATE INDEX idx_sections_page_position
+ON sections(page_id, position);
+
+CREATE INDEX idx_sections_visibility
+ON sections(is_visible);
+
+-- =========================
+-- SECTION TRANSLATIONS
+-- =========================
+CREATE INDEX idx_section_trans_section_id
+ON section_translations(section_id);
+
+CREATE INDEX idx_section_trans_locale
+ON section_translations(locale);
+
+CREATE INDEX idx_section_trans_section_locale
+ON section_translations(section_id, locale);
+
+-- =========================
+-- SECTION MEDIA
+-- =========================
+CREATE INDEX idx_section_media_section_id
+ON section_media(section_id);
+
+CREATE INDEX idx_section_media_media_id
+ON section_media(media_id);
+
+-- =========================
+-- POSTS (NEWS)
+-- =========================
+CREATE INDEX idx_posts_key
+ON posts(key);
+
+CREATE INDEX idx_posts_status
+ON posts(status);
+
+CREATE INDEX idx_posts_created_at
+ON posts(created_at);
+
+-- =========================
+-- POST TRANSLATIONS
+-- =========================
+CREATE INDEX idx_post_trans_post_id
+ON post_translations(post_id);
+
+CREATE INDEX idx_post_trans_locale
+ON post_translations(locale);
+
+CREATE INDEX idx_post_trans_post_locale
+ON post_translations(post_id, locale);
+
+CREATE INDEX idx_post_trans_slug
+ON post_translations(slug);
+
+-- =========================
+-- CONTACT SYSTEM
+-- =========================
+CREATE INDEX idx_contact_pages_key
+ON contact_pages(key);
+
+CREATE INDEX idx_contact_submissions_status
+ON contact_submissions(status);
+
+CREATE INDEX idx_contact_submissions_created_at
+ON contact_submissions(created_at);
+
+-- =========================
+-- TEMPLATE SECTIONS
+-- =========================
+CREATE INDEX idx_template_sections_template_id
+ON template_sections(template_id);
+
+-- =========================
+-- CONTENT VERSIONING (AUDIT LOG)
+-- =========================
+CREATE INDEX idx_content_versions_entity
+ON content_versions(entity_type, entity_id);
+
+CREATE INDEX idx_content_versions_locale
+ON content_versions(locale);
+
+CREATE INDEX idx_content_versions_created_at
+ON content_versions(created_at);
