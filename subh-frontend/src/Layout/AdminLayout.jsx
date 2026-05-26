@@ -23,7 +23,7 @@ export default function AdminLayout() {
             height: "100vh",
             position: "sticky",
             overflowY: "scroll",
-            width: { md: "270px", lg: "350px" },
+            width: { sm: "300px", md: "300px", lg: "400px" },
           }}
         >
           <AdminSidebar />
