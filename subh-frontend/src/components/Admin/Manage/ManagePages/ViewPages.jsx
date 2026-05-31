@@ -70,7 +70,7 @@ export default function ViewPages() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5">Pages Control Center</Typography>
+      <Typography variant="h3">Pages Control Center</Typography>
 
       <Typography variant="body2" color="text.secondary" mb={2}>
         These are page configurations. Each one represents a website route that
@@ -171,7 +171,11 @@ export default function ViewPages() {
                       </Tooltip>
                       <Tooltip title="Manage sections">
                         <IconButton>
-                          <SettingsIcon />
+                          <SettingsIcon
+                            onClick={() =>
+                              navigate(`/admin/view-section/${page.id}`)
+                            }
+                          />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Preview page">

@@ -4,6 +4,7 @@ import {
   deletePage,
   getAllPages,
   getPageById,
+  getPageByKeyModel,
   updatePage,
 } from "../models/pages.Models.js";
 
@@ -61,9 +62,11 @@ export const getAllPagesController = async (req, res) => {
  */
 export const getPageByIdController = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
+    console.log(id);
 
     const page = await getPageById(id);
+    console.log("page", page);
 
     if (!page) {
       return res.status(404).json({
@@ -129,6 +132,37 @@ export const deletePageController = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       message: "Server error while deleting page",
+    });
+  }
+};
+
+export const getPageByKeyController = async (req, res) => {
+  try {
+    const { key } = req.params;
+
+    if (!key) {
+      return res.status(400).json({
+        message: "Page key is required",
+      });
+    }
+
+    const page = await getPageByKeyModel(key);
+
+    if (!page) {
+      return res.status(404).json({
+        message: "Page not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Page fetched successfully",
+      page,
+    });
+  } catch (error) {
+    console.error("getPageByKey error:", error);
+
+    return res.status(500).json({
+      message: "Something went wrong while fetching page",
     });
   }
 };

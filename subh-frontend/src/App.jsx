@@ -28,6 +28,8 @@ import ManageWorkshops from "./components/Admin/Manage/ManageWorkshops/ManageWor
 import ViewPages from "./components/Admin/Manage/ManagePages/ViewPages.jsx";
 import ViewTemplates from "./components/Admin/Manage/ManagePages/ViewTemplates.jsx";
 import CreatePage from "./components/Admin/Manage/ManagePages/CreatePage.jsx";
+import ViewSection from "./components/Admin/Manage/ManageSection/ViewSections.jsx";
+import CreateSection from "./components/Admin/Manage/ManageSection/CreateSection.jsx";
 
 function App() {
   const { id } = useParams();
@@ -65,7 +67,9 @@ function App() {
           {/* manage pages */}
           <Route path="view-pages" element={<ViewPages />} />
           <Route path="view-template" element={<ViewTemplates />} />
-          <Route path="create-page/:templateId" element={<CreatePage />} />{" "}
+          <Route path="create-page/:templateId" element={<CreatePage />} />
+          <Route path="create-section/:pageId" element={<CreateSection />} />
+          <Route path="view-section/:pageId" element={<ViewSection />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

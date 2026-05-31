@@ -23,7 +23,7 @@ const router = express.Router();
  * CREATE SECTION
  */
 router.post(
-  "/sections",
+  "/pages/:page_id/sections",
   protect,
   adminOnly,
   validate(createSectionSchema),

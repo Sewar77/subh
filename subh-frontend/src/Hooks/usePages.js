@@ -4,8 +4,11 @@ import toast from "react-hot-toast";
 
 export const usePages = () => {
   const [pages, setPages] = useState([]);
+  const [page, setPage] = useState({});
   const [loading, setLoading] = useState(false);
   const [template, setTemplate] = useState([]);
+  const [sections, setSections] = useState([]);
+
   // =========================
   // PAGES
   // =========================
@@ -15,6 +18,17 @@ export const usePages = () => {
       setLoading(true);
       const res = await api.get("/pages");
       setPages(res.data.pages || []);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchPageById = async (id) => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/pages/${id}`);
+      setPage(res.data.page);
     } catch (error) {
       handleError(error);
     } finally {
@@ -53,7 +67,20 @@ export const usePages = () => {
       handleError(error);
     }
   };
+  const fetchPageByKey = async (key) => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/pages/key/${key}`);
+      console.log(res);
 
+      setPage(res.data.page);
+      return res.data.page;
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
   // =========================
   // PAGE TRANSLATIONS
   // =========================
@@ -88,6 +115,9 @@ export const usePages = () => {
   const addSection = async (pageId, data) => {
     try {
       const res = await api.post(`/pages/${pageId}/sections`, data);
+      console.log(res);
+
+      console.log(data);
       toast.success("Section added");
       return res.data;
     } catch (error) {
@@ -124,6 +154,18 @@ export const usePages = () => {
       handleError(error);
     }
   };
+  const getSectionsByPageId = async (pageId) => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/sections/page/${pageId}`);
+      setSections(res.data.sections || []);
+      return res.data.sections;
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // =========================
   // PAGE TEMPLATES
@@ -154,9 +196,7 @@ export const usePages = () => {
   // =========================
 
   const handleError = (error) => {
-    const err =
-      error.response?.data?.errors[0].message +
-      ", Make sure name follows the naming rules";
+    const err = error.response?.data?.errors?.message;
 
     toast.error(err || "Something went wrong. Please try again.");
   };
@@ -166,12 +206,16 @@ export const usePages = () => {
     pages,
     loading,
     template,
+    sections,
+    page,
 
     // pages
     fetchAllPages,
     createPage,
     updatePage,
     deletePageById,
+    fetchPageById,
+    fetchPageByKey,
 
     // translations
     addPageTranslation,
@@ -182,6 +226,7 @@ export const usePages = () => {
     updateSection,
     deleteSection,
     reorderSections,
+    getSectionsByPageId,
 
     // templates
     fetchTemplates,
