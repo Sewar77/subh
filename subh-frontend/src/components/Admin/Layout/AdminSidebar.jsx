@@ -24,6 +24,13 @@ export default function AdminSidebar() {
       ],
     },
     {
+      title: "Pages",
+      items: [
+        { label: "View Template", path: "/admin/view-template" },
+        { label: "View Pages", path: "/admin/view-pages" },
+      ],
+    },
+    {
       title: "Text Books",
       items: [
         { label: "View Books", path: "/admin/books" },
@@ -37,39 +44,6 @@ export default function AdminSidebar() {
         { label: "View WorkShops", path: "/admin/workshops" },
         { label: "Add Workshops", path: "" },
         { label: "Manage Appoientments", path: "" },
-      ],
-    },
-    {
-      title: "Pages",
-      items: [
-        { label: "Craete New Page", path: "/admin/new-page" },
-        { label: "View Pages", path: "/admin/view-pages" },
-        { label: "Edit Category", path: "" },
-      ],
-    },
-    {
-      title: "Contact Us",
-      items: [
-        { label: "View Categories", path: "" },
-        { label: "Add Category", path: "" },
-        { label: "Edit Category", path: "" },
-      ],
-    },
-    {
-      title: "About Us",
-      items: [
-        { label: "Manage About", path: "/admin/manage/about" },
-        { label: "Add Category", path: "" },
-        { label: "Edit Category", path: "" },
-      ],
-    },
-
-    {
-      title: "Reports",
-      items: [
-        { label: "View Categories", path: "" },
-        { label: "Add Category", path: "" },
-        { label: "Edit Category", path: "" },
       ],
     },
   ];

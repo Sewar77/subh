@@ -25,6 +25,9 @@ import LandingPage from "./Pages/Landing/LandingPage.jsx";
 import DisplayBooks from "./components/Books/DisplayBooks.jsx";
 import UserLayout from "./Layout/UserLayout.jsx";
 import ManageWorkshops from "./components/Admin/Manage/ManageWorkshops/ManageWorkshops.jsx";
+import ViewPages from "./components/Admin/Manage/ManagePages/ViewPages.jsx";
+import ViewTemplates from "./components/Admin/Manage/ManagePages/ViewTemplates.jsx";
+import CreatePage from "./components/Admin/Manage/ManagePages/CreatePage.jsx";
 
 function App() {
   const { id } = useParams();
@@ -59,8 +62,10 @@ function App() {
           <Route path="category/update/:id" element={<UpdateCategory />} />
           <Route path="book/update/:id" element={<UpdateBook />} />
           <Route path="user/update/:id" element={<UpdateBook />} />
-
           {/* manage pages */}
+          <Route path="view-pages" element={<ViewPages />} />
+          <Route path="view-template" element={<ViewTemplates />} />
+          <Route path="create-page/:templateId" element={<CreatePage />} />{" "}
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
