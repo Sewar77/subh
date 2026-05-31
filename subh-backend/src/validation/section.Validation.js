@@ -1,13 +1,16 @@
 import Joi from "joi";
 
 export const createSectionSchema = Joi.object({
-  page_id: Joi.number().required().messages({
-    "number.base": "page_id must be a number",
-    "any.required": "page_id is required",
-  }),
-
   type: Joi.string()
-    .valid("hero", "text", "image_text", "gallery", "contact_form")
+    .valid(
+      "hero",
+      "text",
+      "image_text",
+      "gallery",
+      "contact_form",
+      "image",
+      "text_image",
+    )
     .required()
     .messages({
       "any.only": "Invalid section type",

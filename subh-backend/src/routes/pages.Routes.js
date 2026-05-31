@@ -5,6 +5,7 @@ import {
   getPageByIdController,
   updatePageController,
   deletePageController,
+  getPageByKeyController,
 } from "../controller/pages.controller.js";
 
 import { protect } from "../middleware/protect.Middleware.js";
@@ -31,12 +32,13 @@ router.post(
 /**
  * GET ALL PAGES
  */
-router.get("/pages", protect, adminOnly, getAllPagesController);
+router.get("/pages", getAllPagesController);
 
 /**
  * GET PAGE BY ID
  */
-router.get("/pages/:id", protect, adminOnly, getPageByIdController);
+router.get("/pages/:id", getPageByIdController);
+router.get("/pages/key/:key", getPageByKeyController);
 
 /**
  * UPDATE PAGE
