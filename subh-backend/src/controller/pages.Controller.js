@@ -1,5 +1,7 @@
+import formatError from "../helper/formatError.js";
 import {
   createPage,
+  deletePage,
   getAllPages,
   getPageById,
   updatePage,
@@ -25,7 +27,7 @@ export const createPageController = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Server error while creating page",
+      message: formatError(error),
     });
   }
 };
@@ -111,10 +113,10 @@ export const updatePageController = async (req, res) => {
  */
 export const deletePageController = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
+    console.log(id);
 
     const page = await deletePage(id);
-
     if (!page) {
       return res.status(404).json({
         message: "Page not found",
