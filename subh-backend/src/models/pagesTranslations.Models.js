@@ -57,12 +57,11 @@ export const getPageTranslationById = async (id) => {
     FROM page_translations pt
     JOIN pages p ON pt.page_id = p.id
     JOIN page_templates t ON p.template_id = t.id
-    WHERE pt.id = $1
+    WHERE p.id = $1
     `,
     [id],
   );
-
-  return result.rows[0];
+  return result.rows;
 };
 
 /**

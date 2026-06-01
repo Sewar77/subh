@@ -1,11 +1,6 @@
 import Joi from "joi";
 
 export const createPageTranslationSchema = Joi.object({
-  page_id: Joi.number().integer().required().messages({
-    "number.base": "page_id must be a number",
-    "any.required": "page_id is required",
-  }),
-
   locale: Joi.string().length(2).required().messages({
     "string.base": "locale must be a string",
     "string.length": "locale must be 2 characters (en/ar)",

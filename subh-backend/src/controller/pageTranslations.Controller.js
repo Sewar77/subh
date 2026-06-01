@@ -12,9 +12,8 @@ import {
  */
 export const createPageTranslationController = async (req, res) => {
   try {
-    const { page_id, locale, title, slug, seo_title, seo_description } =
-      req.body;
-
+    const { locale, title, slug, seo_title, seo_description } = req.body;
+    const page_id = req.params.id;
     const result = await createPageTranslation(
       page_id,
       locale,
@@ -23,17 +22,24 @@ export const createPageTranslationController = async (req, res) => {
       seo_title,
       seo_description,
     );
+    console.log(req.body, page_id);
 
     if (!result) {
       return res.status(400).json({ message: "Failed to create translation" });
     }
-
     return res.status(201).json({
       message: "Translation created",
       translation: result,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Server error" });
+    if (error.code === "23505") {
+      return res.status(400).json({
+        message: "This language already exists for this page.",
+      });
+    }
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
@@ -57,14 +63,11 @@ export const getAllPageTranslationsController = async (req, res) => {
  */
 export const getPageTranslationByIdController = async (req, res) => {
   try {
-    const { id } = req.params;
-
+    const id = req.params.id;
     const result = await getPageTranslationById(id);
-
     if (!result) {
       return res.status(404).json({ message: "Not found" });
     }
-
     return res.status(200).json({
       translation: result,
     });
@@ -78,14 +81,11 @@ export const getPageTranslationByIdController = async (req, res) => {
  */
 export const getPageTranslationController = async (req, res) => {
   try {
-    const { page_id, locale } = req.query;
-
+    const { page_id, locale } = req.params;
     const result = await getPageTranslation(page_id, locale);
-
     if (!result) {
       return res.status(404).json({ message: "Not found" });
     }
-
     return res.status(200).json({
       translation: result,
     });
