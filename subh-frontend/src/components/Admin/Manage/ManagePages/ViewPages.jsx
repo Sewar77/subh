@@ -16,10 +16,13 @@ import {
   LinearProgress,
   Button,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
+import ViewAgendaIcon from "@mui/icons-material/ViewAgenda";
 import SettingsIcon from "@mui/icons-material/Settings";
+import TranslateIcon from "@mui/icons-material/Translate";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { usePages } from "../../../../Hooks/usePages";
 import AddButton from "../../Buttons/AddBtn";
 import { useNavigate } from "react-router-dom";
@@ -67,7 +70,7 @@ export default function ViewPages() {
     }
     return { label: "Ready", color: "success", note: "Fully configured page" };
   };
-
+  // const navigate = useNavigate()
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h3">Pages Control Center</Typography>
@@ -106,17 +109,13 @@ export default function ViewPages() {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow
-              sx={{
-                textAlign: "center",
-              }}
-            >
+            <TableRow>
               <TableCell>Page</TableCell>
               <TableCell>Template</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Created</TableCell>
               <TableCell>State</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ textAlign: "center" }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -162,33 +161,61 @@ export default function ViewPages() {
                   {/* ACTIONS */}
                   <TableCell>
                     <Box
-                      sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 0.5,
+                      }}
                     >
-                      <Tooltip title="Edit page settings">
+                      {/* <Tooltip title="Preview Page">
+                        <IconButton>
+                          <SettingsIcon />
+                        </IconButton>
+                      </Tooltip> */}
+
+                      <Tooltip title="Edit Page">
                         <IconButton>
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Manage sections">
+
+                      <Tooltip title="View Sections">
                         <IconButton>
-                          <SettingsIcon
+                          <VisibilityIcon
                             onClick={() =>
                               navigate(`/admin/view-section/${page.id}`)
                             }
                           />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Preview page">
+                      <Tooltip title="Translations">
                         <IconButton>
-                          <VisibilityIcon />
+                          <TranslateIcon
+                            onClick={() =>
+                              navigate(`/admin/translations-page/${page.id}`)
+                            }
+                          />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Delete page">
+
+                      <Tooltip title="Reports & Analytics">
+                        <IconButton>
+                          <AssessmentIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Page">
                         <DeleteButton
                           onClick={() => {
-                            (setConfirmDelete(true), setSelectedId(page.id));
+                            setSelectedId(page.id);
+                            setConfirmDelete(true);
                           }}
                         />
+                      </Tooltip>
+                      <Tooltip title="More Actions">
+                        <IconButton>
+                          <MoreVertIcon />
+                        </IconButton>
                       </Tooltip>
                     </Box>
                   </TableCell>

@@ -30,6 +30,8 @@ import ViewTemplates from "./components/Admin/Manage/ManagePages/ViewTemplates.j
 import CreatePage from "./components/Admin/Manage/ManagePages/CreatePage.jsx";
 import ViewSection from "./components/Admin/Manage/ManageSection/ViewSections.jsx";
 import CreateSection from "./components/Admin/Manage/ManageSection/CreateSection.jsx";
+import ViewPageTranslations from "./components/Admin/Manage/ManagePages/ViewPageTranslations.jsx";
+import AddPageTranlsations from "./components/Admin/Manage/ManagePages/AddPageTranlsations.jsx";
 
 function App() {
   const { id } = useParams();
@@ -70,6 +72,14 @@ function App() {
           <Route path="create-page/:templateId" element={<CreatePage />} />
           <Route path="create-section/:pageId" element={<CreateSection />} />
           <Route path="view-section/:pageId" element={<ViewSection />} />
+          <Route
+            path="translations-page/:pageId"
+            element={<ViewPageTranslations />}
+          />
+          <Route
+            path="add-translations-page/:pageId"
+            element={<AddPageTranlsations />}
+          />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

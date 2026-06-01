@@ -22,7 +22,7 @@ const router = express.Router();
  * CREATE
  */
 router.post(
-  "/page-translations",
+  "/pages/:id/translations",
   protect,
   adminOnly,
   validate(createPageTranslationSchema),
@@ -53,7 +53,7 @@ router.get(
  * GET BY PAGE + LOCALE (CMS RENDER ENDPOINT)
  */
 router.get(
-  "/page-translation",
+  "/page-translation/:id/:locale",
   protect,
   adminOnly,
   getPageTranslationController,
@@ -63,7 +63,7 @@ router.get(
  * UPDATE
  */
 router.put(
-  "/page-translations/:id",
+  "/pages/:id/translations",
   protect,
   adminOnly,
   validate(updatePageTranslationSchema),

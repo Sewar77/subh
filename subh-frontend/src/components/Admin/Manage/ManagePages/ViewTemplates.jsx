@@ -16,7 +16,8 @@ import {
 import { useNavigate } from "react-router-dom";
 
 export default function ViewTemplates() {
-  const { fetchTemplates, template = [] } = usePages();
+  const { fetchTemplates, templates = [] } = usePages();
+  console.log(templates);
 
   useEffect(() => {
     fetchTemplates();
@@ -98,7 +99,7 @@ export default function ViewTemplates() {
 
       {/* TEMPLATE CARDS */}
       <Grid container spacing={3}>
-        {template.map((item) => (
+        {templates.map((item) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
             <Card
               sx={{
