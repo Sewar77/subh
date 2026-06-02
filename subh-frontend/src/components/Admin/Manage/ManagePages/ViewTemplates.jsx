@@ -17,8 +17,6 @@ import { useNavigate } from "react-router-dom";
 
 export default function ViewTemplates() {
   const { fetchTemplates, templates = [] } = usePages();
-  console.log(templates);
-
   useEffect(() => {
     fetchTemplates();
   }, []);
@@ -147,13 +145,7 @@ export default function ViewTemplates() {
                   <CardActions sx={{ justifyContent: "center" }}>
                     <Button
                       variant="contained"
-                      onClick={() =>
-                        navigate(`/admin/create-page/${item.id}`, {
-                          state: {
-                            template: item,
-                          },
-                        })
-                      }
+                      onClick={() => navigate(`/admin/create-page/${item.id}`)}
                     >
                       Use Template
                     </Button>

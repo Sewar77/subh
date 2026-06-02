@@ -6,6 +6,7 @@ import {
   updatePageController,
   deletePageController,
   getPageByKeyController,
+  getPageByTemplateIdController,
 } from "../controller/pages.controller.js";
 
 import { protect } from "../middleware/protect.Middleware.js";
@@ -38,6 +39,7 @@ router.get("/pages", getAllPagesController);
  * GET PAGE BY ID
  */
 router.get("/pages/:id", getPageByIdController);
+router.get("/template/:id/pages", getPageByTemplateIdController);
 router.get("/pages/key/:key", getPageByKeyController);
 
 /**

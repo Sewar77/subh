@@ -28,6 +28,7 @@ export default function AdminSidebar() {
       items: [
         { label: "View Template", path: "/admin/view-template" },
         { label: "View Pages", path: "/admin/view-pages" },
+        { label: "View All Sections", path: "/admin/view-sections" },
       ],
     },
     {

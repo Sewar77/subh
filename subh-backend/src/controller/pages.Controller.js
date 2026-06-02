@@ -5,6 +5,7 @@ import {
   getAllPages,
   getPageById,
   getPageByKeyModel,
+  getPageByTemplateId,
   updatePage,
 } from "../models/pages.Models.js";
 
@@ -80,6 +81,31 @@ export const getPageByIdController = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       message: "Server error while fetching page",
+    });
+  }
+};
+
+export const getPageByTemplateIdController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    console.log(id);
+    
+    const page = await getPageByTemplateId(id);
+    console.log("page", page);
+
+    if (!page) {
+      return res.status(200).json({
+        message: "template has no pages yet",
+        page: [],
+      });
+    }
+
+    return res.status(200).json({
+      page,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server error while fetching page for the template",
     });
   }
 };

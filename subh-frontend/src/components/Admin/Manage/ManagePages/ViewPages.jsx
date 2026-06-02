@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Chip,
@@ -14,97 +14,113 @@ import {
   Typography,
   Tooltip,
   LinearProgress,
-  Button,
 } from "@mui/material";
+
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
-import ViewAgendaIcon from "@mui/icons-material/ViewAgenda";
-import SettingsIcon from "@mui/icons-material/Settings";
 import TranslateIcon from "@mui/icons-material/Translate";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+
 import { usePages } from "../../../../Hooks/usePages";
 import AddButton from "../../Buttons/AddBtn";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import DeleteButton from "../../Buttons/DeleteBtn";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
+import SectionsFilters from "../../Search and Filter/SectionsFilters";
 
 export default function ViewPages() {
-  const { pages, fetchAllPages, loading, deletePageById } = usePages();
+  const {
+    pages,
+    fetchAllPages,
+    loading,
+    deletePageById,
+    templates,
+    fetchTemplates,
+  } = usePages();
+
   const [search, setSearch] = useState("");
-  useEffect(() => {
-    fetchAllPages();
-  }, []);
+  const [templateFilter, setTemplateFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
+
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+
   const navigate = useNavigate();
-  const filtered = (pages || []).filter((p) => {
-    const key = p.key || "";
-    const template = p.template_name || "";
-    return (
-      key.toLowerCase().includes(search.toLowerCase()) ||
-      template.toLowerCase().includes(search.toLowerCase())
-    );
-  });
+
+  useEffect(() => {
+    fetchAllPages();
+    fetchTemplates();
+  }, []);
+
   const getCompletionState = (page) => {
     const hasTemplate = !!page.template_id;
     const hasStatus = page.status === "published";
-    const hasBaseConfig = !!page.key;
-    if (!hasBaseConfig) {
-      return {
-        label: "Broken",
-        color: "error",
-        note: "Missing page identifier",
-      };
-    }
-    if (!hasTemplate) {
-      return {
-        label: "Unassigned",
-        color: "warning",
-        note: "No template attached",
-      };
-    }
-    if (!hasStatus || page.status === "draft") {
-      return { label: "In Progress", color: "warning", note: "Not live yet" };
-    }
-    return { label: "Ready", color: "success", note: "Fully configured page" };
+    const hasKey = !!page.key;
+
+    if (!hasKey)
+      return { label: "Broken", color: "error", note: "Missing key" };
+    if (!hasTemplate)
+      return { label: "Unassigned", color: "warning", note: "No template" };
+    if (!hasStatus)
+      return { label: "In Progress", color: "warning", note: "Not published" };
+
+    return { label: "Ready", color: "success", note: "Fully configured" };
   };
-  // const navigate = useNavigate()
+
+  const filtered = useMemo(() => {
+    return (pages || []).filter((p) => {
+      const key = (p.key || "").toLowerCase();
+      const templateName = (p.template_name || "").toLowerCase();
+      const status = (p.status || "").toLowerCase();
+
+      const searchQ = search.toLowerCase();
+
+      const matchSearch =
+        key.includes(searchQ) || templateName.includes(searchQ);
+
+      const matchTemplate = templateFilter
+        ? p.template_key === templateFilter
+        : true;
+      const matchStatus = statusFilter
+        ? status === statusFilter.toLowerCase()
+        : true;
+
+      const state = getCompletionState(p);
+      const matchState = stateFilter
+        ? state.label.toLowerCase() === stateFilter.toLowerCase()
+        : true;
+
+      return matchSearch && matchTemplate && matchStatus && matchState;
+    });
+  }, [pages, search, templateFilter, statusFilter, stateFilter]);
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h3">Pages Control Center</Typography>
 
-      <Typography variant="body2" color="text.secondary" mb={2}>
-        These are page configurations. Each one represents a website route that
-        will later be filled with content sections and translations.
+      <Typography variant="body2" color="text.secondary" sx={{ my: 2 }}>
+        Manage pages, templates, and publishing state.
       </Typography>
+
       {loading && <LinearProgress sx={{ mb: 2 }} />}
-      <TextField
-        fullWidth
-        placeholder="Search pages by key or template..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        sx={{ my: 2 }}
+
+      <SectionsFilters
+        search={search}
+        setSearch={setSearch}
+        pages={pages}
+        templates={templates}
+        pageFilter={""}
+        setPageFilter={() => {}}
+        templateFilter={templateFilter}
+        setTemplateFilter={setTemplateFilter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        stateFilter={stateFilter}
+        setStateFilter={setStateFilter}
       />
-      <Box
-        sx={{
-          my: 3,
-          display: "flex",
-          justifyContent: "center",
-          gap: 3,
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          To create new page, choose a template first
-        </Typography>
-        <AddButton
-          label="Page"
-          to={"/admin/view-template"}
-          onClick={() => toast("Select a template to continue")}
-        />
-      </Box>
 
       <TableContainer component={Paper}>
         <Table>
@@ -115,26 +131,27 @@ export default function ViewPages() {
               <TableCell>Status</TableCell>
               <TableCell>Created</TableCell>
               <TableCell>State</TableCell>
-              <TableCell sx={{ textAlign: "center" }}>Actions</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
             {filtered.map((page) => {
               const state = getCompletionState(page);
+
               return (
                 <TableRow key={page.id} hover>
-                  {/* PAGE KEY */}
                   <TableCell>
                     <Typography fontWeight={600}>{page.key}</Typography>
                   </TableCell>
-                  {/* TEMPLATE */}
+
                   <TableCell>
                     <Chip
                       label={page.template_name || "No template"}
                       size="small"
                     />
                   </TableCell>
-                  {/* STATUS */}
+
                   <TableCell>
                     <Chip
                       label={page.status}
@@ -144,11 +161,11 @@ export default function ViewPages() {
                       size="small"
                     />
                   </TableCell>
-                  {/* CREATED */}
+
                   <TableCell>
                     {new Date(page.created_at).toLocaleDateString()}
                   </TableCell>
-                  {/* STATE */}
+
                   <TableCell>
                     <Tooltip title={state.note}>
                       <Chip
@@ -158,53 +175,48 @@ export default function ViewPages() {
                       />
                     </Tooltip>
                   </TableCell>
-                  {/* ACTIONS */}
+
                   <TableCell>
                     <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 0.5,
-                      }}
+                      sx={{ display: "flex", justifyContent: "center", gap: 1 }}
                     >
-                      {/* <Tooltip title="Preview Page">
-                        <IconButton>
-                          <SettingsIcon />
-                        </IconButton>
-                      </Tooltip> */}
-
-                      <Tooltip title="Edit Page">
+                      <Tooltip title="Edit">
                         <IconButton>
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
 
-                      <Tooltip title="View Sections">
-                        <IconButton>
-                          <VisibilityIcon
-                            onClick={() =>
-                              navigate(`/admin/view-section/${page.id}`)
-                            }
-                          />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Translations">
-                        <IconButton>
-                          <TranslateIcon
-                            onClick={() =>
-                              navigate(`/admin/translations-page/${page.id}`)
-                            }
-                          />
+                      <Tooltip title="View Page">
+                        <IconButton
+                          onClick={() =>
+                            navigate(`/admin/view-page/${page.id}`)
+                          }
+                        >
+                          <VisibilityIcon />
                         </IconButton>
                       </Tooltip>
 
-                      <Tooltip title="Reports & Analytics">
-                        <IconButton>
+                      <Tooltip title="Translations">
+                        <IconButton
+                          onClick={() =>
+                            navigate(`/admin/translations-page/${page.id}`)
+                          }
+                        >
+                          <TranslateIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Analytics">
+                        <IconButton
+                          onClick={() =>
+                            navigate(`/admin/view-section/${page.id}`)
+                          }
+                        >
                           <AssessmentIcon />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Delete Page">
+
+                      <Tooltip title="Delete">
                         <DeleteButton
                           onClick={() => {
                             setSelectedId(page.id);
@@ -212,7 +224,8 @@ export default function ViewPages() {
                           }}
                         />
                       </Tooltip>
-                      <Tooltip title="More Actions">
+
+                      <Tooltip title="More">
                         <IconButton>
                           <MoreVertIcon />
                         </IconButton>
@@ -225,15 +238,16 @@ export default function ViewPages() {
           </TableBody>
         </Table>
       </TableContainer>
+
       {confirmDelete && (
         <ConfirmDeleteModal
           open={confirmDelete}
           onClose={() => setConfirmDelete(false)}
-          onConfirm={() => (
-            deletePageById(selectedId),
-            setConfirmDelete(false)
-          )}
-          label={"Page"}
+          onConfirm={() => {
+            deletePageById(selectedId);
+            setConfirmDelete(false);
+          }}
+          label="Page"
         />
       )}
     </Box>

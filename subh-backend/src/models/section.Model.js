@@ -84,3 +84,58 @@ export const deleteSection = async (id) => {
 
   return result.rows[0];
 };
+
+export const getAllSections = async () => {
+  const result = await pool.query(`
+    SELECT 
+      s.*,
+
+      -- PAGE
+      p.key AS page_key,
+      p.status,
+      p.template_id,
+
+      -- TEMPLATE
+      t.key AS template_key,
+      t.name AS template_name,
+
+      -- TRANSLATIONS
+      COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', st.id,
+            'locale', st.locale,
+            'title', st.title,
+            'content', st.content,
+            'is_visible', st.is_visible
+          )
+        ) FILTER (WHERE st.id IS NOT NULL),
+        '[]'
+      ) AS translations,
+
+      -- MEDIA
+      COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'media_id', sm.media_id,
+            'role', sm.role,
+            'position', sm.position
+          )
+        ) FILTER (WHERE sm.media_id IS NOT NULL),
+        '[]'
+      ) AS media
+
+    FROM sections s
+    JOIN pages p ON s.page_id = p.id
+    LEFT JOIN page_templates t ON p.template_id = t.id
+    LEFT JOIN section_translations st ON s.id = st.section_id
+    LEFT JOIN section_media sm ON s.id = sm.section_id
+
+    GROUP BY 
+      s.id, p.id, t.id
+
+    ORDER BY s.position ASC
+  `);
+
+  return result.rows;
+};
