@@ -4,8 +4,27 @@ import {
   getSectionById,
   updateSection,
   deleteSection,
+  getAllSections,
 } from "../models/section.Model.js";
 
+export const getAllSectionsController = async (req, res) => {
+  try {
+    const sections = await getAllSections();
+
+    return res.status(200).json({
+      success: true,
+      message: "Sections fetched successfully",
+      sections,
+    });
+  } catch (error) {
+    console.error("Get All Sections Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch sections",
+    });
+  }
+};
 /**
  * CREATE
  */

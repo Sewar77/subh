@@ -137,3 +137,10 @@ export const getPageByKeyModel = async (key) => {
 
   return result.rows[0];
 };
+
+export const getPageByTemplateId = async (template_id) => {
+  const result = await pool.query(`select * from pages where template_id=$1`, [
+    template_id,
+  ]);
+  return result.rows;
+};

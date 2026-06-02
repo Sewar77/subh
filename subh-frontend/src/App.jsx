@@ -32,6 +32,8 @@ import ViewSection from "./components/Admin/Manage/ManageSection/ViewSections.js
 import CreateSection from "./components/Admin/Manage/ManageSection/CreateSection.jsx";
 import ViewPageTranslations from "./components/Admin/Manage/ManagePages/ViewPageTranslations.jsx";
 import AddPageTranlsations from "./components/Admin/Manage/ManagePages/AddPageTranlsations.jsx";
+import ViewAllSections from "./components/Admin/Manage/ManageSection/ViewAllSections.jsx";
+import ViewPage from "./components/Admin/Manage/ManagePages/ViewPage.jsx";
 
 function App() {
   const { id } = useParams();
@@ -68,10 +70,12 @@ function App() {
           <Route path="user/update/:id" element={<UpdateBook />} />
           {/* manage pages */}
           <Route path="view-pages" element={<ViewPages />} />
+          <Route path="view-sections" element={<ViewAllSections />} />
           <Route path="view-template" element={<ViewTemplates />} />
           <Route path="create-page/:templateId" element={<CreatePage />} />
           <Route path="create-section/:pageId" element={<CreateSection />} />
           <Route path="view-section/:pageId" element={<ViewSection />} />
+          <Route path="view-page/:pageId" element={<ViewPage />} />
           <Route
             path="translations-page/:pageId"
             element={<ViewPageTranslations />}

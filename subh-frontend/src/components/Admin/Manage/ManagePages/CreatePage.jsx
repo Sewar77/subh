@@ -7,24 +7,37 @@ import {
   Chip,
   Container,
   Divider,
+  Grid,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages.js";
+import ViewButton from "../../Buttons/ViewBtn.jsx";
 
 export default function CreatePage() {
-  const { createPage } = usePages();
-  const { state } = useLocation();
-  const template = state?.template;
+  const navigate = useNavigate();
+  const {
+    createPage,
+    templatePages,
+    fetchPageByTemplateId,
+    getTemplateById,
+    template,
+  } = usePages();
+  const { templateId } = useParams();
   const [form, setForm] = useState({
     key: "",
   });
+  useEffect(() => {
+    fetchPageByTemplateId(templateId);
+    getTemplateById(templateId);
+  }, [templateId]);
+
   const handleSubmit = async () => {
     await createPage({
-      template_id: template.id,
+      template_id: templateId,
       key: form.key,
     });
     setForm({
@@ -42,7 +55,10 @@ export default function CreatePage() {
         Create a new website page using the selected template.
       </Typography>
 
-      <Alert severity="info" sx={{ mb: 4 }}>
+      <Alert
+        severity="info"
+        sx={{ mb: 4, textAlign: "center", justifyContent: "center" }}
+      >
         You are creating a page from a template. After creating the page you
         will be able to:
         <br />
@@ -133,6 +149,107 @@ export default function CreatePage() {
             <br />
             6. Publish when ready.
           </Typography>
+        </CardContent>
+      </Card>
+      <Card sx={{ mt: 4, p: 3 }}>
+        <CardContent>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              textAlign: "center",
+              alignItems: "center",
+              mb: 3,
+            }}
+          >
+            <Typography variant="h4" fontWeight={700}>
+              Pages in this Template
+            </Typography>
+
+            <Chip
+              label={`Total: ${templatePages?.length || 0}`}
+              color="primary"
+              size="large"
+            />
+          </Stack>
+
+          {/* EMPTY STATE */}
+          {(!templatePages || templatePages.length === 0) && (
+            <Box
+              sx={{
+                mt: 3,
+                py: 6,
+                textAlign: "center",
+                border: "1px dashed #ccc",
+                borderRadius: 2,
+                backgroundColor: "#fafafa",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="h6" fontWeight={600} color="text.secondary">
+                No pages yet
+              </Typography>
+
+              <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+                This template doesn’t have any pages created yet.
+              </Typography>
+            </Box>
+          )}
+
+          {/* GRID LIST */}
+          {templatePages?.length > 0 && (
+            <Grid container spacing={2} mt={4}>
+              {templatePages.map((page) => (
+                <Grid
+                  size={{ xs: 12, md: 4, lg: 6 }}
+                  key={page.id}
+                  sx={{ textAlign: "center" }}
+                >
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      p: 2,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      transition: "0.2s",
+                      "&:hover": {
+                        transform: "translateY(-3px)",
+                        boxShadow: 3,
+                      },
+                    }}
+                  >
+                    <Stack
+                      sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography variant="h6" fontWeight={700}>
+                        {page.key}
+                      </Typography>
+
+                      <Chip
+                        label={page.status}
+                        color={page.status === "draft" ? "warning" : "success"}
+                        size="small"
+                      />
+                    </Stack>
+                    <ViewButton
+                      onClick={() => {
+                        navigate(`/admin/view-page/${page.id}`);
+                      }}
+                    >
+                      View
+                    </ViewButton>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
         </CardContent>
       </Card>
     </Container>

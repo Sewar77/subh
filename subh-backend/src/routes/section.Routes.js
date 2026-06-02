@@ -6,6 +6,7 @@ import {
   getSectionByIdController,
   updateSectionController,
   deleteSectionController,
+  getAllSectionsController,
 } from "../controller/section.Controller.js";
 
 import { protect } from "../middleware/protect.Middleware.js";
@@ -44,6 +45,7 @@ router.get(
  * GET SECTION BY ID
  */
 router.get("/sections/:id", protect, adminOnly, getSectionByIdController);
+router.get("/all-sections", getAllSectionsController);
 
 /**
  * UPDATE SECTION
