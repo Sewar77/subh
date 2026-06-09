@@ -108,9 +108,6 @@ export const updateUserController = async (req, res) => {
   const { userType, userRole } = req.body;
 
   try {
-    console.log("body:", req.body);
-    console.log("userId:", userId);
-
     const existingUser = await getUserById(userId);
 
     if (!existingUser) {
@@ -139,8 +136,6 @@ export const updateUserController = async (req, res) => {
       updateFields.user_type,
       updateFields.role,
     );
-    console.log("updated===", updatedUser);
-
     return res.status(200).json({
       message: "User updated successfully",
       user: updatedUser,

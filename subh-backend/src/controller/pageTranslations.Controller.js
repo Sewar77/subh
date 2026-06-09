@@ -22,8 +22,6 @@ export const createPageTranslationController = async (req, res) => {
       seo_title,
       seo_description,
     );
-    console.log(req.body, page_id);
-
     if (!result) {
       return res.status(400).json({ message: "Failed to create translation" });
     }

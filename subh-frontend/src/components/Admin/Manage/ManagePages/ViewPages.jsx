@@ -14,6 +14,8 @@ import {
   Typography,
   Tooltip,
   LinearProgress,
+  MenuItem,
+  Menu,
 } from "@mui/material";
 
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -29,6 +31,7 @@ import toast from "react-hot-toast";
 import DeleteButton from "../../Buttons/DeleteBtn";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 import SectionsFilters from "../../Search and Filter/SectionsFilters";
+import Title from "../../Headers/Titles";
 
 export default function ViewPages() {
   const {
@@ -44,67 +47,55 @@ export default function ViewPages() {
   const [templateFilter, setTemplateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [stateFilter, setStateFilter] = useState("");
-
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [menuPageId, setMenuPageId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
   const navigate = useNavigate();
-
   useEffect(() => {
     fetchAllPages();
     fetchTemplates();
   }, []);
-
   const getCompletionState = (page) => {
     const hasTemplate = !!page.template_id;
     const hasStatus = page.status === "published";
     const hasKey = !!page.key;
-
     if (!hasKey)
       return { label: "Broken", color: "error", note: "Missing key" };
     if (!hasTemplate)
       return { label: "Unassigned", color: "warning", note: "No template" };
     if (!hasStatus)
       return { label: "In Progress", color: "warning", note: "Not published" };
-
     return { label: "Ready", color: "success", note: "Fully configured" };
   };
-
   const filtered = useMemo(() => {
     return (pages || []).filter((p) => {
       const key = (p.key || "").toLowerCase();
       const templateName = (p.template_name || "").toLowerCase();
       const status = (p.status || "").toLowerCase();
-
       const searchQ = search.toLowerCase();
-
       const matchSearch =
         key.includes(searchQ) || templateName.includes(searchQ);
-
       const matchTemplate = templateFilter
         ? p.template_key === templateFilter
         : true;
       const matchStatus = statusFilter
         ? status === statusFilter.toLowerCase()
         : true;
-
       const state = getCompletionState(p);
       const matchState = stateFilter
         ? state.label.toLowerCase() === stateFilter.toLowerCase()
         : true;
-
       return matchSearch && matchTemplate && matchStatus && matchState;
     });
   }, [pages, search, templateFilter, statusFilter, stateFilter]);
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h3">Pages Control Center</Typography>
-
-      <Typography variant="body2" color="text.secondary" sx={{ my: 2 }}>
-        Manage pages, templates, and publishing state.
-      </Typography>
-
+      <Title
+        title={" Pages Control Center"}
+        caption={"Manage pages, templates, and publishing state."}
+      />
       {loading && <LinearProgress sx={{ mb: 2 }} />}
 
       <SectionsFilters
@@ -181,7 +172,11 @@ export default function ViewPages() {
                       sx={{ display: "flex", justifyContent: "center", gap: 1 }}
                     >
                       <Tooltip title="Edit">
-                        <IconButton>
+                        <IconButton
+                          onClick={() =>
+                            navigate(`/admin/edit-page/${page.id}`)
+                          }
+                        >
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
@@ -206,7 +201,7 @@ export default function ViewPages() {
                         </IconButton>
                       </Tooltip>
 
-                      <Tooltip title="Analytics">
+                      <Tooltip title="View Sections">
                         <IconButton
                           onClick={() =>
                             navigate(`/admin/view-section/${page.id}`)
@@ -225,11 +220,45 @@ export default function ViewPages() {
                         />
                       </Tooltip>
 
-                      <Tooltip title="More">
-                        <IconButton>
+                      <Tooltip title="More Actions">
+                        <IconButton
+                          sx={{ transform: "scale(1.15)" }}
+                          onClick={(e) => {
+                            setAnchorEl(e.currentTarget);
+                            setMenuPageId(page.id);
+                          }}
+                        >
                           <MoreVertIcon />
                         </IconButton>
                       </Tooltip>
+
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl && menuPageId === page.id)}
+                        onClose={() => setAnchorEl(null)}
+                      >
+                        <MenuItem sx={{ fontSize: "1rem" }}>
+                          Quick Edit
+                        </MenuItem>
+
+                        <MenuItem sx={{ fontSize: "1rem" }}>
+                          Duplicate Page
+                        </MenuItem>
+
+                        <MenuItem sx={{ fontSize: "1rem" }}>
+                          View Sections
+                        </MenuItem>
+
+                        <MenuItem sx={{ fontSize: "1rem" }}>
+                          Preview Page
+                        </MenuItem>
+
+                        <MenuItem
+                          sx={{ fontSize: "1rem", color: "error.main" }}
+                        >
+                          Force Publish Check
+                        </MenuItem>
+                      </Menu>
                     </Box>
                   </TableCell>
                 </TableRow>

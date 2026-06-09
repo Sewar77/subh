@@ -35,8 +35,6 @@ export const createBookController = async (req, res) => {
       author_name_en,
       author_name_ar,
     } = req.body;
-    console.log(req.body);
-
     let author = await findAuthorByName(client, author_name_en, author_name_ar);
     if (!author) {
       author = await createAuthor(client, author_name_en, author_name_ar);

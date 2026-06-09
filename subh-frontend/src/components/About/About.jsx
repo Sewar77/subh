@@ -14,7 +14,6 @@ export default function About() {
       getSectionsByPageId(page.id);
     }
   }, [page?.id]);
-  console.log(page);
 
   const renderSection = (section) => {
     switch (section.type) {

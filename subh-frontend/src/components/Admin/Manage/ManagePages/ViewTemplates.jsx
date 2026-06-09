@@ -14,6 +14,7 @@ import {
   Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import Title from "../../Headers/Titles.jsx";
 
 export default function ViewTemplates() {
   const { fetchTemplates, templates = [] } = usePages();
@@ -32,15 +33,12 @@ export default function ViewTemplates() {
       }}
     >
       {/* PAGE HEADER */}
-      <Typography variant="h3" fontWeight={700} gutterBottom>
-        Page Templates
-      </Typography>
-
-      <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
-        Templates are the starting point for creating pages on your website.
-        Think of them as page blueprints. They define the layout and purpose of
-        a page before content, images, and translations are added.
-      </Typography>
+      <Title
+        title={"Page Templates"}
+        caption={
+          "Templates are the starting point for creating pages on your website. Think of them as page blueprints. They define the layout and purpose of a page before content, images, and translations are added."
+        }
+      />
 
       {/* INFO CARD */}
       <Card

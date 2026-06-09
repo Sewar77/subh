@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages";
+import Title from "../../Headers/Titles";
 
 export default function AddPageTranlsations() {
   const { pageId } = useParams();
@@ -65,13 +66,10 @@ export default function AddPageTranlsations() {
         }}
       >
         {/* HEADER */}
-        <Typography variant="h4" fontWeight={700} sx={{ mb: 2 }}>
-          Add Page Translation
-        </Typography>
-
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
-          Create a language version for this page
-        </Typography>
+        <Title
+          title={"Add Page Translation"}
+          caption={" Create a language version for this page"}
+        />
 
         <Divider sx={{ mb: 6 }} />
 

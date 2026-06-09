@@ -36,6 +36,7 @@ import AddPageTranlsations from "./components/Admin/Manage/ManagePages/AddPageTr
 import AddSectionTranlsations from "./components/Admin/Manage/ManageSection/AddSectionTranlsations.jsx";
 import ViewAllSections from "./components/Admin/Manage/ManageSection/ViewAllSections.jsx";
 import ViewPage from "./components/Admin/Manage/ManagePages/ViewPage.jsx";
+import EditPage from "./components/Admin/Manage/EditPages/EditPage.jsx";
 
 function App() {
   const { id } = useParams();
@@ -77,6 +78,7 @@ function App() {
           <Route path="create-page/:templateId" element={<CreatePage />} />
           <Route path="create-section/:pageId" element={<CreateSection />} />
           <Route path="view-section/:pageId" element={<ViewSection />} />
+          <Route path="view-section/:sectionId" element={<ViewSection />} />
           <Route path="view-page/:pageId" element={<ViewPage />} />
           <Route
             path="translations-page/:pageId"
@@ -94,6 +96,8 @@ function App() {
             path="add-translations-section/:sectionId"
             element={<AddSectionTranlsations />}
           />
+          {/* edit pages/sections.. */}
+          <Route path="edit-page/:pageId" element={<EditPage />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

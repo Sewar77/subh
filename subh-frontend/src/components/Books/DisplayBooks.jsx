@@ -21,7 +21,6 @@ export default function DisplayBooks() {
   useEffect(() => {
     loadBooks();
   }, []);
-  console.log(books);
   return (
     <Grid
       container
