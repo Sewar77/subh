@@ -9,8 +9,6 @@ import {
 export const createPageTemplatesController = async (req, res) => {
   try {
     const { name, key } = req.body;
-    console.log(req.body);
-
     const page_templates = await createPageTemplates(key, name);
     if (!page_templates) {
       return res

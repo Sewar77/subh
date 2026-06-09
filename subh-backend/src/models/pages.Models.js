@@ -68,22 +68,22 @@ export const deletePage = async (id) => {
   return result.rows[0];
 };
 
-export const updatePage = async (key, template_id, id) => {
+export const updatePage = async (key, template_id, status, id) => {
   const result = await pool.query(
     `
     UPDATE pages
     SET key = $1,
         template_id = $2,
+        status = $3,
         updated_at = CURRENT_TIMESTAMP
-    WHERE id = $3
+    WHERE id = $4
     RETURNING *
     `,
-    [key, template_id, id],
+    [key, template_id, status, id],
   );
 
   return result.rows[0];
 };
-
 export const getPageByKeyModel = async (key) => {
   const result = await pool.query(
     `

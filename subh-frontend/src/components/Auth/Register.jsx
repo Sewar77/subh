@@ -26,7 +26,6 @@ export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const handleSubmit = () => {
-    console.log(userInfo);
     register(userInfo);
   };
   return (

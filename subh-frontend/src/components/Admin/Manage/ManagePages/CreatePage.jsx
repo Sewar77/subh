@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages.js";
 import ViewButton from "../../Buttons/ViewBtn.jsx";
+import Title from "../../Headers/Titles.jsx";
 
 export default function CreatePage() {
   const navigate = useNavigate();
@@ -47,14 +48,10 @@ export default function CreatePage() {
 
   return (
     <Container sx={{ justifyContent: "center", p: 3 }} p={4}>
-      <Typography variant="h3" fontWeight={700} gutterBottom>
-        Create New Page
-      </Typography>
-
-      <Typography variant="h6" color="text.secondary" mb={4}>
-        Create a new website page using the selected template.
-      </Typography>
-
+      <Title
+        title={"Create New Page"}
+        caption={"Create a new website page using the selected template."}
+      />
       <Alert
         severity="info"
         sx={{ mb: 4, textAlign: "center", justifyContent: "center" }}

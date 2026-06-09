@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages";
+import Title from "../../Headers/Titles";
 
 export default function AddSectionTranlsations() {
   const { sectionId } = useParams();
@@ -130,13 +131,7 @@ export default function AddSectionTranlsations() {
       {/* ================= SECTION HEADER ================= */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h5" fontWeight={700}>
-            Section Details
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary" mt={1}>
-            {config.label}
-          </Typography>
+          <Title title={"Section Details"} caption={config.label} />
 
           <Divider sx={{ my: 2 }} />
 

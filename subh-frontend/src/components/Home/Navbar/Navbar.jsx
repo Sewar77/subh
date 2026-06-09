@@ -37,7 +37,6 @@ export default function Navbar() {
   useEffect(() => {
     loadUser();
   }, []);
-  console.log(user);
   return (
     <AppBar
       position="sticky"

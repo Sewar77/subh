@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -12,10 +12,15 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import AddButton from "../../Buttons/AddBtn";
 import { usePages } from "../../../../Hooks/usePages";
+import Title from "../../Headers/Titles";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 
 export default function ViewSection() {
   const { pageId } = useParams();
-  const { sections, getSectionsByPageId, fetchPageById, page } = usePages();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const { sections, getSectionsByPageId, fetchPageById, page, deleteSection } =
+    usePages();
   const navigate = useNavigate();
   useEffect(() => {
     getSectionsByPageId(pageId);
@@ -34,13 +39,10 @@ export default function ViewSection() {
   return (
     <Box sx={{ p: 4 }}>
       {/* HEADER */}
-      <Typography variant="h3" fontWeight={800} sx={{ mb: 1 }}>
-        Page Sections
-      </Typography>
-
-      <Typography variant="h5" sx={{ mb: 1 }} fontWeight={600}>
-        {page?.key} • {page?.template_name}
-      </Typography>
+      <Title
+        title={" Page Sections"}
+        caption={`${page?.key} • ${page?.template_name}`}
+      />
 
       <Typography variant="body1" sx={{ mb: 3 }} color="text.secondary">
         These blocks build the page layout. Admin can reorder, edit, or hide
@@ -118,7 +120,15 @@ export default function ViewSection() {
                     Reorder
                   </Button>
 
-                  <Button color="error" variant="outlined" size="large">
+                  <Button
+                    color="error"
+                    variant="outlined"
+                    size="large"
+                    onClick={() => {
+                      setSelectedId(section.id);
+                      setConfirmDelete(true);
+                    }}
+                  >
                     Delete
                   </Button>
                 </Box>
@@ -126,6 +136,18 @@ export default function ViewSection() {
             </Card>
           ))}
       </Stack>
+      {confirmDelete && (
+        <ConfirmDeleteModal
+          open={confirmDelete}
+          onClose={() => setConfirmDelete(false)}
+          onConfirm={async () => {
+            await deleteSection(selectedId);
+            await getSectionsByPageId(pageId);
+            setConfirmDelete(false);
+          }}
+          label="Section"
+        />
+      )}
     </Box>
   );
 }

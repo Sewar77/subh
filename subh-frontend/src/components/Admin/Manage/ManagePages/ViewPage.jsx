@@ -8,23 +8,40 @@ import {
   Divider,
   Grid,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AddButton from "../../Buttons/AddBtn";
+import Title from "../../Headers/Titles";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
+import DeleteButton from "../../Buttons/DeleteBtn";
 export default function ViewPage() {
-  const { fetchPageById, page, getSectionsByPageId, sections } = usePages();
+  const {
+    deletePageById,
+    fetchPageById,
+    page,
+    getSectionsByPageId,
+    sections,
+    deleteSection,
+  } = usePages();
   const { pageId } = useParams();
+  const [confirmPageDelete, setConfirmPageDelete] = useState(false);
   const navigate = useNavigate();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
   useEffect(() => {
     fetchPageById(pageId);
     getSectionsByPageId(pageId);
   }, [pageId]);
-
   if (!page) return null;
-
+  const handleDeletePage = async () => {
+    await deletePageById(pageId);
+    setConfirmPageDelete(false);
+    navigate("/admin/view-pages");
+  };
   return (
     <Container sx={{ py: 4 }}>
       {/* HEADER */}
@@ -33,15 +50,11 @@ export default function ViewPage() {
         sx={{ justifyContent: "space-between", alignItems: "center", my: 2 }}
       >
         <Box>
-          <Typography variant="h4" fontWeight={700}>
-            Page: {page.key}
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary">
-            Template: {page.template_name}
-          </Typography>
+          <Title
+            title={`Page: ${page.key}`}
+            caption={` Template: ${page.template_name}`}
+          />
         </Box>
-
         <Chip
           label={page.status}
           color={page.status === "draft" ? "warning" : "success"}
@@ -49,27 +62,30 @@ export default function ViewPage() {
           sx={{ p: 3, fontSize: "20px" }}
         />
       </Stack>
-
       {/* ACTIONS */}
       <Stack direction="row" spacing={2} sx={{ my: 3 }}>
         <AddButton label="Section" to={`/admin/create-section/${page.id}`} />
-
         <Button
           onClick={() => navigate(`/admin/view-section/${page.id}`)}
           variant="outlined"
         >
           View Sections
         </Button>
-
-        <Button variant="outlined" color="secondary">
+        <Button
+          variant="outlined"
+          onClick={() => navigate(`/admin/edit-page/${page.id}`)}
+          color="secondary"
+        >
           Edit Page
         </Button>
-
-        <Button variant="outlined" color="error">
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={() => setConfirmPageDelete(true)}
+        >
           Delete Page
         </Button>
       </Stack>
-
       <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
         {/* MAIN INFO */}
         <Card sx={{ flex: 2 }}>
@@ -77,34 +93,27 @@ export default function ViewPage() {
             <Typography variant="h6" fontWeight={600} gutterBottom>
               Page Information
             </Typography>
-
             <Divider sx={{ mb: 2 }} />
-
             <Stack spacing={1}>
               <Typography>Key: {page.key}</Typography>
               <Typography>Template Key: {page.template_key}</Typography>
               <Typography>Template Name: {page.template_name}</Typography>
-
               <Typography variant="body2" color="text.secondary">
                 Created: {new Date(page.created_at).toLocaleString()}
               </Typography>
-
               <Typography variant="body2" color="text.secondary">
                 Updated: {new Date(page.updated_at).toLocaleString()}
               </Typography>
             </Stack>
           </CardContent>
         </Card>
-
         {/* PREVIEW AREA */}
         <Card sx={{ flex: 1 }}>
           <CardContent>
             <Typography variant="h6" fontWeight={600} gutterBottom>
               Page Preview
             </Typography>
-
             <Divider sx={{ mb: 2 }} />
-
             <Box
               sx={{
                 height: 250,
@@ -164,7 +173,6 @@ export default function ViewPage() {
               </Typography>
             </Box>
           )}
-
           {/* LIST */}
           {sections?.length > 0 && (
             <Grid container spacing={3} mt={1}>
@@ -208,7 +216,6 @@ export default function ViewPage() {
                         size="large"
                       />
                     </Stack>
-
                     {/* INFO */}
                     <Stack spacing={1}>
                       <Typography variant="body1">
@@ -219,7 +226,6 @@ export default function ViewPage() {
                         <strong>Type:</strong> {section.type}
                       </Typography>
                     </Stack>
-
                     {/* PREVIEW PLACEHOLDER */}
                     <Box
                       sx={{
@@ -237,7 +243,6 @@ export default function ViewPage() {
                         Section Preview
                       </Typography>
                     </Box>
-
                     {/* ACTIONS */}
                     <Stack
                       direction="row"
@@ -247,14 +252,17 @@ export default function ViewPage() {
                       <Button size="small" variant="contained">
                         Edit
                       </Button>
-
                       <Button size="small" variant="outlined">
                         Preview
                       </Button>
-
-                      <Button size="small" color="error" variant="outlined">
-                        Delete
-                      </Button>
+                      <Tooltip title="Delete">
+                        <DeleteButton
+                          onClick={() => {
+                            setSelectedId(section.id);
+                            setConfirmDelete(true);
+                          }}
+                        />
+                      </Tooltip>
                     </Stack>
                   </Card>
                 </Grid>
@@ -263,6 +271,26 @@ export default function ViewPage() {
           )}
         </CardContent>
       </Card>
+      {confirmDelete && (
+        <ConfirmDeleteModal
+          open={confirmDelete}
+          onClose={() => setConfirmDelete(false)}
+          onConfirm={async () => {
+            await deleteSection(selectedId);
+            await getSectionsByPageId(pageId);
+            setConfirmDelete(false);
+          }}
+          label="Section"
+        />
+      )}
+      {confirmPageDelete && (
+        <ConfirmDeleteModal
+          open={confirmPageDelete}
+          onClose={() => setConfirmPageDelete(false)}
+          onConfirm={handleDeletePage}
+          label="Page"
+        />
+      )}
     </Container>
   );
 }

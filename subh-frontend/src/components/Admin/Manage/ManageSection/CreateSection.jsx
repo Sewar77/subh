@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages";
+import Title from "../../Headers/Titles";
 
 export default function CreateSection() {
   const { pageId } = useParams();
@@ -39,13 +40,16 @@ export default function CreateSection() {
     <Container>
       <Box sx={{ p: 4 }}>
         {/* HEADER */}
-        <Typography variant="h4" fontWeight={700}>
-          Create New Section
-        </Typography>
 
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-          Page: {page?.key} ({page?.template_name})
-        </Typography>
+        <Title
+          title={"Create New Section"}
+          caption={`Page: ${page?.key} (${page?.template_name})`}
+        />
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ mb: 2 }}
+        ></Typography>
 
         <Divider sx={{ mb: 3 }} />
 

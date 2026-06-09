@@ -9,17 +9,16 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TranslateIcon from "@mui/icons-material/Translate";
 import ImageIcon from "@mui/icons-material/Image";
-
 import { usePages } from "../../../../Hooks/usePages";
 import SectionsFilters from "../../Search and Filter/SectionsFilters";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 import { useNavigate } from "react-router-dom";
+import Title from "../../Headers/Titles";
 export default function ViewAllSections() {
   const {
     fetchAllSections,
@@ -30,6 +29,7 @@ export default function ViewAllSections() {
     templates,
     deleteSection,
   } = usePages();
+
   const [search, setSearch] = useState("");
   const [pageFilter, setPageFilter] = useState("");
   const [templateFilter, setTemplateFilter] = useState("");
@@ -38,8 +38,6 @@ export default function ViewAllSections() {
     fetchAllPages();
     fetchTemplates();
   }, []);
-  console.log(allSections);
-
   const filteredSections = useMemo(() => {
     return (allSections || []).filter((s) => {
       const matchSearch =
@@ -59,12 +57,12 @@ export default function ViewAllSections() {
   return (
     <Box sx={{ p: 3, bgcolor: "#f8fafc", minHeight: "100vh" }}>
       {/* HEADER */}
-      <Typography variant="h4" fontWeight={700}>
-        Sections Control Center
-      </Typography>
-      <Typography variant="body1" color="text.secondary" mb={3}>
-        Search, filter, and manage all page sections in one place.
-      </Typography>
+
+      <Title
+        title={"Sections Control Center"}
+        caption={"Search, filter, and manage all page sections in one place."}
+      />
+
       {/* FILTERS */}
       <SectionsFilters
         search={search}
@@ -149,9 +147,7 @@ export default function ViewAllSections() {
                   }}
                 />
               </Stack>
-
               <Divider sx={{ my: 2.5 }} />
-
               {/* META */}
               <Stack
                 direction="row"
@@ -172,7 +168,10 @@ export default function ViewAllSections() {
                 sx={{ justifyContent: "center" }}
               >
                 <Tooltip title="Preview">
-                  <IconButton sx={{ bgcolor: "#f1f5f9" }}>
+                  <IconButton
+                    onClick={() => navigate(`/admin/view-section/${s.page_id}`)}
+                    sx={{ bgcolor: "#f1f5f9" }}
+                  >
                     <VisibilityIcon />
                   </IconButton>
                 </Tooltip>

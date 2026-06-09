@@ -175,7 +175,6 @@ export const usePages = () => {
     (sectionId) =>
       withLoading(async () => {
         const res = await api.get(`/sections/${sectionId}`);
-        console.log(res);
         toast.success("Section found");
         setSection(res.data.section);
         return res.data.section;

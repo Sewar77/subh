@@ -26,6 +26,7 @@ import { usePages } from "../../../../Hooks/usePages";
 import { useParams } from "react-router-dom";
 import CopyButton from "../../../Buttons/CopyBtn";
 import AddButton from "../../Buttons/AddBtn";
+import Title from "../../Headers/Titles";
 
 export default function ViewPageTranslations() {
   const { pageId } = useParams();
@@ -49,14 +50,12 @@ export default function ViewPageTranslations() {
   return (
     <Box sx={{ p: 3 }}>
       {/* HEADER */}
-      <Typography variant="h4" fontWeight={700}>
-        Page Translations
-      </Typography>
-
-      <Typography variant="body2" color="text.secondary" mb={2}>
-        This is where you manage different languages of the same page. Each row
-        is one language version (English, Arabic, etc).
-      </Typography>
+      <Title
+        title={"Page Translations"}
+        caption={
+          "This is where you manage different languages of the same page. Each row is one language version (English, Arabic, etc)."
+        }
+      />
 
       {/* GUIDANCE BOX */}
       <Alert

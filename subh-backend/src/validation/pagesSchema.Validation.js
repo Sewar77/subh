@@ -35,4 +35,8 @@ export const updatePageSchema = Joi.object({
       "string.base": "key must be a string",
       "string.pattern.base": "key must be 2–100 chars (a-z, 0-9, _ or - only)",
     }),
+
+  status: Joi.string().valid("draft", "published").optional().messages({
+    "any.only": "status must be either draft or published",
+  }),
 });

@@ -35,8 +35,6 @@ export const useUser = () => {
     }
   };
   const updateUserData = async (userId, newUserData) => {
-    console.log(userId);
-
     const res = await api.put(`/user/update/${userId}`, newUserData);
     try {
       toast.success(" user updated!");

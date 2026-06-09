@@ -64,11 +64,7 @@ export const getAllPagesController = async (req, res) => {
 export const getPageByIdController = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log(id);
-
     const page = await getPageById(id);
-    console.log("page", page);
-
     if (!page) {
       return res.status(404).json({
         message: "Page not found",
@@ -88,11 +84,7 @@ export const getPageByIdController = async (req, res) => {
 export const getPageByTemplateIdController = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log(id);
-    
     const page = await getPageByTemplateId(id);
-    console.log("page", page);
-
     if (!page) {
       return res.status(200).json({
         message: "template has no pages yet",
@@ -116,9 +108,9 @@ export const getPageByTemplateIdController = async (req, res) => {
 export const updatePageController = async (req, res) => {
   try {
     const { id } = req.params;
-    const { key, template_id } = req.body;
+    const { key, template_id, status } = req.body;
 
-    const page = await updatePage(key, template_id, id);
+    const page = await updatePage(key, template_id, status, id);
 
     if (!page) {
       return res.status(404).json({
@@ -143,8 +135,6 @@ export const updatePageController = async (req, res) => {
 export const deletePageController = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log(id);
-
     const page = await deletePage(id);
     if (!page) {
       return res.status(404).json({
