@@ -39,13 +39,26 @@ export const getSectionsByPage = async (page_id) => {
 export const getSectionById = async (id) => {
   const result = await pool.query(
     `
-    SELECT *
-    FROM sections
-    WHERE id = $1
+    SELECT 
+      s.*,
+
+      -- PAGE
+      p.key AS page_key,
+      p.status,
+      p.template_id,
+
+      -- TEMPLATE
+      t.key AS template_key,
+      t.name AS template_name
+
+    FROM sections s
+    JOIN pages p ON s.page_id = p.id
+    LEFT JOIN page_templates t ON p.template_id = t.id
+
+    WHERE s.id = $1
     `,
     [id],
   );
-
   return result.rows[0];
 };
 

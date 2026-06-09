@@ -12,7 +12,7 @@ import pagesTemplatesRoutes from "./src/routes/pageTemplates.Routes.js";
 import pagesRoutes from "./src/routes/pages.Routes.js";
 import pagesTranslationsRoutes from "./src/routes/pageTranslation.Routes.js";
 import sectionRoutes from "./src/routes/section.Routes.js";
-
+import sectionTranlsationRoutes from "./src/routes/sectionTranslation.Routes.js";
 dotenv.config();
 const app = express();
 const port = process.env.PORT;
@@ -36,7 +36,7 @@ app.use("/api", pagesTemplatesRoutes);
 app.use("/api", pagesRoutes);
 app.use("/api", pagesTranslationsRoutes);
 app.use("/api", sectionRoutes);
-
+app.use("/api", sectionTranlsationRoutes);
 app.listen(port, () => {
   console.log("server runs on port: ", port);
 });

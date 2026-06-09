@@ -19,7 +19,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import { usePages } from "../../../../Hooks/usePages";
 import SectionsFilters from "../../Search and Filter/SectionsFilters";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
-
+import { useNavigate } from "react-router-dom";
 export default function ViewAllSections() {
   const {
     fetchAllSections,
@@ -30,16 +30,15 @@ export default function ViewAllSections() {
     templates,
     deleteSection,
   } = usePages();
-
   const [search, setSearch] = useState("");
   const [pageFilter, setPageFilter] = useState("");
   const [templateFilter, setTemplateFilter] = useState("");
-
   useEffect(() => {
     fetchAllSections();
     fetchAllPages();
     fetchTemplates();
   }, []);
+  console.log(allSections);
 
   const filteredSections = useMemo(() => {
     return (allSections || []).filter((s) => {
@@ -47,29 +46,25 @@ export default function ViewAllSections() {
         s.type?.toLowerCase().includes(search.toLowerCase()) ||
         s.status?.toLowerCase().includes(search.toLowerCase()) ||
         s.page_key?.toLowerCase().includes(search.toLowerCase());
-
       const matchPage = pageFilter ? s.page_key === pageFilter : true;
       const matchTemplate = templateFilter
         ? s.template_key === templateFilter
         : true;
-
       return matchSearch && matchPage && matchTemplate;
     });
   }, [allSections, search, pageFilter, templateFilter]);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
+  const navigate = useNavigate();
   return (
     <Box sx={{ p: 3, bgcolor: "#f8fafc", minHeight: "100vh" }}>
       {/* HEADER */}
       <Typography variant="h4" fontWeight={700}>
         Sections Control Center
       </Typography>
-
       <Typography variant="body1" color="text.secondary" mb={3}>
         Search, filter, and manage all page sections in one place.
       </Typography>
-
       {/* FILTERS */}
       <SectionsFilters
         search={search}
@@ -81,7 +76,6 @@ export default function ViewAllSections() {
         templateFilter={templateFilter}
         setTemplateFilter={setTemplateFilter}
       />
-
       {/* SECTIONS */}
       {filteredSections.length === 0 ? (
         <Paper
@@ -96,11 +90,9 @@ export default function ViewAllSections() {
           <Typography variant="h5" fontWeight={700} mb={1}>
             No sections found
           </Typography>
-
           <Typography color="text.secondary" mb={2}>
             There are no sections matching your current filters.
           </Typography>
-
           <Typography variant="body2" color="text.secondary">
             Try changing the page filter, template filter, or search query.
           </Typography>
@@ -172,9 +164,7 @@ export default function ViewAllSections() {
                 <Chip label={`Translations: ${s.translations?.length || 0}`} />
                 <Chip label={`Media: ${s.media?.length || 0}`} />
               </Stack>
-
               <Divider sx={{ my: 2.5 }} />
-
               {/* ACTIONS */}
               <Stack
                 direction="row"
@@ -195,7 +185,11 @@ export default function ViewAllSections() {
 
                 <Tooltip title="Translations">
                   <IconButton sx={{ bgcolor: "#f1f5f9" }}>
-                    <TranslateIcon />
+                    <TranslateIcon
+                      onClick={() =>
+                        navigate(`/admin/add-translations-section/${s.id}`)
+                      }
+                    />
                   </IconButton>
                 </Tooltip>
 

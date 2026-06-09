@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createSectionController,
   getSectionsByPageController,
@@ -8,16 +7,13 @@ import {
   deleteSectionController,
   getAllSectionsController,
 } from "../controller/section.Controller.js";
-
 import { protect } from "../middleware/protect.Middleware.js";
 import { adminOnly } from "../middleware/adminOnly.Middleware.js";
 import { validate } from "../middleware/validate.Middleware.js";
-
 import {
   createSectionSchema,
   updateSectionSchema,
 } from "../validation/section.Validation.js";
-
 const router = express.Router();
 
 /**

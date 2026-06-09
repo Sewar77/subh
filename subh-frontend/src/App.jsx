@@ -31,7 +31,9 @@ import CreatePage from "./components/Admin/Manage/ManagePages/CreatePage.jsx";
 import ViewSection from "./components/Admin/Manage/ManageSection/ViewSections.jsx";
 import CreateSection from "./components/Admin/Manage/ManageSection/CreateSection.jsx";
 import ViewPageTranslations from "./components/Admin/Manage/ManagePages/ViewPageTranslations.jsx";
+import ViewSectionTranslations from "./components/Admin/Manage/ManageSection/ViewSectionTranslations.jsx";
 import AddPageTranlsations from "./components/Admin/Manage/ManagePages/AddPageTranlsations.jsx";
+import AddSectionTranlsations from "./components/Admin/Manage/ManageSection/AddSectionTranlsations.jsx";
 import ViewAllSections from "./components/Admin/Manage/ManageSection/ViewAllSections.jsx";
 import ViewPage from "./components/Admin/Manage/ManagePages/ViewPage.jsx";
 
@@ -81,8 +83,16 @@ function App() {
             element={<ViewPageTranslations />}
           />
           <Route
+            path="translations-section/:sectionId"
+            element={<ViewSectionTranslations />}
+          />
+          <Route
             path="add-translations-page/:pageId"
             element={<AddPageTranlsations />}
+          />
+          <Route
+            path="add-translations-section/:sectionId"
+            element={<AddSectionTranlsations />}
           />
         </Route>
         <Route path="*" element={<NotFound />} />

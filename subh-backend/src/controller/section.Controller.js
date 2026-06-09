@@ -72,12 +72,14 @@ export const getSectionsByPageController = async (req, res) => {
 export const getSectionByIdController = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(id);
 
     const section = await getSectionById(id);
 
     if (!section) {
       return res.status(404).json({ message: "Not found" });
     }
+    console.log(section);
 
     return res.status(200).json({
       section,
