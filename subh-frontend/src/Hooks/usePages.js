@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { api } from "../../api";
 import toast from "react-hot-toast";
-
 export const usePages = () => {
   const [pages, setPages] = useState([]);
   const [templatePages, setTemplatePages] = useState([]);
@@ -11,18 +10,18 @@ export const usePages = () => {
   const [templates, setTemplates] = useState([]);
   const [template, setTemplate] = useState(null);
   const [sections, setSections] = useState([]);
+  const [section, setSection] = useState(null);
   const [loading, setLoading] = useState(false);
   const [allSections, setAllSections] = useState([]);
+  const [sectionTranslations, setSectionTranslations] = useState([]);
   const handleError = (error) => {
     const message =
       error?.response?.data?.errors?.message ||
       error?.response?.data?.message ||
       error?.message ||
       "Something went wrong";
-
     toast.error(message);
   };
-
   const withLoading = async (fn) => {
     try {
       setLoading(true);
@@ -34,11 +33,9 @@ export const usePages = () => {
       setLoading(false);
     }
   };
-
   // =========================
   // PAGES
   // =========================
-
   const fetchAllPages = useCallback(
     () =>
       withLoading(async () => {
@@ -48,7 +45,6 @@ export const usePages = () => {
       }),
     [],
   );
-
   const fetchPageById = useCallback(
     (id) =>
       withLoading(async () => {
@@ -59,7 +55,6 @@ export const usePages = () => {
       }),
     [],
   );
-
   const fetchPageByTemplateId = useCallback(
     (id) =>
       withLoading(async () => {
@@ -70,7 +65,6 @@ export const usePages = () => {
       }),
     [],
   );
-
   const fetchPageByKey = useCallback(
     (key) =>
       withLoading(async () => {
@@ -91,7 +85,6 @@ export const usePages = () => {
       }),
     [],
   );
-
   const updatePage = useCallback(
     (id, data) =>
       withLoading(async () => {
@@ -101,7 +94,6 @@ export const usePages = () => {
       }),
     [],
   );
-
   const deletePageById = useCallback(
     (id) =>
       withLoading(async () => {
@@ -111,11 +103,9 @@ export const usePages = () => {
       }),
     [],
   );
-
   // =========================
   // TRANSLATIONS
   // =========================
-
   const addPageTranslation = useCallback(
     (pageId, data) =>
       withLoading(async () => {
@@ -180,6 +170,18 @@ export const usePages = () => {
       }),
     [],
   );
+
+  const fetchSectionById = useCallback(
+    (sectionId) =>
+      withLoading(async () => {
+        const res = await api.get(`/sections/${sectionId}`);
+        console.log(res);
+        toast.success("Section found");
+        setSection(res.data.section);
+        return res.data.section;
+      }),
+    [],
+  );
   const deleteSection = useCallback(
     (sectionId) =>
       withLoading(async () => {
@@ -219,11 +221,9 @@ export const usePages = () => {
       setLoading(false);
     }
   };
-
   // =========================
   // TEMPLATES
   // =========================
-
   const fetchTemplates = useCallback(
     () =>
       withLoading(async () => {
@@ -233,7 +233,6 @@ export const usePages = () => {
       }),
     [],
   );
-
   const getTemplateById = useCallback(
     (id) =>
       withLoading(async () => {
@@ -243,7 +242,6 @@ export const usePages = () => {
       }),
     [],
   );
-
   const createTemplate = useCallback(
     (data) =>
       withLoading(async () => {
@@ -253,7 +251,50 @@ export const usePages = () => {
       }),
     [],
   );
-
+  // =========================
+  // SECTION TRANSLATIONS
+  // =========================
+  const addSectionTranslation = useCallback(
+    (data) =>
+      withLoading(async () => {
+        const res = await api.post(
+          `/section-translations/${data.section_id}`,
+          data.data,
+        );
+        setSectionTranslations(res.data.sectionTranslations);
+        toast.success("Section translation added");
+        return res.data;
+      }),
+    [],
+  );
+  const updateSectionTranslation = useCallback(
+    (id, data) =>
+      withLoading(async () => {
+        const res = await api.put(`/section-translations/${id}`, data);
+        toast.success("Section translation updated");
+        return res.data;
+      }),
+    [],
+  );
+  const getSectionTranslationsBySectionId = useCallback(
+    (sectionId) =>
+      withLoading(async () => {
+        setSectionTranslations([]);
+        const res = await api.get(`/section-translations/section/${sectionId}`);
+        setSectionTranslations(res.data.translations || []);
+        return res.data.translations;
+      }),
+    [],
+  );
+  const deleteSectionTranslation = useCallback(
+    (id) =>
+      withLoading(async () => {
+        await api.delete(`/section-translations/${id}`);
+        setSectionTranslations((prev) => prev.filter((t) => t.id !== id));
+        toast.success("Section translation deleted");
+      }),
+    [],
+  );
   return {
     pages,
     page,
@@ -262,9 +303,16 @@ export const usePages = () => {
     templates,
     sections,
     loading,
+    section,
     allSections,
     templatePages,
     template,
+    sectionTranslations,
+
+    addSectionTranslation,
+    updateSectionTranslation,
+    getSectionTranslationsBySectionId,
+    deleteSectionTranslation,
 
     fetchAllPages,
     fetchPageById,
@@ -285,6 +333,7 @@ export const usePages = () => {
     reorderSections,
     getSectionsByPageId,
     fetchAllSections,
+    fetchSectionById,
 
     fetchTemplates,
     createTemplate,
