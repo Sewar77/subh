@@ -1,88 +1,105 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Box, Typography, Stack, Card, CardContent } from "@mui/material";
 import { usePages } from "../../Hooks/usePages";
+import SectionRenderer from "../../cms/SectionRenderer";
 
 export default function About() {
-  const { page, sections, fetchPageByKey, getSectionsByPageId } = usePages();
+  const {
+    page,
+    sections,
+    fetchPageByKey,
+    getSectionsByPageId,
+    getSectionTranslationsBySectionId,
+  } = usePages();
 
+  const [hydratedSections, setHydratedSections] = useState([]);
+
+  // 1. Load page
   useEffect(() => {
-    fetchPageByKey("about");
+    fetchPageByKey("about-page");
   }, []);
 
+  // 2. Load sections
   useEffect(() => {
     if (page?.id) {
       getSectionsByPageId(page.id);
     }
   }, [page?.id]);
 
-  const renderSection = (section) => {
-    switch (section.type) {
-      case "image":
-        return (
-          <Box
-            sx={{
-              width: "100%",
-              height: 300,
-              background: "#eee",
-              borderRadius: 2,
-            }}
-          >
-            <Typography>Image Block</Typography>
-          </Box>
-        );
+  // 3. Merge translations INTO sections
+  useEffect(() => {
+    if (!sections?.length) return;
 
-      case "text":
-        return (
-          <Typography variant="body1" sx={{ fontSize: 18, lineHeight: 1.8 }}>
-            This is a text block. Content comes from section_translations JSON.
-          </Typography>
-        );
+    const load = async () => {
+      const enriched = await Promise.all(
+        sections.map(async (section) => {
+          const res = await getSectionTranslationsBySectionId(section.id);
 
-      case "image_text":
-        return (
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Box sx={{ flex: 1, height: 200, background: "#ddd" }}>Image</Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography>Text next to image</Typography>
-            </Box>
-          </Stack>
-        );
+          return {
+            ...section,
+            translations: res || [],
+          };
+        }),
+      );
 
-      case "text_image":
-        return (
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Box sx={{ flex: 1 }}>
-              <Typography>Text first</Typography>
-            </Box>
-            <Box sx={{ flex: 1, height: 200, background: "#ddd" }}>
-              Image second
-            </Box>
-          </Stack>
-        );
+      setHydratedSections(enriched);
+    };
 
-      default:
-        return <Typography>Unknown section</Typography>;
-    }
+    load();
+  }, [sections]);
+
+  // 4. Get localized section
+  const getLocalizedSection = (section, locale = "en") => {
+    const trans = section.translations || [];
+
+    const active = trans.find((t) => t.locale === locale);
+
+    return {
+      ...section,
+      title: active?.title || "",
+      content: active?.content?.text || "",
+    };
+  };
+
+  // 5. normalize types
+  const normalizeType = (type) => {
+    if (type === "text_image") return "image_text";
+    return type;
   };
 
   return (
     <Box sx={{ p: 4 }}>
-      {/* PAGE HEADER */}
-      <Typography variant="h3" fontWeight={700}>
-        {page?.title || "About Us"}
+      <Typography sx={{ fontSize: "2.5rem", fontWeight: 800 }}>
+        {page?.title || "About Page"}
       </Typography>
 
-      <Typography variant="body1" sx={{ mb: 4, color: "text.secondary" }}>
-        {page?.description || "Learn more about who we are"}
+      <Typography sx={{ mb: 4, color: "text.secondary" }}>
+        CMS-driven dynamic page
       </Typography>
 
-      {/* SECTIONS */}
-      <Stack spacing={4}>
-        {sections
+      <Stack spacing={5}>
+        {hydratedSections
           ?.sort((a, b) => a.position - b.position)
           .map((section) => (
-            <Card key={section.id} sx={{ p: 2 }}>
-              <CardContent>{renderSection(section)}</CardContent>
+            <Card
+              key={section.id}
+              sx={{
+                p: 3,
+                borderRadius: 3,
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+              }}
+            >
+              <CardContent>
+                <SectionRenderer
+                  section={getLocalizedSection(
+                    {
+                      ...section,
+                      type: normalizeType(section.type),
+                    },
+                    "en",
+                  )}
+                />
+              </CardContent>
             </Card>
           ))}
       </Stack>

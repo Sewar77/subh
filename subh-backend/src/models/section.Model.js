@@ -3,14 +3,28 @@ import pool from "../config/db.js";
 /**
  * CREATE SECTION
  */
-export const createSection = async (page_id, type, position) => {
+
+export const createSection = async (page_id, type) => {
+  // 1. Get next position for this page
+  const positionResult = await pool.query(
+    `
+    SELECT COALESCE(MAX(position), 0) + 1 AS next_position
+    FROM sections
+    WHERE page_id = $1
+    `,
+    [page_id],
+  );
+
+  const nextPosition = positionResult.rows[0].next_position;
+
+  // 2. Insert section with correct position
   const result = await pool.query(
     `
     INSERT INTO sections (page_id, type, position)
     VALUES ($1, $2, $3)
     RETURNING *
     `,
-    [page_id, type, position],
+    [page_id, type, nextPosition],
   );
 
   return result.rows[0];
@@ -42,24 +56,55 @@ export const getSectionById = async (id) => {
     SELECT 
       s.*,
 
-      -- PAGE
+      -- PAGE INFO
       p.key AS page_key,
-      p.status,
+      p.status AS page_status,
       p.template_id,
 
-      -- TEMPLATE
+      -- TEMPLATE INFO
       t.key AS template_key,
       t.name AS template_name
 
     FROM sections s
     JOIN pages p ON s.page_id = p.id
     LEFT JOIN page_templates t ON p.template_id = t.id
-
     WHERE s.id = $1
     `,
     [id],
   );
-  return result.rows[0];
+
+  const section = result.rows[0];
+
+  if (!section) return null;
+
+  // GET TRANSLATIONS
+  const translationsResult = await pool.query(
+    `
+    SELECT *
+    FROM section_translations
+    WHERE section_id = $1
+    ORDER BY locale ASC
+    `,
+    [id],
+  );
+
+  // GET MEDIA
+  const mediaResult = await pool.query(
+    `
+    SELECT sm.*, m.*
+    FROM section_media sm
+    JOIN media m ON m.id = sm.media_id
+    WHERE sm.section_id = $1
+    ORDER BY sm.position ASC
+    `,
+    [id],
+  );
+
+  return {
+    ...section,
+    translations: translationsResult.rows || [],
+    media: mediaResult.rows || [],
+  };
 };
 
 /**

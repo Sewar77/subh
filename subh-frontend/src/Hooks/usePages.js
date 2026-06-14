@@ -175,6 +175,7 @@ export const usePages = () => {
     (sectionId) =>
       withLoading(async () => {
         const res = await api.get(`/sections/${sectionId}`);
+        console.log(res);
         toast.success("Section found");
         setSection(res.data.section);
         return res.data.section;
@@ -278,9 +279,13 @@ export const usePages = () => {
   const getSectionTranslationsBySectionId = useCallback(
     (sectionId) =>
       withLoading(async () => {
-        setSectionTranslations([]);
         const res = await api.get(`/section-translations/section/${sectionId}`);
-        setSectionTranslations(res.data.translations || []);
+
+        setSectionTranslations((prev) => ({
+          ...prev,
+          [sectionId]: res.data.translations || [],
+        }));
+
         return res.data.translations;
       }),
     [],

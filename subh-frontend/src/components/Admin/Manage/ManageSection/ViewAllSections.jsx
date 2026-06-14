@@ -54,6 +54,8 @@ export default function ViewAllSections() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const navigate = useNavigate();
+  console.log(filteredSections);
+
   return (
     <Box sx={{ p: 3, bgcolor: "#f8fafc", minHeight: "100vh" }}>
       {/* HEADER */}
@@ -169,7 +171,7 @@ export default function ViewAllSections() {
               >
                 <Tooltip title="Preview">
                   <IconButton
-                    onClick={() => navigate(`/admin/view-section/${s.page_id}`)}
+                    onClick={() => navigate(`/admin/view-section/${s.id}`)}
                     sx={{ bgcolor: "#f1f5f9" }}
                   >
                     <VisibilityIcon />

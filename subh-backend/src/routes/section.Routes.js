@@ -32,15 +32,14 @@ router.post(
  */
 router.get(
   "/sections/page/:page_id",
-  protect,
-  adminOnly,
+
   getSectionsByPageController,
 );
 
 /**
  * GET SECTION BY ID
  */
-router.get("/sections/:id", protect, adminOnly, getSectionByIdController);
+router.get("/sections/:id", getSectionByIdController);
 router.get("/all-sections", getAllSectionsController);
 
 /**

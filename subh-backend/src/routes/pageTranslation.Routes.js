@@ -34,8 +34,7 @@ router.post(
  */
 router.get(
   "/page-translations",
-  protect,
-  adminOnly,
+ 
   getAllPageTranslationsController,
 );
 
@@ -44,8 +43,7 @@ router.get(
  */
 router.get(
   "/page-translations/:id",
-  protect,
-  adminOnly,
+ 
   getPageTranslationByIdController,
 );
 
@@ -54,8 +52,7 @@ router.get(
  */
 router.get(
   "/page-translation/:id/:locale",
-  protect,
-  adminOnly,
+  
   getPageTranslationController,
 );
 

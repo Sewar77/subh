@@ -31,8 +31,8 @@ export const getAllSectionsController = async (req, res) => {
 export const createSectionController = async (req, res) => {
   try {
     const { page_id } = req.params;
-    const { type, position } = req.body;
-    const section = await createSection(page_id, type, position);
+    const { type } = req.body;
+    const section = await createSection(page_id, type);
 
     if (!section) {
       return res.status(400).json({ message: "Failed to create section" });

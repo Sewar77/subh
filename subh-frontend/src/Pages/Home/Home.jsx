@@ -1,20 +1,23 @@
-import { Container } from "@mui/material";
-import About from "../../components/Home/About/About";
-import Footer from "../../components/Home/Footer/Footer";
+import { useEffect } from "react";
+import SectionRenderer from "../../cms/SectionRenderer";
+import { usePages } from "../../Hooks/usePages";
 import Navbar from "../../components/Home/Navbar/Navbar";
-import News from "../../components/Home/News/News";
-import Questions from "../../components/Home/Questions/Questions";
+import Footer from "../../components/Home/Footer/Footer";
 
 export default function Home() {
+  const { page, fetchPageByKey } = usePages();
+
+  useEffect(() => {
+    fetchPageByKey("about-page");
+  }, [fetchPageByKey]);
+
   return (
     <>
-      <Container>
-        <Navbar />
-        <News />
-        <About />
-        <Questions />
-        <Footer />
-      </Container>
+      <Navbar />
+      {page?.sections?.map((section) => (
+        <SectionRenderer key={section.id} section={section} />
+      ))}
+      <Footer />
     </>
   );
 }
