@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Box,
   Card,
@@ -9,145 +9,318 @@ import {
   Divider,
   Button,
 } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
-import AddButton from "../../Buttons/AddBtn";
+import { useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages";
 import Title from "../../Headers/Titles";
-import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 
 export default function ViewSection() {
-  const { pageId } = useParams();
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const { sections, getSectionsByPageId, fetchPageById, page, deleteSection } =
-    usePages();
-  const navigate = useNavigate();
-  useEffect(() => {
-    getSectionsByPageId(pageId);
-    fetchPageById(pageId);
-  }, [pageId]);
+  const { sectionId } = useParams();
+  const { fetchSectionById, deleteSection, section } = usePages();
 
+  useEffect(() => {
+    if (sectionId) fetchSectionById(sectionId);
+  }, [sectionId]);
+  const typeConfig = {
+    hero: {
+      showImage: false,
+      showText: true,
+      multipleImages: false,
+    },
+    text: {
+      showImage: false,
+      showText: true,
+      multipleImages: false,
+    },
+    image: {
+      showImage: true,
+      showText: false,
+      multipleImages: false,
+    },
+    image_text: {
+      showImage: true,
+      showText: true,
+      multipleImages: false,
+    },
+    text_image: {
+      showImage: true,
+      showText: true,
+      multipleImages: false,
+    },
+    gallery: {
+      showImage: true,
+      showText: true,
+      multipleImages: true,
+    },
+    contact_form: {
+      showImage: false,
+      showText: true,
+      multipleImages: false,
+    },
+  };
   const getTypeLabel = (type) => {
     const map = {
       hero: "Hero Section",
       text: "Text Block",
       image_text: "Image + Text",
+      image: "Image Section",
     };
     return map[type] || type;
   };
 
+  if (!section) return null;
+
+  const en = section.translations?.find((t) => t.locale === "en");
+  const ar = section.translations?.find((t) => t.locale === "ar");
+
+  const config = typeConfig[section.type] || {};
+  const getImages = (section) => {
+    if (!section.media) return [];
+
+    return section.media.filter((m) => m.role === "image");
+  };
+  const images = getImages(section);
   return (
-    <Box sx={{ p: 4 }}>
+    <Box
+      sx={{
+        p: 5,
+        background: "#f6f7fb",
+        minHeight: "100vh",
+        justifyContent: "center",
+      }}
+    >
       {/* HEADER */}
       <Title
-        title={" Page Sections"}
-        caption={`${page?.key} • ${page?.template_name}`}
+        title="Section Control Center"
+        caption={`Page: ${section.page_key} • Template: ${section.template_name}`}
       />
 
-      <Typography variant="body1" sx={{ mb: 3 }} color="text.secondary">
-        These blocks build the page layout. Admin can reorder, edit, or hide
-        sections. Think of this as stacking Lego pieces that form the page.
+      <Typography sx={{ fontSize: "1.2rem", color: "text.secondary", mb: 4 }}>
+        This is a live CMS section inspector. Every block here represents a
+        modular piece of your webpage. Think of it like LEGO bricks — except
+        these bricks can talk, translate, and sometimes break in Arabic.
       </Typography>
 
-      <AddButton
-        to={`/admin/create-section/${pageId}`}
-        sx={{ my: 3 }}
-        label="Section"
-      />
+      {/* MAIN CARD */}
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+        }}
+      >
+        <CardContent sx={{ p: 4 }}>
+          {/* HEADER STRIP */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 3,
+            }}
+          >
+            <Typography sx={{ fontSize: "1.8rem", fontWeight: 900 }}>
+              {getTypeLabel(section.type)}
+            </Typography>
 
-      <Divider sx={{ my: 4 }} />
-      {sections.length === 0 && (
-        <>
-          <Typography>No SECTIONS YET FOR THIS PAGE, create new</Typography>
-        </>
-      )}
-      {/* SECTIONS */}
-      <Stack spacing={3}>
-        {sections
-          ?.sort((a, b) => a.position - b.position)
-          .map((section) => (
-            <Card
-              key={section.id}
+            <Chip
+              label={section.is_visible ? "Visible on Website" : "Hidden"}
+              color={section.is_visible ? "success" : "default"}
+              sx={{ fontSize: "1rem", p: 2 }}
+            />
+          </Box>
+
+          <Divider sx={{ mb: 3 }} />
+
+          {/* BASIC INFO */}
+          <Box>
+            <Typography sx={{ fontSize: "1.3rem", fontWeight: 800 }}>
+              Position in Page Flow
+            </Typography>
+            <Typography sx={{ fontSize: "1rem", color: "text.secondary" }}>
+              Controls where this section appears on the page
+            </Typography>
+            <Typography sx={{ fontSize: "1.3rem", mt: 1 }}>
+              #{section.position}
+            </Typography>
+          </Box>
+
+          <Divider sx={{ my: 4 }} />
+
+          {/* PAGE CONTEXT */}
+          <Box
+            sx={{
+              p: 3,
+              borderRadius: 3,
+              background: "#eef4ff",
+            }}
+          >
+            <Typography sx={{ fontSize: "1.4rem", fontWeight: 900, mb: 1 }}>
+              Page Context
+            </Typography>
+
+            <Typography sx={{ fontSize: "1.1rem" }}>
+              Page Key: <strong>{section.page_key}</strong>
+            </Typography>
+
+            <Typography sx={{ fontSize: "1.1rem" }}>
+              Status: {section.status}
+            </Typography>
+
+            <Typography sx={{ fontSize: "1.1rem" }}>
+              Template: {section.template_name}
+            </Typography>
+          </Box>
+
+          <Divider sx={{ my: 4 }} />
+
+          {/* TRANSLATIONS TITLE */}
+          <Typography sx={{ fontSize: "1.6rem", fontWeight: 900, mb: 2 }}>
+            Multilingual Content
+          </Typography>
+
+          {/* EN */}
+          <Card
+            sx={{
+              mb: 3,
+              p: 3,
+              borderLeft: "6px solid #1976d2",
+            }}
+          >
+            <Typography sx={{ fontSize: "1.4rem", fontWeight: 800 }}>
+              English Version
+            </Typography>
+
+            <Typography sx={{ fontSize: "1.1rem", mt: 1 }}>
+              Title: {en?.title || "Missing"}
+            </Typography>
+
+            <Box
               sx={{
-                borderRadius: 3,
-                p: 1,
-                boxShadow: 2,
+                mt: 2,
+                p: 2,
+                background: "#f5f5f5",
+                borderRadius: 2,
+                fontSize: "1.1rem",
+                whiteSpace: "pre-wrap",
               }}
             >
-              <CardContent>
-                {/* TITLE ROW */}
+              {en?.content?.text || "No content yet"}
+            </Box>
+
+            <Chip
+              sx={{ mt: 2 }}
+              label={en?.is_visible ? "Active" : "Inactive"}
+              color={en?.is_visible ? "success" : "default"}
+            />
+          </Card>
+
+          {/* AR */}
+          <Card
+            sx={{
+              mb: 3,
+              p: 3,
+              borderLeft: "6px solid #9c27b0",
+              direction: "rtl",
+            }}
+          >
+            <Typography sx={{ fontSize: "1.4rem", fontWeight: 800 }}>
+              النسخة العربية
+            </Typography>
+
+            <Typography sx={{ fontSize: "1.1rem", mt: 1 }}>
+              العنوان: {ar?.title || "غير موجود"}
+            </Typography>
+
+            <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                background: "#f5f5f5",
+                borderRadius: 2,
+                fontSize: "1.1rem",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {ar?.content?.text || "لا يوجد محتوى"}
+            </Box>
+
+            <Chip
+              sx={{ mt: 2 }}
+              label={ar?.is_visible ? "نشط" : "غير نشط"}
+              color={ar?.is_visible ? "success" : "default"}
+            />
+          </Card>
+
+          {/* MEDIA */}
+          {config.showImage && images.length > 0 && (
+            <Box sx={{ my: 3 }}>
+              <Divider sx={{ my: 4 }} />
+              {config.multipleImages ? (
                 <Box
                   sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                    gap: 2,
                   }}
                 >
-                  <Typography variant="h5" fontWeight={800}>
-                    {getTypeLabel(section.type)}
-                  </Typography>
-
-                  <Box sx={{ display: "flex", gap: 1 }}>
-                    <Chip
-                      label={section.is_visible ? "Visible" : "Hidden"}
-                      color={section.is_visible ? "success" : "default"}
-                      size="medium"
+                  {images.map((img) => (
+                    <Box
+                      key={img.media_id}
+                      component="img"
+                      src={img.url}
+                      sx={{
+                        width: "100%",
+                        borderRadius: 2,
+                        boxShadow: 2,
+                      }}
                     />
-                  </Box>
+                  ))}
                 </Box>
+              ) : (
+                <Box
+                  component="img"
+                  src={images[0]?.url}
+                  sx={{
+                    width: "100%",
+                    maxHeight: 400,
+                    objectFit: "cover",
+                    borderRadius: 3,
+                    boxShadow: 3,
+                  }}
+                />
+              )}
+            </Box>
+          )}
 
-                {/* INFO */}
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    Position: #{section.position}
-                  </Typography>
+          <Divider sx={{ my: 4 }} />
 
-                  <Typography variant="body2" color="text.secondary">
-                    Internal type: {section.type}
-                  </Typography>
-                </Box>
+          {/* ACTIONS */}
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
+            <Button variant="contained" size="large">
+              Edit Content
+            </Button>
 
-                <Divider sx={{ my: 2 }} />
+            <Button variant="outlined" size="large">
+              Toggle Visibility
+            </Button>
 
-                {/* ACTIONS */}
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <Button variant="contained" size="large">
-                    Edit Content
-                  </Button>
-
-                  <Button variant="outlined" size="large">
-                    Reorder
-                  </Button>
-
-                  <Button
-                    color="error"
-                    variant="outlined"
-                    size="large"
-                    onClick={() => {
-                      setSelectedId(section.id);
-                      setConfirmDelete(true);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
-      </Stack>
-      {confirmDelete && (
-        <ConfirmDeleteModal
-          open={confirmDelete}
-          onClose={() => setConfirmDelete(false)}
-          onConfirm={async () => {
-            await deleteSection(selectedId);
-            await getSectionsByPageId(pageId);
-            setConfirmDelete(false);
-          }}
-          label="Section"
-        />
-      )}
+            <Button
+              color="error"
+              variant="outlined"
+              size="large"
+              onClick={async () => deleteSection(section.id)}
+            >
+              Delete Section
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
     </Box>
   );
 }

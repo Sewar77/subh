@@ -44,6 +44,7 @@ export default function CreatePage() {
     setForm({
       key: "",
     });
+    await fetchPageByTemplateId(templateId);
   };
 
   return (

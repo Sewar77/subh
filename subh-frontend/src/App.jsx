@@ -37,7 +37,7 @@ import AddSectionTranlsations from "./components/Admin/Manage/ManageSection/AddS
 import ViewAllSections from "./components/Admin/Manage/ManageSection/ViewAllSections.jsx";
 import ViewPage from "./components/Admin/Manage/ManagePages/ViewPage.jsx";
 import EditPage from "./components/Admin/Manage/EditPages/EditPage.jsx";
-
+import ViewPageSections from "./components/Admin/Manage/ManageSection/ViewPageSections.jsx";
 function App() {
   const { id } = useParams();
   return (
@@ -77,7 +77,10 @@ function App() {
           <Route path="view-template" element={<ViewTemplates />} />
           <Route path="create-page/:templateId" element={<CreatePage />} />
           <Route path="create-section/:pageId" element={<CreateSection />} />
-          <Route path="view-section/:pageId" element={<ViewSection />} />
+          <Route
+            path="view-page-sections/:pageId"
+            element={<ViewPageSections />}
+          />
           <Route path="view-section/:sectionId" element={<ViewSection />} />
           <Route path="view-page/:pageId" element={<ViewPage />} />
           <Route

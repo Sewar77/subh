@@ -22,10 +22,9 @@ export default function AdminNavbar() {
   const { loadUsers } = useContext(usersContext);
   useEffect(() => {
     loadUser();
-  }, []);
-  useEffect(() => {
     loadUsers();
   }, []);
+
   const handleLogout = () => {
     logout();
   };

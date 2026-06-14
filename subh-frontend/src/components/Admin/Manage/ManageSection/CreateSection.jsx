@@ -10,7 +10,7 @@ import {
   Divider,
   Container,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages";
 import Title from "../../Headers/Titles";
 
@@ -18,6 +18,7 @@ export default function CreateSection() {
   const { pageId } = useParams();
   const { fetchPageById, page, addSection, getSectionsByPageId, sections } =
     usePages();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     type: "",
   });
@@ -107,7 +108,7 @@ export default function CreateSection() {
           </CardContent>
         </Card>
       </Box>
-      <Box sx={{ mt: 5, display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ my: 5, display: "flex", flexDirection: "column", gap: 3 }}>
         {sections
           ?.sort((a, b) => a.position - b.position)
           .map((section) => (
@@ -175,6 +176,15 @@ export default function CreateSection() {
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                 <Button size="small" variant="contained">
                   Edit
+                </Button>
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={() =>
+                    navigate(`/admin/add-translations-section/${section.id}`)
+                  }
+                >
+                  Add Content
                 </Button>
 
                 <Button size="small" variant="outlined">

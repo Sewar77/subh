@@ -18,6 +18,7 @@ import AddButton from "../../Buttons/AddBtn";
 import Title from "../../Headers/Titles";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
 import DeleteButton from "../../Buttons/DeleteBtn";
+import PagePreview from "./PagePreview";
 export default function ViewPage() {
   const {
     deletePageById,
@@ -66,10 +67,17 @@ export default function ViewPage() {
       <Stack direction="row" spacing={2} sx={{ my: 3 }}>
         <AddButton label="Section" to={`/admin/create-section/${page.id}`} />
         <Button
-          onClick={() => navigate(`/admin/view-section/${page.id}`)}
+          onClick={() => navigate(`/admin/view-page-sections/${page.id}`)}
           variant="outlined"
         >
           View Sections
+        </Button>
+        <Button
+          onClick={() => navigate(`/admin/add-translations-page/${page.id}`)}
+          variant="contained"
+          color="primary"
+        >
+          Add Translation
         </Button>
         <Button
           variant="outlined"
@@ -86,51 +94,126 @@ export default function ViewPage() {
           Delete Page
         </Button>
       </Stack>
-      <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
+      <Stack direction={{ xs: "column", md: "column" }} spacing={3}>
         {/* MAIN INFO */}
         <Card sx={{ flex: 2 }}>
           <CardContent>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+            <Typography variant="h5" fontWeight={800} gutterBottom>
               Page Information
             </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Stack spacing={1}>
-              <Typography>Key: {page.key}</Typography>
-              <Typography>Template Key: {page.template_key}</Typography>
-              <Typography>Template Name: {page.template_name}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Created: {new Date(page.created_at).toLocaleString()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Updated: {new Date(page.updated_at).toLocaleString()}
-              </Typography>
+
+            <Divider sx={{ mb: 3 }} />
+
+            <Stack spacing={3}>
+              {/* INTERNAL KEY */}
+              <Box>
+                <Typography sx={{ fontSize: "1.2rem", fontWeight: 800 }}>
+                  Internal Page Identifier
+                </Typography>
+
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ fontSize: "1rem", mt: 0.5 }}
+                >
+                  Used by the system to uniquely identify this page. It is not
+                  shown to users on the website.
+                </Typography>
+
+                <Typography
+                  sx={{
+                    mt: 1,
+                    fontFamily: "monospace",
+                    fontSize: "1.1rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  {page.key}
+                </Typography>
+              </Box>
+
+              {/* TEMPLATE */}
+              <Box>
+                <Typography sx={{ fontSize: "1.2rem", fontWeight: 800 }}>
+                  Page Structure Template
+                </Typography>
+
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ fontSize: "1rem", mt: 0.5 }}
+                >
+                  Defines the layout and available sections (Hero, Text, Image).
+                  This controls how the page is built.
+                </Typography>
+
+                <Typography sx={{ mt: 1, fontSize: "1.1rem" }}>
+                  {page.template_name} ({page.template_key})
+                </Typography>
+              </Box>
+
+              {/* CREATED */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 4,
+                  justifyContent: "center",
+                }}
+              >
+                {/* CREATED */}
+                <Box
+                  sx={{
+                    flex: "1 1 300px",
+                    minWidth: 250,
+                    textAlign: "center",
+                    px: 2,
+                  }}
+                >
+                  <Typography sx={{ fontSize: "1.2rem", fontWeight: 800 }}>
+                    Created Date
+                  </Typography>
+
+                  <Typography
+                    sx={{ fontSize: "1rem", color: "text.secondary", mt: 0.5 }}
+                  >
+                    When this page was first created in the CMS.
+                  </Typography>
+
+                  <Typography sx={{ fontSize: "1.1rem", mt: 1 }}>
+                    {new Date(page.created_at).toLocaleString()}
+                  </Typography>
+                </Box>
+
+                {/* UPDATED */}
+                <Box
+                  sx={{
+                    flex: "1 1 300px",
+                    minWidth: 250,
+                    textAlign: "center",
+                    px: 2,
+                  }}
+                >
+                  <Typography sx={{ fontSize: "1.2rem", fontWeight: 800 }}>
+                    Last Updated
+                  </Typography>
+
+                  <Typography
+                    sx={{ fontSize: "1rem", color: "text.secondary", mt: 0.5 }}
+                  >
+                    The most recent change made to this page or its content.
+                  </Typography>
+
+                  <Typography sx={{ fontSize: "1.1rem", mt: 1 }}>
+                    {new Date(page.updated_at).toLocaleString()}
+                  </Typography>
+                </Box>
+              </Box>
             </Stack>
           </CardContent>
         </Card>
         {/* PREVIEW AREA */}
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
-              Page Preview
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Box
-              sx={{
-                height: 250,
-                borderRadius: 2,
-                backgroundColor: "#f3f3f3",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "1px dashed #ccc",
-              }}
-            >
-              <Typography color="text.secondary">
-                Image Preview (coming soon)
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
+        <PagePreview page={page} />
       </Stack>
       {/* SECTIONS */}
       <Card

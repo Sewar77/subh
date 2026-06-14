@@ -96,6 +96,10 @@ export default function ViewPages() {
         title={" Pages Control Center"}
         caption={"Manage pages, templates, and publishing state."}
       />
+      <Box sx={{ my: 3 }}>
+        <AddButton label={"Page"} onClick={() => navigate("")} />
+      </Box>
+
       {loading && <LinearProgress sx={{ mb: 2 }} />}
 
       <SectionsFilters
@@ -112,161 +116,170 @@ export default function ViewPages() {
         stateFilter={stateFilter}
         setStateFilter={setStateFilter}
       />
+      {filtered.length === 0 ? (
+        <Typography variant="h5" sx={{ textAlign: "center" }}>
+          No Pages Yet, create new!
+        </Typography>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Page</TableCell>
+                <TableCell>Template</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Created</TableCell>
+                <TableCell>State</TableCell>
+                <TableCell align="center">Actions</TableCell>
+              </TableRow>
+            </TableHead>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Page</TableCell>
-              <TableCell>Template</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Created</TableCell>
-              <TableCell>State</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
+            <TableBody>
+              {filtered.map((page) => {
+                const state = getCompletionState(page);
 
-          <TableBody>
-            {filtered.map((page) => {
-              const state = getCompletionState(page);
+                return (
+                  <TableRow key={page.id} hover>
+                    <TableCell>
+                      <Typography fontWeight={600}>{page.key}</Typography>
+                    </TableCell>
 
-              return (
-                <TableRow key={page.id} hover>
-                  <TableCell>
-                    <Typography fontWeight={600}>{page.key}</Typography>
-                  </TableCell>
-
-                  <TableCell>
-                    <Chip
-                      label={page.template_name || "No template"}
-                      size="small"
-                    />
-                  </TableCell>
-
-                  <TableCell>
-                    <Chip
-                      label={page.status}
-                      color={
-                        page.status === "published" ? "success" : "warning"
-                      }
-                      size="small"
-                    />
-                  </TableCell>
-
-                  <TableCell>
-                    {new Date(page.created_at).toLocaleDateString()}
-                  </TableCell>
-
-                  <TableCell>
-                    <Tooltip title={state.note}>
+                    <TableCell>
                       <Chip
-                        label={state.label}
-                        color={state.color}
+                        label={page.template_name || "No template"}
                         size="small"
                       />
-                    </Tooltip>
-                  </TableCell>
+                    </TableCell>
 
-                  <TableCell>
-                    <Box
-                      sx={{ display: "flex", justifyContent: "center", gap: 1 }}
-                    >
-                      <Tooltip title="Edit">
-                        <IconButton
-                          onClick={() =>
-                            navigate(`/admin/edit-page/${page.id}`)
-                          }
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
+                    <TableCell>
+                      <Chip
+                        label={page.status}
+                        color={
+                          page.status === "published" ? "success" : "warning"
+                        }
+                        size="small"
+                      />
+                    </TableCell>
 
-                      <Tooltip title="View Page">
-                        <IconButton
-                          onClick={() =>
-                            navigate(`/admin/view-page/${page.id}`)
-                          }
-                        >
-                          <VisibilityIcon />
-                        </IconButton>
-                      </Tooltip>
+                    <TableCell>
+                      {new Date(page.created_at).toLocaleDateString()}
+                    </TableCell>
 
-                      <Tooltip title="Translations">
-                        <IconButton
-                          onClick={() =>
-                            navigate(`/admin/translations-page/${page.id}`)
-                          }
-                        >
-                          <TranslateIcon />
-                        </IconButton>
-                      </Tooltip>
-
-                      <Tooltip title="View Sections">
-                        <IconButton
-                          onClick={() =>
-                            navigate(`/admin/view-section/${page.id}`)
-                          }
-                        >
-                          <AssessmentIcon />
-                        </IconButton>
-                      </Tooltip>
-
-                      <Tooltip title="Delete">
-                        <DeleteButton
-                          onClick={() => {
-                            setSelectedId(page.id);
-                            setConfirmDelete(true);
-                          }}
+                    <TableCell>
+                      <Tooltip title={state.note}>
+                        <Chip
+                          label={state.label}
+                          color={state.color}
+                          size="small"
                         />
                       </Tooltip>
+                    </TableCell>
 
-                      <Tooltip title="More Actions">
-                        <IconButton
-                          sx={{ transform: "scale(1.15)" }}
-                          onClick={(e) => {
-                            setAnchorEl(e.currentTarget);
-                            setMenuPageId(page.id);
-                          }}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      </Tooltip>
-
-                      <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl && menuPageId === page.id)}
-                        onClose={() => setAnchorEl(null)}
+                    <TableCell>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          gap: 1,
+                        }}
                       >
-                        <MenuItem sx={{ fontSize: "1rem" }}>
-                          Quick Edit
-                        </MenuItem>
+                        <Tooltip title="Edit">
+                          <IconButton
+                            onClick={() =>
+                              navigate(`/admin/edit-page/${page.id}`)
+                            }
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
 
-                        <MenuItem sx={{ fontSize: "1rem" }}>
-                          Duplicate Page
-                        </MenuItem>
+                        <Tooltip title="View Page">
+                          <IconButton
+                            onClick={() =>
+                              navigate(`/admin/view-page/${page.id}`)
+                            }
+                          >
+                            <VisibilityIcon />
+                          </IconButton>
+                        </Tooltip>
 
-                        <MenuItem sx={{ fontSize: "1rem" }}>
-                          View Sections
-                        </MenuItem>
+                        <Tooltip title="Translations">
+                          <IconButton
+                            onClick={() =>
+                              navigate(`/admin/translations-page/${page.id}`)
+                            }
+                          >
+                            <TranslateIcon />
+                          </IconButton>
+                        </Tooltip>
 
-                        <MenuItem sx={{ fontSize: "1rem" }}>
-                          Preview Page
-                        </MenuItem>
+                        <Tooltip title="View Sections">
+                          <IconButton
+                            onClick={() =>
+                              navigate(`/admin/view-page-sections/${page.id}`)
+                            }
+                          >
+                            <AssessmentIcon />
+                          </IconButton>
+                        </Tooltip>
 
-                        <MenuItem
-                          sx={{ fontSize: "1rem", color: "error.main" }}
+                        <Tooltip title="Delete">
+                          <DeleteButton
+                            onClick={() => {
+                              setSelectedId(page.id);
+                              setConfirmDelete(true);
+                            }}
+                          />
+                        </Tooltip>
+
+                        <Tooltip title="More Actions">
+                          <IconButton
+                            sx={{ transform: "scale(1.15)" }}
+                            onClick={(e) => {
+                              setAnchorEl(e.currentTarget);
+                              setMenuPageId(page.id);
+                            }}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                        </Tooltip>
+
+                        <Menu
+                          anchorEl={anchorEl}
+                          open={Boolean(anchorEl && menuPageId === page.id)}
+                          onClose={() => setAnchorEl(null)}
                         >
-                          Force Publish Check
-                        </MenuItem>
-                      </Menu>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                          <MenuItem sx={{ fontSize: "1rem" }}>
+                            Quick Edit
+                          </MenuItem>
+
+                          <MenuItem sx={{ fontSize: "1rem" }}>
+                            Duplicate Page
+                          </MenuItem>
+
+                          <MenuItem sx={{ fontSize: "1rem" }}>
+                            View Sections
+                          </MenuItem>
+
+                          <MenuItem sx={{ fontSize: "1rem" }}>
+                            Preview Page
+                          </MenuItem>
+
+                          <MenuItem
+                            sx={{ fontSize: "1rem", color: "error.main" }}
+                          >
+                            Force Publish Check
+                          </MenuItem>
+                        </Menu>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       {confirmDelete && (
         <ConfirmDeleteModal
