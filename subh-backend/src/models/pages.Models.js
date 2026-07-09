@@ -4,14 +4,14 @@ import pool from "../config/db.js";
 // CREATE PAGE
 // =========================
 
-export const createPage = async (key, status = "draft") => {
+export const createPage = async (key, name, status = "draft") => {
   const result = await pool.query(
     `
-    INSERT INTO pages (key, status)
-    VALUES ($1, $2)
+    INSERT INTO pages (key,name, status)
+    VALUES ($1,$2, $3)
     RETURNING *
     `,
-    [key, status],
+    [key, name, status],
   );
 
   return result.rows[0];

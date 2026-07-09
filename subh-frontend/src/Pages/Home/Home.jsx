@@ -10,7 +10,7 @@ export default function Home() {
   useEffect(() => {
     fetchPageByKey("home-page");
   }, [fetchPageByKey]);
-  console.log(page);
+  page;
 
   return (
     <>

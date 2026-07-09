@@ -4,8 +4,10 @@ import {
   getAllSectionsController,
   getSectionsByPageController,
   getSectionByIdController,
+  toggleSectionVisibilityController,
 } from "../controller/section.Controller.js";
-
+import { protect } from "../middleware/protect.Middleware.js";
+import { adminOnly } from "../middleware/adminOnly.Middleware.js";
 const router = express.Router();
 
 /*
@@ -25,5 +27,10 @@ GET ONE SECTION
 Admin edit
 */
 router.get("/sections/:id", getSectionByIdController);
-
+router.patch(
+  "/sections/:id/toggle",
+  protect,
+  adminOnly,
+  toggleSectionVisibilityController,
+);
 export default router;

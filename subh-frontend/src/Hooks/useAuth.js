@@ -33,7 +33,7 @@ export const useAuth = () => {
       }
       toast.error(data?.message || "Something went wrong");
 
-      console.log(error);
+      error;
     }
   };
 
@@ -57,7 +57,7 @@ export const useAuth = () => {
         return;
       }
       toast.error(data?.message || "Something went wrong");
-      console.log(error);
+      error;
     }
   };
   const logout = async () => {

@@ -14,281 +14,294 @@ import {
   Typography,
   Tooltip,
   LinearProgress,
-  MenuItem,
-  Menu,
 } from "@mui/material";
-
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import EditIcon from "@mui/icons-material/Edit";
 import TranslateIcon from "@mui/icons-material/Translate";
-import AssessmentIcon from "@mui/icons-material/Assessment";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-
+import ViewModuleIcon from "@mui/icons-material/ViewModule";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { usePages } from "../../../../Hooks/usePages";
-import AddButton from "../../Buttons/AddBtn";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import DeleteButton from "../../Buttons/DeleteBtn";
-import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
-import SectionsFilters from "../../Search and Filter/SectionsFilters";
 import Title from "../../Headers/Titles";
-
+import AddButton from "../../Buttons/AddBtn";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
+import { useNavigate } from "react-router-dom";
 export default function ViewPages() {
-  const {
-    pages,
-    fetchAllPages,
-    loading,
-    deletePageById,
-    templates,
-    fetchTemplates,
-  } = usePages();
-
-  const [search, setSearch] = useState("");
-  const [templateFilter, setTemplateFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [stateFilter, setStateFilter] = useState("");
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [menuPageId, setMenuPageId] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
+  const { pages, loading, fetchPages, deletePage } = usePages();
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [selectedPage, setSelectedPage] = useState(null);
   useEffect(() => {
-    fetchAllPages();
-    fetchTemplates();
+    fetchPages();
   }, []);
-  const getCompletionState = (page) => {
-    const hasTemplate = !!page.template_id;
-    const hasStatus = page.status === "published";
-    const hasKey = !!page.key;
-    if (!hasKey)
-      return { label: "Broken", color: "error", note: "Missing key" };
-    if (!hasTemplate)
-      return { label: "Unassigned", color: "warning", note: "No template" };
-    if (!hasStatus)
-      return { label: "In Progress", color: "warning", note: "Not published" };
-    return { label: "Ready", color: "success", note: "Fully configured" };
-  };
-  const filtered = useMemo(() => {
-    return (pages || []).filter((p) => {
-      const key = (p.key || "").toLowerCase();
-      const templateName = (p.template_name || "").toLowerCase();
-      const status = (p.status || "").toLowerCase();
-      const searchQ = search.toLowerCase();
-      const matchSearch =
-        key.includes(searchQ) || templateName.includes(searchQ);
-      const matchTemplate = templateFilter
-        ? p.template_key === templateFilter
-        : true;
-      const matchStatus = statusFilter
-        ? status === statusFilter.toLowerCase()
-        : true;
-      const state = getCompletionState(p);
-      const matchState = stateFilter
-        ? state.label.toLowerCase() === stateFilter.toLowerCase()
-        : true;
-      return matchSearch && matchTemplate && matchStatus && matchState;
+  const filteredPages = useMemo(() => {
+    return pages.filter((page) => {
+      const value = `${page.key} ${page.status}`.toLowerCase();
+      return value.includes(search.toLowerCase());
     });
-  }, [pages, search, templateFilter, statusFilter, stateFilter]);
-
+  }, [pages, search]);
+  const handleDelete = async () => {
+    if (!selectedPage) return;
+    await deletePage(selectedPage.id);
+    setDeleteModal(false);
+    setSelectedPage(null);
+    fetchPages();
+  };
   return (
-    <Box sx={{ p: 3 }}>
+    <Box
+      sx={{
+        p: { xs: 2, md: 4 },
+      }}
+    >
       <Title
-        title={" Pages Control Center"}
-        caption={"Manage pages, templates, and publishing state."}
+        title="Pages Control Center"
+        caption="Manage website pages and their content."
       />
-      <Box sx={{ my: 3 }}>
-        <AddButton label={"Page"} onClick={() => navigate("")} />
-      </Box>
+      <TextField
+        fullWidth
+        label="Search pages"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        sx={{
+          mb: 4,
 
-      {loading && <LinearProgress sx={{ mb: 2 }} />}
+          "& .MuiInputBase-input": {
+            fontSize: {
+              xs: "1rem",
+              md: "1.2rem",
+            },
+          },
 
-      <SectionsFilters
-        search={search}
-        setSearch={setSearch}
-        pages={pages}
-        templates={templates}
-        pageFilter={""}
-        setPageFilter={() => {}}
-        templateFilter={templateFilter}
-        setTemplateFilter={setTemplateFilter}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        stateFilter={stateFilter}
-        setStateFilter={setStateFilter}
+          "& .MuiInputLabel-root": {
+            fontSize: {
+              xs: "1rem",
+              md: "1.1rem",
+            },
+          },
+        }}
       />
-      {filtered.length === 0 ? (
-        <Typography variant="h5" sx={{ textAlign: "center" }}>
-          No Pages Yet, create new!
+
+      {loading && (
+        <LinearProgress
+          sx={{
+            mb: 3,
+          }}
+        />
+      )}
+
+      {filteredPages.length === 0 ? (
+        <Typography
+          variant="h5"
+          textAlign="center"
+          sx={{
+            mt: 5,
+          }}
+        >
+          No pages found
         </Typography>
       ) : (
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 3,
+            overflowX: "auto",
+          }}
+        >
+          <Table
+            sx={{
+              minWidth: 900,
+              "& .MuiTableCell-root": {
+                padding: {
+                  xs: "14px 16px",
+                  md: "22px 28px",
+                },
+              },
+              "& .MuiTableRow-root": {
+                height: {
+                  xs: 70,
+
+                  md: 90,
+                },
+              },
+            }}
+          >
             <TableHead>
               <TableRow>
-                <TableCell>Page</TableCell>
-                <TableCell>Template</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Created</TableCell>
-                <TableCell>State</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                {["Page Key", "Name", "Status", "Created", "Actions"].map(
+                  (header) => (
+                    <TableCell
+                      key={header}
+                      align={header === "Actions" ? "center" : "left"}
+                    >
+                      <Typography
+                        fontWeight={800}
+                        fontSize={{
+                          xs: "1rem",
+                          md: "1.25rem",
+                        }}
+                      >
+                        {header}
+                      </Typography>
+                    </TableCell>
+                  ),
+                )}
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {filtered.map((page) => {
-                const state = getCompletionState(page);
+              {filteredPages.map((page) => (
+                <TableRow
+                  key={page.id}
+                  hover
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "action.hover",
+                    },
+                  }}
+                >
+                  {/* KEY */}
+                  <TableCell>
+                    <Typography
+                      fontSize={{
+                        xs: "1.3rem",
+                        md: "1.7rem",
+                      }}
+                      fontWeight={900}
+                    >
+                      {page.key}
+                    </Typography>
 
-                return (
-                  <TableRow key={page.id} hover>
-                    <TableCell>
-                      <Typography fontWeight={600}>{page.key}</Typography>
-                    </TableCell>
+                    <Typography
+                      fontSize="0.95rem"
+                      color="text.secondary"
+                      sx={{
+                        mt: 0.5,
+                      }}
+                    >
+                      Unique identifier used by the system to locate this page.
+                    </Typography>
+                  </TableCell>
 
-                    <TableCell>
-                      <Chip
-                        label={page.template_name || "No template"}
-                        size="small"
-                      />
-                    </TableCell>
+                  {/* NAME */}
+                  <TableCell>
+                    <Typography
+                      fontSize={{
+                        xs: "1.rem",
+                        md: "1.6rem",
+                      }}
+                      fontWeight={800}
+                    >
+                      {page.name || "No name"}
+                    </Typography>
 
-                    <TableCell>
-                      <Chip
-                        label={page.status}
-                        color={
-                          page.status === "published" ? "success" : "warning"
-                        }
-                        size="small"
-                      />
-                    </TableCell>
+                    <Typography
+                      fontSize="0.95rem"
+                      color="text.secondary"
+                      sx={{
+                        mt: 0.5,
+                      }}
+                    >
+                      Display name shown to administrators for managing content.
+                    </Typography>
+                  </TableCell>
 
-                    <TableCell>
+                  {/* STATUS */}
+                  <TableCell>
+                    <Chip
+                      label={page.status}
+                      color={
+                        page.status === "published" ? "success" : "warning"
+                      }
+                      sx={{
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        height: 36,
+                      }}
+                    />
+
+                    <Typography
+                      fontSize="0.85rem"
+                      color="text.secondary"
+                      sx={{
+                        mt: 0.5,
+                      }}
+                    >
+                      Current publishing state.
+                    </Typography>
+                  </TableCell>
+
+                  {/* CREATED */}
+                  <TableCell>
+                    <Typography fontSize="1.1rem">
                       {new Date(page.created_at).toLocaleDateString()}
-                    </TableCell>
+                    </Typography>
 
-                    <TableCell>
-                      <Tooltip title={state.note}>
-                        <Chip
-                          label={state.label}
-                          color={state.color}
-                          size="small"
-                        />
-                      </Tooltip>
-                    </TableCell>
+                    <Typography fontSize="0.85rem" color="text.secondary">
+                      Creation date.
+                    </Typography>
+                  </TableCell>
 
-                    <TableCell>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          gap: 1,
-                        }}
-                      >
-                        <Tooltip title="Edit">
-                          <IconButton
-                            onClick={() =>
-                              navigate(`/admin/edit-page/${page.id}`)
-                            }
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="View Page">
-                          <IconButton
-                            onClick={() =>
-                              navigate(`/admin/view-page/${page.id}`)
-                            }
-                          >
-                            <VisibilityIcon />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Translations">
-                          <IconButton
-                            onClick={() =>
-                              navigate(`/admin/translations-page/${page.id}`)
-                            }
-                          >
-                            <TranslateIcon />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="View Sections">
-                          <IconButton
-                            onClick={() =>
-                              navigate(`/admin/view-page-sections/${page.id}`)
-                            }
-                          >
-                            <AssessmentIcon />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Delete">
-                          <DeleteButton
-                            onClick={() => {
-                              setSelectedId(page.id);
-                              setConfirmDelete(true);
-                            }}
-                          />
-                        </Tooltip>
-
-                        <Tooltip title="More Actions">
-                          <IconButton
-                            sx={{ transform: "scale(1.15)" }}
-                            onClick={(e) => {
-                              setAnchorEl(e.currentTarget);
-                              setMenuPageId(page.id);
-                            }}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Menu
-                          anchorEl={anchorEl}
-                          open={Boolean(anchorEl && menuPageId === page.id)}
-                          onClose={() => setAnchorEl(null)}
+                  {/* ACTIONS */}
+                  <TableCell>
+                    <Box display="flex" justifyContent="center" gap={1}>
+                      <Tooltip title="View page content">
+                        <IconButton
+                          onClick={() =>
+                            navigate(`/admin/view-page/${page.id}`)
+                          }
                         >
-                          <MenuItem sx={{ fontSize: "1rem" }}>
-                            Quick Edit
-                          </MenuItem>
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Manage translations">
+                        <IconButton
+                          onClick={() =>
+                            navigate(`/admin/page-translations/${page.id}`)
+                          }
+                        >
+                          <TranslateIcon />
+                        </IconButton>
+                      </Tooltip>
 
-                          <MenuItem sx={{ fontSize: "1rem" }}>
-                            Duplicate Page
-                          </MenuItem>
+                      <Tooltip title="Manage page sections">
+                        <IconButton
+                          onClick={() =>
+                            navigate(`/admin/view-page-sections/${page.id}`)
+                          }
+                        >
+                          <ViewModuleIcon />
+                        </IconButton>
+                      </Tooltip>
 
-                          <MenuItem sx={{ fontSize: "1rem" }}>
-                            View Sections
-                          </MenuItem>
-
-                          <MenuItem sx={{ fontSize: "1rem" }}>
-                            Preview Page
-                          </MenuItem>
-
-                          <MenuItem
-                            sx={{ fontSize: "1rem", color: "error.main" }}
-                          >
-                            Force Publish Check
-                          </MenuItem>
-                        </Menu>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      <Tooltip title="Delete page">
+                        <IconButton
+                          color="error"
+                          onClick={() => {
+                            setSelectedPage(page);
+                            setDeleteModal(true);
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
       )}
 
-      {confirmDelete && (
+      {deleteModal && (
         <ConfirmDeleteModal
-          open={confirmDelete}
-          onClose={() => setConfirmDelete(false)}
-          onConfirm={() => {
-            deletePageById(selectedId);
-            setConfirmDelete(false);
+          open={deleteModal}
+          onClose={() => {
+            setDeleteModal(false);
+
+            setSelectedPage(null);
           }}
+          onConfirm={handleDelete}
           label="Page"
         />
       )}

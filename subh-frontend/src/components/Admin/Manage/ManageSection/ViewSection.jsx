@@ -9,17 +9,20 @@ import {
   Divider,
   Button,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages";
 import Title from "../../Headers/Titles";
 
 export default function ViewSection() {
   const { sectionId } = useParams();
-  const { fetchSectionById, deleteSection, section } = usePages();
-
+  const { fetchSectionById, deleteSection, section, toggleSectionVisibility } =
+    usePages();
+  const navigate = useNavigate();
   useEffect(() => {
     if (sectionId) fetchSectionById(sectionId);
   }, [sectionId]);
+  section;
+
   const typeConfig = {
     hero: {
       showImage: false,
@@ -77,6 +80,10 @@ export default function ViewSection() {
     if (!section.media) return [];
 
     return section.media.filter((m) => m.role === "image");
+  };
+  const handleToggle = async (sectionId) => {
+    sectionId;
+    await toggleSectionVisibility(sectionId);
   };
   const images = getImages(section);
   return (
@@ -199,11 +206,33 @@ export default function ViewSection() {
                 p: 2,
                 background: "#f5f5f5",
                 borderRadius: 2,
-                fontSize: "1.1rem",
-                whiteSpace: "pre-wrap",
               }}
             >
-              {en?.content?.text || "No content yet"}
+              {en?.content && Object.keys(en.content).length > 0 ? (
+                <Stack spacing={2}>
+                  {Object.entries(en.content).map(([key, value]) => (
+                    <Box key={key}>
+                      <Typography
+                        sx={{ fontWeight: 800, fontSize: "1rem", mb: 0.5 }}
+                      >
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          fontSize: "1rem",
+                          color: "text.secondary",
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {value}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              ) : (
+                <Typography color="text.secondary">No content yet</Typography>
+              )}
             </Box>
 
             <Chip
@@ -236,11 +265,41 @@ export default function ViewSection() {
                 p: 2,
                 background: "#f5f5f5",
                 borderRadius: 2,
-                fontSize: "1.1rem",
-                whiteSpace: "pre-wrap",
               }}
             >
-              {ar?.content?.text || "لا يوجد محتوى"}
+              {ar?.content && Object.keys(ar.content).length > 0 ? (
+                <Stack spacing={2}>
+                  {Object.entries(ar.content).map(([key, value]) => (
+                    <Box key={key}>
+                      <Typography
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: "1rem",
+                          mb: 0.5,
+                        }}
+                      >
+                        {key === "vision"
+                          ? "الرؤية"
+                          : key === "mission"
+                            ? "الرسالة"
+                            : key.charAt(0).toUpperCase() + key.slice(1)}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          fontSize: "1rem",
+                          color: "text.secondary",
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {value}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              ) : (
+                <Typography color="text.secondary">لا يوجد محتوى</Typography>
+              )}
             </Box>
 
             <Chip
@@ -302,11 +361,21 @@ export default function ViewSection() {
               justifyContent: "center",
             }}
           >
-            <Button variant="contained" size="large">
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() =>
+                navigate(`/admin/edit-section-content/${section.id}`)
+              }
+            >
               Edit Content
             </Button>
 
-            <Button variant="outlined" size="large">
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => handleToggle(section.id)}
+            >
               Toggle Visibility
             </Button>
 

@@ -1,225 +1,305 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
-  Paper,
-  Typography,
   Chip,
-  Stack,
-  Divider,
   IconButton,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
   Tooltip,
+  Typography,
 } from "@mui/material";
+
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import TranslateIcon from "@mui/icons-material/Translate";
-import ImageIcon from "@mui/icons-material/Image";
-import { usePages } from "../../../../Hooks/usePages";
-import SectionsFilters from "../../Search and Filter/SectionsFilters";
-import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 import { useNavigate } from "react-router-dom";
+import { usePages } from "../../../../Hooks/usePages";
 import Title from "../../Headers/Titles";
+import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
+
 export default function ViewAllSections() {
-  const {
-    fetchAllSections,
-    allSections,
-    fetchAllPages,
-    pages,
-    fetchTemplates,
-    templates,
-    deleteSection,
-  } = usePages();
+  const { allSections, loading, getAllSections, deleteSection } = usePages();
+
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
-  const [pageFilter, setPageFilter] = useState("");
-  const [templateFilter, setTemplateFilter] = useState("");
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [selectedSection, setSelectedSection] = useState(null);
+
   useEffect(() => {
-    fetchAllSections();
-    fetchAllPages();
-    fetchTemplates();
-  }, []);
+    getAllSections();
+  }, [getAllSections]);
+
   const filteredSections = useMemo(() => {
-    return (allSections || []).filter((s) => {
-      const matchSearch =
-        s.type?.toLowerCase().includes(search.toLowerCase()) ||
-        s.status?.toLowerCase().includes(search.toLowerCase()) ||
-        s.page_key?.toLowerCase().includes(search.toLowerCase());
-      const matchPage = pageFilter ? s.page_key === pageFilter : true;
-      const matchTemplate = templateFilter
-        ? s.template_key === templateFilter
-        : true;
-      return matchSearch && matchPage && matchTemplate;
+    return (allSections || []).filter((section) => {
+      const value = `
+        ${section.id}
+        ${section.page_key}
+        ${section.type}
+        ${section.page_status}
+      `.toLowerCase();
+
+      return value.includes(search.toLowerCase());
     });
-  }, [allSections, search, pageFilter, templateFilter]);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const navigate = useNavigate();
-  console.log(filteredSections);
+  }, [allSections, search]);
+
+  const handleDelete = async () => {
+    if (!selectedSection) return;
+
+    await deleteSection(selectedSection.id);
+
+    setDeleteModal(false);
+    setSelectedSection(null);
+
+    getAllSections();
+  };
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#f8fafc", minHeight: "100vh" }}>
-      {/* HEADER */}
-
+    <Box
+      sx={{
+        p: {
+          xs: 2,
+          md: 3,
+        },
+      }}
+    >
       <Title
-        title={"Sections Control Center"}
-        caption={"Search, filter, and manage all page sections in one place."}
+        title="All Sections"
+        caption="Manage all sections across all pages."
       />
 
-      {/* FILTERS */}
-      <SectionsFilters
-        search={search}
-        setSearch={setSearch}
-        pages={pages}
-        templates={templates}
-        pageFilter={pageFilter}
-        setPageFilter={setPageFilter}
-        templateFilter={templateFilter}
-        setTemplateFilter={setTemplateFilter}
+      <TextField
+        fullWidth
+        label="Search sections"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        sx={{
+          mb: 3,
+          "& .MuiInputBase-input": {
+            fontSize: "1.05rem",
+          },
+          "& .MuiInputLabel-root": {
+            fontSize: "1rem",
+          },
+        }}
       />
-      {/* SECTIONS */}
-      {filteredSections.length === 0 ? (
-        <Paper
+
+      {loading && (
+        <LinearProgress
           sx={{
-            p: 4,
+            mb: 2,
+          }}
+        />
+      )}
+
+      {filteredSections.length === 0 ? (
+        <Typography
+          sx={{
+            mt: 4,
             textAlign: "center",
-            borderRadius: 4,
-            bgcolor: "#f8fafc",
-            border: "1px dashed #cbd5e1",
+            fontSize: "1.2rem",
+            fontWeight: 600,
           }}
         >
-          <Typography variant="h5" fontWeight={700} mb={1}>
-            No sections found
-          </Typography>
-          <Typography color="text.secondary" mb={2}>
-            There are no sections matching your current filters.
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Try changing the page filter, template filter, or search query.
-          </Typography>
-        </Paper>
+          No sections found.
+        </Typography>
       ) : (
-        <Stack spacing={4}>
-          {filteredSections.map((s, idx) => (
-            <Paper
-              key={s.id}
-              elevation={3}
-              sx={{
-                p: 3,
-                borderRadius: 4,
-                borderLeft: s.is_visible
-                  ? "6px solid #22c55e"
-                  : "6px solid #ef4444",
-                transition: "0.2s",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-                },
-              }}
-            >
-              {/* HEADER */}
-              <Stack
-                direction="row"
-                sx={{
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="h5"
-                    fontWeight={900}
-                    sx={{ letterSpacing: 0.2 }}
-                  >
-                    Section #{idx + 1}
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 3,
+            overflowX: "auto",
+          }}
+        >
+          <Table
+            sx={{
+              minWidth: 950,
+              "& .MuiTableCell-root": {
+                py: 2,
+                px: 2,
+              },
+            }}
+          >
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <Typography sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+                    ID
                   </Typography>
+                </TableCell>
 
-                  <Typography color="text.secondary" fontSize="1rem">
-                    <b>Page:</b> {s.page_key} • <b>Template:</b>{" "}
-                    {s.template_name}
+                <TableCell>
+                  <Typography sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+                    Page
                   </Typography>
-                </Box>
+                </TableCell>
 
-                <Chip
-                  label={s.is_visible ? "Visible" : "Hidden"}
-                  color={s.is_visible ? "success" : "error"}
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: "1rem",
-                    px: 1,
-                  }}
-                />
-              </Stack>
-              <Divider sx={{ my: 2.5 }} />
-              {/* META */}
-              <Stack
-                direction="row"
-                spacing={1.2}
-                sx={{ justifyContent: "center", flexWrap: "wrap" }}
-              >
-                <Chip label={`Type: ${s.type}`} />
-                <Chip label={`Position: ${s.position}`} />
-                <Chip label={s.status} />
-                <Chip label={`Translations: ${s.translations?.length || 0}`} />
-                <Chip label={`Media: ${s.media?.length || 0}`} />
-              </Stack>
-              <Divider sx={{ my: 2.5 }} />
-              {/* ACTIONS */}
-              <Stack
-                direction="row"
-                spacing={1.5}
-                sx={{ justifyContent: "center" }}
-              >
-                <Tooltip title="Preview">
-                  <IconButton
-                    onClick={() => navigate(`/admin/view-section/${s.id}`)}
-                    sx={{ bgcolor: "#f1f5f9" }}
-                  >
-                    <VisibilityIcon />
-                  </IconButton>
-                </Tooltip>
+                <TableCell>
+                  <Typography sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+                    Type
+                  </Typography>
+                </TableCell>
 
-                <Tooltip title="Edit">
-                  <IconButton sx={{ bgcolor: "#f1f5f9" }}>
-                    <EditIcon />
-                  </IconButton>
-                </Tooltip>
+                <TableCell>
+                  <Typography sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+                    Position
+                  </Typography>
+                </TableCell>
 
-                <Tooltip title="Translations">
-                  <IconButton sx={{ bgcolor: "#f1f5f9" }}>
-                    <TranslateIcon
-                      onClick={() =>
-                        navigate(`/admin/add-translations-section/${s.id}`)
-                      }
-                    />
-                  </IconButton>
-                </Tooltip>
+                <TableCell>
+                  <Typography sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+                    Status
+                  </Typography>
+                </TableCell>
 
-                <Tooltip title="Media">
-                  <IconButton sx={{ bgcolor: "#f1f5f9" }}>
-                    <ImageIcon />
-                  </IconButton>
-                </Tooltip>
+                <TableCell>
+                  <Typography sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+                    Translations
+                  </Typography>
+                </TableCell>
 
-                <Tooltip title="Delete">
-                  <IconButton color="error" sx={{ bgcolor: "#fef2f2" }}>
-                    <DeleteIcon
-                      onClick={() => {
-                        (setConfirmDelete(true), setSelectedId(s.id));
+                <TableCell>
+                  <Typography sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+                    Media
+                  </Typography>
+                </TableCell>
+
+                <TableCell align="center">
+                  <Typography sx={{ fontWeight: 800, fontSize: "1.1rem" }}>
+                    Actions
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {filteredSections.map((section) => (
+                <TableRow key={section.id} hover>
+                  <TableCell>
+                    <Typography sx={{ fontWeight: 700 }}>
+                      #{section.id}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell>
+                    <Typography sx={{ fontWeight: 700 }}>
+                      {section.page_key}
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        color: "text.secondary",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      Page ID: {section.page_id}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell>
+                    <Chip
+                      label={section.type}
+                      sx={{
+                        fontWeight: 700,
                       }}
                     />
-                  </IconButton>
-                </Tooltip>
-              </Stack>
-            </Paper>
-          ))}
-        </Stack>
+                  </TableCell>
+
+                  <TableCell>
+                    <Typography sx={{ fontWeight: 600 }}>
+                      {section.position}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell>
+                    <Chip
+                      label={section.is_visible ? "Visible" : "Hidden"}
+                      color={section.is_visible ? "success" : "default"}
+                      sx={{
+                        fontWeight: 700,
+                      }}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <Typography sx={{ fontWeight: 600 }}>
+                      {section.translations?.length || 0}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell>
+                    <Typography sx={{ fontWeight: 600 }}>
+                      {section.media?.length || 0}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <Tooltip title="View Section">
+                        <IconButton
+                          onClick={() =>
+                            navigate(`/admin/view-section/${section.id}`)
+                          }
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Translations">
+                        <IconButton
+                          onClick={() =>
+                            navigate(
+                              `/admin/add-translations-section/${section.id}`,
+                            )
+                          }
+                        >
+                          <TranslateIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Delete Section">
+                        <IconButton
+                          color="error"
+                          onClick={() => {
+                            setSelectedSection(section);
+                            setDeleteModal(true);
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-      {confirmDelete && (
+
+      {deleteModal && (
         <ConfirmDeleteModal
-          open={confirmDelete}
-          onClose={() => setConfirmDelete(false)}
-          onConfirm={() => (deleteSection(selectedId), setConfirmDelete(false))}
-          label={"User"}
+          open={deleteModal}
+          onClose={() => {
+            setDeleteModal(false);
+            setSelectedSection(null);
+          }}
+          onConfirm={handleDelete}
+          label="Section"
         />
       )}
     </Box>

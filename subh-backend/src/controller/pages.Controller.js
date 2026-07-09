@@ -24,6 +24,8 @@ export const createPageController = async (req, res) => {
       page,
     });
   } catch (error) {
+     (error);
+
     return res.status(500).json({
       message: formatError(error),
     });

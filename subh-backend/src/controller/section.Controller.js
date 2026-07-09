@@ -2,6 +2,7 @@ import {
   getSectionsByPage,
   getSectionById,
   getAllSections,
+  toggleSectionVisibility,
 } from "../models/section.Model.js";
 
 /**
@@ -73,6 +74,30 @@ export const getSectionByIdController = async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to fetch section",
+    });
+  }
+};
+
+export const toggleSectionVisibilityController = async (req, res) => {
+  try {
+    const section = await toggleSectionVisibility(req.params.id);
+    ("yes");
+
+    if (!section) {
+      return res.status(404).json({
+        message: "Section not found",
+      });
+    }
+
+    return res.json({
+      success: true,
+      section,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Server error",
     });
   }
 };

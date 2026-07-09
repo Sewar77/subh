@@ -35,8 +35,8 @@ export default function About() {
         sections.map(async (section) => {
           const res = await getSectionTranslationsBySectionId(section.id);
 
-          console.log("section id:", section.id);
-          console.log("translations:", res);
+          ("section id:", section.id);
+          ("translations:", res);
 
           return {
             ...section,
@@ -56,7 +56,7 @@ export default function About() {
     const trans = section.translations || [];
     const active = trans.find((t) => t.locale === locale);
 
-    console.log("active translation:", active);
+    ("active translation:", active);
 
     return {
       ...section,

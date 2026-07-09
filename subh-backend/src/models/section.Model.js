@@ -5,6 +5,12 @@ import pool from "../config/db.js";
 // =========================
 
 export const createSection = async (page_id, type) => {
+  const allowedTypes = ["image", "image-text", "text-image", "text"];
+
+  if (!allowedTypes.includes(type)) {
+    throw new Error("Invalid section type");
+  }
+
   const positionResult = await pool.query(
     `
     SELECT COALESCE(MAX(position),0)+1 AS next_position
@@ -24,9 +30,7 @@ export const createSection = async (page_id, type) => {
       type,
       position
     )
-
     VALUES($1,$2,$3)
-
     RETURNING *
     `,
     [page_id, type, position],
@@ -113,74 +117,60 @@ ORDER BY s.position ASC
 export const getSectionById = async (id) => {
   const result = await pool.query(
     `
-SELECT
+    SELECT
 
-s.*,
+        s.id,
+        s.page_id,
+        s.type,
+        s.position,
+        s.is_visible,
+        s.created_at,
 
-p.key AS page_key,
-p.status AS page_status
+        p.key AS page_key,
+        p.name AS page_name,
+        p.status AS page_status,
 
+        COALESCE(
+            json_agg(
+                jsonb_build_object(
+                    'id', st.id,
+                    'locale', st.locale,
+                    'title', st.title,
+                    'content', st.content,
+                    'is_visible', st.is_visible
+                )
+            )
+            FILTER(
+                WHERE st.id IS NOT NULL
+            ),
+            '[]'
+        ) AS translations
 
-FROM sections s
+    FROM sections s
 
+    JOIN pages p
+    ON s.page_id = p.id
 
-JOIN pages p
+    LEFT JOIN section_translations st
+    ON s.id = st.section_id
 
-ON s.page_id=p.id
+    WHERE s.id = $1
 
+    GROUP BY
+        s.id,
+        p.id
 
-WHERE s.id=$1
-
-`,
+    `,
     [id],
   );
 
   const section = result.rows[0];
 
-  if (!section) return null;
+  if (!section) {
+    return null;
+  }
 
-  const translations = await pool.query(
-    `
-SELECT *
-
-FROM section_translations
-
-WHERE section_id=$1
-
-ORDER BY locale ASC
-
-`,
-    [id],
-  );
-
-  const media = await pool.query(
-    `
-SELECT
-
-sm.section_id,
-sm.media_id,
-sm.role,
-sm.position
-
-
-FROM section_media sm
-
-
-WHERE sm.section_id=$1
-
-ORDER BY sm.position ASC
-
-`,
-    [id],
-  );
-
-  return {
-    ...section,
-
-    translations: translations.rows,
-
-    media: media.rows,
-  };
+  return section;
 };
 
 // =========================
@@ -240,107 +230,70 @@ RETURNING *
 
 export const getAllSections = async () => {
   const result = await pool.query(
-    `
-SELECT
+    `SELECT
+    s.id,
+    s.page_id,
+    s.type,
+    s.position,
+    s.is_visible,
 
+    p.key AS page_key,
+    p.status AS page_status,
 
-s.id,
-s.page_id,
-s.type,
-s.position,
-s.is_visible,
-
-
-p.key AS page_key,
-p.status AS page_status,
-
-
-
-COALESCE(
-
-json_agg(
-
-DISTINCT jsonb_build_object(
-
-'id',st.id,
-'locale',st.locale,
-'title',st.title,
-'content',st.content,
-'is_visible',st.is_visible
-
-)
-
-)
-
-FILTER(
-WHERE st.id IS NOT NULL
-),
-
-'[]'
-
-) AS translations,
-
-
-
-
-COALESCE(
-
-json_agg(
-
-DISTINCT jsonb_build_object(
-
-'media_id',sm.media_id,
-'role',sm.role,
-'position',sm.position
-
-)
-
-)
-
-FILTER(
-WHERE sm.media_id IS NOT NULL
-),
-
-'[]'
-
-) AS media
-
-
+    COALESCE(
+        json_agg(
+            DISTINCT jsonb_build_object(
+                'id', st.id,
+                'locale', st.locale,
+                'title', st.title,
+                'content', st.content,
+                'is_visible', st.is_visible
+            )
+        )
+        FILTER(
+            WHERE st.id IS NOT NULL
+        ),
+        '[]'
+    ) AS translations
 
 FROM sections s
 
-
 JOIN pages p
-
-ON s.page_id=p.id
-
-
+ON s.page_id = p.id
 
 LEFT JOIN section_translations st
+ON s.id = st.section_id
 
-ON s.id=st.section_id
-
-
-
-LEFT JOIN section_media sm
-
-ON s.id=sm.section_id
-
-
-
-GROUP BY 
-
-s.id,
-p.id
-
-
+GROUP BY
+    s.id,
+    p.id
 
 ORDER BY
-
-s.position ASC
-
+    s.position ASC;
 `,
   );
 
   return result.rows;
+};
+
+// =========================
+// TOGGLE SECTION VISIBILITY
+// =========================
+
+export const toggleSectionVisibility = async (id) => {
+  const result = await pool.query(
+    `
+    UPDATE sections
+
+    SET 
+      is_visible = NOT is_visible
+
+    WHERE id=$1
+
+    RETURNING *
+    `,
+    [id],
+  );
+
+  return result.rows[0];
 };

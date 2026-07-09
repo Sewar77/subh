@@ -26,18 +26,10 @@ import DisplayBooks from "./components/Books/DisplayBooks.jsx";
 import UserLayout from "./Layout/UserLayout.jsx";
 import ManageWorkshops from "./components/Admin/Manage/ManageWorkshops/ManageWorkshops.jsx";
 import ViewPages from "./components/Admin/Manage/ManagePages/ViewPages.jsx";
-import ViewTemplates from "./components/Admin/Manage/ManagePages/ViewTemplates.jsx";
-import CreatePage from "./components/Admin/Manage/ManagePages/CreatePage.jsx";
-import ViewSection from "./components/Admin/Manage/ManageSection/ViewSections.jsx";
-import CreateSection from "./components/Admin/Manage/ManageSection/CreateSection.jsx";
-import ViewPageTranslations from "./components/Admin/Manage/ManagePages/ViewPageTranslations.jsx";
-import ViewSectionTranslations from "./components/Admin/Manage/ManageSection/ViewSectionTranslations.jsx";
-import AddPageTranlsations from "./components/Admin/Manage/ManagePages/AddPageTranlsations.jsx";
-import AddSectionTranlsations from "./components/Admin/Manage/ManageSection/AddSectionTranlsations.jsx";
-import ViewAllSections from "./components/Admin/Manage/ManageSection/ViewAllSections.jsx";
 import ViewPage from "./components/Admin/Manage/ManagePages/ViewPage.jsx";
-import EditPage from "./components/Admin/Manage/EditPages/EditPage.jsx";
-import ViewPageSections from "./components/Admin/Manage/ManageSection/ViewPageSections.jsx";
+import ViewAllSections from "./components/Admin/Manage/ManageSection/ViewAllSections.jsx";
+import ViewSection from "./components/Admin/Manage/ManageSection/ViewSection.jsx";
+import EditSectionContent from "./components/Admin/Manage/ManageSection/EditSectionContent.jsx";
 function App() {
   const { id } = useParams();
   return (
@@ -72,6 +64,14 @@ function App() {
           <Route path="book/update/:id" element={<UpdateBook />} />
           <Route path="user/update/:id" element={<UpdateBook />} />
           {/* manage pages */}
+          <Route path="pages/view" element={<ViewPages />} />
+          <Route path="view-page/:pageId" element={<ViewPage />} />
+          <Route path="view-section/:sectionId" element={<ViewSection />} />
+          <Route path="view-sections" element={<ViewAllSections />} />
+          <Route
+            path="edit-section-content/:sectionId"
+            element={<EditSectionContent />}
+          />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

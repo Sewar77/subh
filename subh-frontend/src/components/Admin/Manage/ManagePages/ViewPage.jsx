@@ -6,371 +6,258 @@ import {
   Chip,
   Container,
   Divider,
-  Grid,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages";
 import { useEffect, useState } from "react";
-import AddButton from "../../Buttons/AddBtn";
 import Title from "../../Headers/Titles";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
-import DeleteButton from "../../Buttons/DeleteBtn";
-import PagePreview from "./PagePreview";
 export default function ViewPage() {
-  const {
-    deletePageById,
-    fetchPageById,
-    page,
-    getSectionsByPageId,
-    sections,
-    deleteSection,
-  } = usePages();
+  const { page, fetchPageById, deletePage } = usePages();
   const { pageId } = useParams();
-  const [confirmPageDelete, setConfirmPageDelete] = useState(false);
   const navigate = useNavigate();
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
+  const [deleteModal, setDeleteModal] = useState(false);
   useEffect(() => {
-    fetchPageById(pageId);
-    getSectionsByPageId(pageId);
+    if (pageId) {
+      fetchPageById(pageId);
+    }
   }, [pageId]);
   if (!page) return null;
-  const handleDeletePage = async () => {
-    await deletePageById(pageId);
-    setConfirmPageDelete(false);
+  const handleDelete = async () => {
+    await deletePage(page.id);
+    setDeleteModal(false);
     navigate("/admin/view-pages");
   };
-  return (
-    <Container sx={{ py: 4 }}>
-      {/* HEADER */}
-      <Stack
-        direction="row"
-        sx={{ justifyContent: "space-between", alignItems: "center", my: 2 }}
+  const InfoItem = ({ title, description, children }) => (
+    <Box
+      sx={{
+        p: {
+          xs: 2,
+          md: 3,
+        },
+        my: 2,
+        borderRadius: 3,
+        backgroundColor: "background.default",
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: {
+            xs: "1.4rem",
+            md: "1.7rem",
+          },
+          fontWeight: 900,
+          mb: 1,
+        }}
       >
-        <Box>
-          <Title
-            title={`Page: ${page.key}`}
-            caption={` Template: ${page.template_name}`}
-          />
-        </Box>
-        <Chip
-          label={page.status}
-          color={page.status === "draft" ? "warning" : "success"}
-          size="large"
-          sx={{ p: 3, fontSize: "20px" }}
-        />
-      </Stack>
-      {/* ACTIONS */}
-      <Stack direction="row" spacing={2} sx={{ my: 3 }}>
-        <AddButton label="Section" to={`/admin/create-section/${page.id}`} />
+        {title}
+      </Typography>
+
+      <Typography
+        sx={{
+          fontSize: {
+            xs: "0.85rem",
+            md: "0.95rem",
+          },
+          color: "text.secondary",
+          mb: 2,
+          lineHeight: 1.5,
+        }}
+      >
+        {description}
+      </Typography>
+
+      {children}
+    </Box>
+  );
+
+  return (
+    <Container
+      maxWidth="lg"
+      sx={{
+        py: {
+          xs: 3,
+          md: 5,
+        },
+      }}
+    >
+      <Title title={`Page: ${page.name}`} />
+
+      <Stack
+        direction={{
+          xs: "column",
+          sm: "row",
+        }}
+        sx={{
+          gap: 2,
+          mb: 4,
+        }}
+      >
         <Button
-          onClick={() => navigate(`/admin/view-page-sections/${page.id}`)}
           variant="outlined"
+          onClick={() => navigate(`/admin/page-translations/${page.id}`)}
+          sx={{
+            fontSize: {
+              xs: "1rem",
+              md: "1.1rem",
+            },
+            px: 4,
+          }}
         >
-          View Sections
+          Translations
         </Button>
         <Button
-          onClick={() => navigate(`/admin/add-translations-page/${page.id}`)}
-          variant="contained"
-          color="primary"
-        >
-          Add Translation
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => navigate(`/admin/edit-page/${page.id}`)}
-          color="secondary"
-        >
-          Edit Page
-        </Button>
-        <Button
-          variant="outlined"
           color="error"
-          onClick={() => setConfirmPageDelete(true)}
+          variant="contained"
+          onClick={() => setDeleteModal(true)}
+          sx={{
+            fontSize: {
+              xs: "1rem",
+              md: "1.1rem",
+            },
+            px: 4,
+          }}
         >
           Delete Page
         </Button>
       </Stack>
-      <Stack direction={{ xs: "column", md: "column" }} spacing={3}>
-        {/* MAIN INFO */}
-        <Card sx={{ flex: 2 }}>
-          <CardContent>
-            <Typography variant="h5" fontWeight={800} gutterBottom>
-              Page Information
-            </Typography>
 
-            <Divider sx={{ mb: 3 }} />
-
-            <Stack spacing={3}>
-              {/* INTERNAL KEY */}
-              <Box>
-                <Typography sx={{ fontSize: "1.2rem", fontWeight: 800 }}>
-                  Internal Page Identifier
-                </Typography>
-
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ fontSize: "1rem", mt: 0.5 }}
-                >
-                  Used by the system to uniquely identify this page. It is not
-                  shown to users on the website.
-                </Typography>
-
-                <Typography
-                  sx={{
-                    mt: 1,
-                    fontFamily: "monospace",
-                    fontSize: "1.1rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  {page.key}
-                </Typography>
-              </Box>
-
-              {/* TEMPLATE */}
-              <Box>
-                <Typography sx={{ fontSize: "1.2rem", fontWeight: 800 }}>
-                  Page Structure Template
-                </Typography>
-
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ fontSize: "1rem", mt: 0.5 }}
-                >
-                  Defines the layout and available sections (Hero, Text, Image).
-                  This controls how the page is built.
-                </Typography>
-
-                <Typography sx={{ mt: 1, fontSize: "1.1rem" }}>
-                  {page.template_name} ({page.template_key})
-                </Typography>
-              </Box>
-
-              {/* CREATED */}
-              <Box
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 4,
-                  justifyContent: "center",
-                }}
-              >
-                {/* CREATED */}
-                <Box
-                  sx={{
-                    flex: "1 1 300px",
-                    minWidth: 250,
-                    textAlign: "center",
-                    px: 2,
-                  }}
-                >
-                  <Typography sx={{ fontSize: "1.2rem", fontWeight: 800 }}>
-                    Created Date
-                  </Typography>
-
-                  <Typography
-                    sx={{ fontSize: "1rem", color: "text.secondary", mt: 0.5 }}
-                  >
-                    When this page was first created in the CMS.
-                  </Typography>
-
-                  <Typography sx={{ fontSize: "1.1rem", mt: 1 }}>
-                    {new Date(page.created_at).toLocaleString()}
-                  </Typography>
-                </Box>
-
-                {/* UPDATED */}
-                <Box
-                  sx={{
-                    flex: "1 1 300px",
-                    minWidth: 250,
-                    textAlign: "center",
-                    px: 2,
-                  }}
-                >
-                  <Typography sx={{ fontSize: "1.2rem", fontWeight: 800 }}>
-                    Last Updated
-                  </Typography>
-
-                  <Typography
-                    sx={{ fontSize: "1rem", color: "text.secondary", mt: 0.5 }}
-                  >
-                    The most recent change made to this page or its content.
-                  </Typography>
-
-                  <Typography sx={{ fontSize: "1.1rem", mt: 1 }}>
-                    {new Date(page.updated_at).toLocaleString()}
-                  </Typography>
-                </Box>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-        {/* PREVIEW AREA */}
-        <PagePreview page={page} />
-      </Stack>
-      {/* SECTIONS */}
       <Card
         sx={{
-          mt: 4,
-          p: 2,
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center",
+          borderRadius: 4,
+          boxShadow: 4,
         }}
       >
-        <CardContent>
-          <Box sx={{ display: "flex", justifyContent: "space-evenly", my: 3 }}>
-            <Typography variant="h4" fontWeight={700} gutterBottom>
-              Page Sections
-            </Typography>
-            <AddButton
-              label="Section"
-              to={`/admin/create-section/${page.id}`}
-            />
-          </Box>
-          {/* EMPTY STATE */}
-          {(!sections || sections.length === 0) && (
-            <Box
-              sx={{
-                mt: 3,
-                py: 5,
-                textAlign: "center",
-                border: "1px dashed #ccc",
-                borderRadius: 2,
-                backgroundColor: "#fafafa",
-              }}
+        <CardContent
+          sx={{
+            p: {
+              xs: 2,
+              md: 5,
+            },
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: {
+                xs: "2rem",
+                md: "3rem",
+              },
+              fontWeight: 900,
+            }}
+          >
+            Page Information
+          </Typography>
+
+          <Divider
+            sx={{
+              my: 4,
+            }}
+          />
+
+          <Stack
+            sx={{
+              gap: 2,
+            }}
+          >
+            <InfoItem
+              title="Page Name"
+              description="The display name used by administrators to recognize and manage this page."
             >
-              <Typography variant="h6" fontWeight={700} color="text.secondary">
-                No sections yet
+              <Typography
+                sx={{
+                  fontSize: {
+                    xs: "1.6rem",
+                    md: "2rem",
+                  },
+                  fontWeight: 900,
+                }}
+              >
+                {page.name}
               </Typography>
+            </InfoItem>
 
-              <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-                This page doesn’t contain any sections. Start by creating one.
+            <InfoItem
+              title="Page Key"
+              description="The unique internal identifier used by the system. This value connects the page with backend operations."
+            >
+              <Typography
+                sx={{
+                  fontFamily: "monospace",
+                  fontSize: {
+                    xs: "1.4rem",
+                    md: "1.8rem",
+                  },
+                  fontWeight: 800,
+                }}
+              >
+                {page.key}
               </Typography>
-            </Box>
-          )}
-          {/* LIST */}
-          {sections?.length > 0 && (
-            <Grid container spacing={3} mt={1}>
-              {sections.map((section) => (
-                <Grid
-                  size={{ xs: 12, md: 4, lg: 6 }}
-                  key={section.id}
-                  sx={{ alignItems: "center" }}
-                >
-                  <Card
-                    variant="outlined"
-                    sx={{
-                      p: 3,
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      transition: "0.2s",
-                      "&:hover": {
-                        transform: "translateY(-3px)",
-                        boxShadow: 3,
-                      },
-                    }}
-                  >
-                    {/* HEADER */}
-                    <Stack
-                      direction="row"
-                      sx={{
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        my: 3,
-                      }}
-                    >
-                      <Typography variant="h6" fontWeight={800}>
-                        {section.type.toUpperCase()}
-                      </Typography>
+            </InfoItem>
 
-                      <Chip
-                        label={section.is_visible ? "VISIBLE" : "HIDDEN"}
-                        color={section.is_visible ? "success" : "default"}
-                        size="large"
-                      />
-                    </Stack>
-                    {/* INFO */}
-                    <Stack spacing={1}>
-                      <Typography variant="body1">
-                        <strong>Position:</strong> {section.position}
-                      </Typography>
+            <InfoItem
+              title="Publishing Status"
+              description="Controls whether this page is visible to website visitors or still under development."
+            >
+              <Chip
+                label={page.status}
+                color={page.status === "published" ? "success" : "warning"}
+                sx={{
+                  fontSize: {
+                    xs: "1rem",
+                    md: "1.2rem",
+                  },
+                  fontWeight: 800,
+                  px: 2,
+                }}
+              />
+            </InfoItem>
 
-                      <Typography variant="body1">
-                        <strong>Type:</strong> {section.type}
-                      </Typography>
-                    </Stack>
-                    {/* PREVIEW PLACEHOLDER */}
-                    <Box
-                      sx={{
-                        mt: 2,
-                        height: 120,
-                        borderRadius: 2,
-                        border: "1px dashed #ccc",
-                        backgroundColor: "#f5f5f5",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Typography color="text.secondary">
-                        Section Preview
-                      </Typography>
-                    </Box>
-                    {/* ACTIONS */}
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      sx={{ justifyContent: "center", my: 3 }}
-                    >
-                      <Button size="small" variant="contained">
-                        Edit
-                      </Button>
-                      <Button size="small" variant="outlined">
-                        Preview
-                      </Button>
-                      <Tooltip title="Delete">
-                        <DeleteButton
-                          onClick={() => {
-                            setSelectedId(section.id);
-                            setConfirmDelete(true);
-                          }}
-                        />
-                      </Tooltip>
-                    </Stack>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
+            <InfoItem
+              title="Created At"
+              description="The date and time when this page was initially created inside the CMS."
+            >
+              <Typography
+                sx={{
+                  fontSize: {
+                    xs: "1.1rem",
+                    md: "1.3rem",
+                  },
+                  fontWeight: 600,
+                }}
+              >
+                {new Date(page.created_at).toLocaleString()}
+              </Typography>
+            </InfoItem>
+
+            <InfoItem
+              title="Last Updated"
+              description="The latest modification time of this page information."
+            >
+              <Typography
+                sx={{
+                  fontSize: {
+                    xs: "1.1rem",
+                    md: "1.3rem",
+                  },
+                  fontWeight: 600,
+                }}
+              >
+                {page.updated_at
+                  ? new Date(page.updated_at).toLocaleString()
+                  : "-"}
+              </Typography>
+            </InfoItem>
+          </Stack>
         </CardContent>
       </Card>
-      {confirmDelete && (
+
+      {deleteModal && (
         <ConfirmDeleteModal
-          open={confirmDelete}
-          onClose={() => setConfirmDelete(false)}
-          onConfirm={async () => {
-            await deleteSection(selectedId);
-            await getSectionsByPageId(pageId);
-            setConfirmDelete(false);
-          }}
-          label="Section"
-        />
-      )}
-      {confirmPageDelete && (
-        <ConfirmDeleteModal
-          open={confirmPageDelete}
-          onClose={() => setConfirmPageDelete(false)}
-          onConfirm={handleDeletePage}
+          open={deleteModal}
+          onClose={() => setDeleteModal(false)}
+          onConfirm={handleDelete}
           label="Page"
         />
       )}
