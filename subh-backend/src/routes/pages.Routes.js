@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   createPageController,
   getAllPagesController,
@@ -6,12 +7,12 @@ import {
   updatePageController,
   deletePageController,
   getPageByKeyController,
-  getPageByTemplateIdController,
 } from "../controller/pages.controller.js";
 
 import { protect } from "../middleware/protect.Middleware.js";
 import { adminOnly } from "../middleware/adminOnly.Middleware.js";
 import { validate } from "../middleware/validate.Middleware.js";
+
 import {
   createPageSchema,
   updatePageSchema,
@@ -19,32 +20,42 @@ import {
 
 const router = express.Router();
 
-/**
- * CREATE PAGE
- */
+// =========================
+// CREATE PAGE
+// (Developer/Admin only)
+// =========================
+
 router.post(
-  "/pages",
+  "/create-page",
   protect,
   adminOnly,
   validate(createPageSchema),
   createPageController,
 );
 
-/**
- * GET ALL PAGES
- */
+// =========================
+// GET ALL PAGES
+// =========================
+
 router.get("/pages", getAllPagesController);
 
-/**
- * GET PAGE BY ID
- */
+// =========================
+// GET PAGE BY ID
+// =========================
+
 router.get("/pages/:id", getPageByIdController);
-router.get("/template/:id/pages", getPageByTemplateIdController);
+
+// =========================
+// GET PAGE BY KEY
+// Frontend uses this
+// =========================
+
 router.get("/pages/key/:key", getPageByKeyController);
 
-/**
- * UPDATE PAGE
- */
+// =========================
+// UPDATE PAGE
+// =========================
+
 router.put(
   "/pages/:id",
   protect,
@@ -53,9 +64,10 @@ router.put(
   updatePageController,
 );
 
-/**
- * DELETE PAGE
- */
+// =========================
+// DELETE PAGE
+// =========================
+
 router.delete("/pages/:id", protect, adminOnly, deletePageController);
 
 export default router;

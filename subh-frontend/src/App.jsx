@@ -72,35 +72,6 @@ function App() {
           <Route path="book/update/:id" element={<UpdateBook />} />
           <Route path="user/update/:id" element={<UpdateBook />} />
           {/* manage pages */}
-          <Route path="view-pages" element={<ViewPages />} />
-          <Route path="view-sections" element={<ViewAllSections />} />
-          <Route path="view-template" element={<ViewTemplates />} />
-          <Route path="create-page/:templateId" element={<CreatePage />} />
-          <Route path="create-section/:pageId" element={<CreateSection />} />
-          <Route
-            path="view-page-sections/:pageId"
-            element={<ViewPageSections />}
-          />
-          <Route path="view-section/:sectionId" element={<ViewSection />} />
-          <Route path="view-page/:pageId" element={<ViewPage />} />
-          <Route
-            path="translations-page/:pageId"
-            element={<ViewPageTranslations />}
-          />
-          <Route
-            path="translations-section/:sectionId"
-            element={<ViewSectionTranslations />}
-          />
-          <Route
-            path="add-translations-page/:pageId"
-            element={<AddPageTranlsations />}
-          />
-          <Route
-            path="add-translations-section/:sectionId"
-            element={<AddSectionTranlsations />}
-          />
-          {/* edit pages/sections.. */}
-          <Route path="edit-page/:pageId" element={<EditPage />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

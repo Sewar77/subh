@@ -11,24 +11,27 @@ import {
 } from "../controller/sectionTranslator.Controller.js";
 const router = express.Router();
 router.post(
-  "/section-translations/:id",
+  "/sections/:id/translations",
   protect,
   adminOnly,
   validate(createTranslationSchema),
   createSectionTranslationController,
 );
+
 router.get(
-  "/section-translations/section/:id",
+  "/sections/:id/translations",
   getSectionTranslationsBySectionController,
 );
+
 router.put(
-  "/update-section/:id",
+  "/translations/:id",
   protect,
   adminOnly,
   updateSectionTranslationController,
 );
+
 router.delete(
-  "/delete-section/:id",
+  "/translations/:id",
   protect,
   adminOnly,
   deleteSectionTranslationController,

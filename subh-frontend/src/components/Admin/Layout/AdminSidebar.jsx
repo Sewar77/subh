@@ -23,14 +23,14 @@ export default function AdminSidebar() {
         { label: "Add User", path: "/admin/add/user" },
       ],
     },
-    {
-      title: "Pages",
-      items: [
-        { label: "View Template", path: "/admin/view-template" },
-        { label: "View Pages", path: "/admin/view-pages" },
-        { label: "View All Sections", path: "/admin/view-sections" },
-      ],
-    },
+    // {
+    //   title: "Pages",
+    //   items: [
+    //     { label: "View Template", path: "/admin/view-template" },
+    //     { label: "View Pages", path: "/admin/view-pages" },
+    //     { label: "View All Sections", path: "/admin/view-sections" },
+    //   ],
+    // },
     {
       title: "Text Books",
       items: [
