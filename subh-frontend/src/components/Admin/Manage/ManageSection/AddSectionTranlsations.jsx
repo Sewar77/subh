@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -16,8 +16,9 @@ import {
 import { useParams } from "react-router-dom";
 import { usePages } from "../../../../Hooks/usePages";
 import Title from "../../Headers/Titles";
+import { useUpload } from "../../../../Hooks/useUpload";
 
-export default function AddSectionTranlsations() {
+export default function AddSectionTranslations() {
   const { sectionId } = useParams();
 
   const {
@@ -28,158 +29,225 @@ export default function AddSectionTranlsations() {
     section,
   } = usePages();
 
+  const coverUpload = useUpload();
+
   const [form, setForm] = useState({
     locale: "en",
     title: "",
     content: "",
-    media: null,
   });
 
+  const [mediaFile, setMediaFile] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null);
+
+  // ================= LOAD DATA =================
+
   useEffect(() => {
-    if (sectionId) {
-      fetchSectionById(sectionId);
-      getSectionTranslationsBySectionId(sectionId);
-    }
+    if (!sectionId) return;
+
+    fetchSectionById(sectionId);
+    getSectionTranslationsBySectionId(sectionId);
   }, [sectionId]);
 
-  // ================= SECTION TYPE CONFIG =================
-  const sectionType = section?.type;
+  // ================= SECTION CONFIG =================
 
   const config = useMemo(() => {
-    switch (sectionType) {
+    switch (section?.type) {
       case "hero":
-        return { title: true, text: true, media: true, label: "Hero Section" };
-
-      case "text":
-        return { title: true, text: true, media: false, label: "Text Section" };
-
-      case "image_text":
-      case "text_image":
         return {
+          label: "Hero Section",
           title: true,
           text: true,
           media: true,
-          label: "Media + Text Section",
+        };
+
+      case "text":
+        return {
+          label: "Text Section",
+          title: true,
+          text: true,
+          media: false,
         };
 
       case "image":
         return {
+          label: "Image Section",
           title: false,
           text: false,
           media: true,
-          label: "Image Section",
+        };
+
+      case "image_text":
+      case "text_image":
+        return {
+          label: "Image + Text Section",
+          title: true,
+          text: true,
+          media: true,
         };
 
       case "gallery":
         return {
+          label: "Gallery Section",
           title: true,
           text: false,
           media: true,
-          label: "Gallery Section",
         };
 
       case "contact_form":
-        return { title: true, text: true, media: false, label: "Form Section" };
-
-      default:
         return {
+          label: "Contact Form",
           title: true,
           text: true,
           media: false,
+        };
+
+      default:
+        return {
           label: "Default Section",
+          title: true,
+          text: true,
+          media: false,
         };
     }
-  }, [sectionType]);
+  }, [section]);
 
-  // ================= PAYLOAD =================
-  const payload = useMemo(() => {
-    const data = { locale: form.locale };
+  // ================= IMAGE =================
 
-    if (config.title) data.title = form.title;
-    if (config.text) data.content = { text: form.content };
-    if (config.media) data.media = form.media;
+  const handleMediaChange = (e) => {
+    const file = e.target.files[0];
 
-    return data;
-  }, [form, config]);
+    if (!file) return;
 
-  const isValid = useMemo(() => {
-    if (config.title && !form.title) return false;
-    if (config.text && !form.content) return false;
-    return true;
-  }, [form, config]);
+    // if (!validateImage(file)) return;
+
+    setMediaFile(file);
+
+    setMediaPreview(URL.createObjectURL(file));
+  };
+
+  // ================= SAVE =================
 
   const handleSubmit = async () => {
-    if (!isValid) return;
+    let imageUrl = null;
+
+    if (config.media && mediaFile) {
+      const uploaded = await coverUpload.uploadImage(mediaFile);
+
+      imageUrl = uploaded?.url || uploaded?.path || null;
+    }
+
+    const content = {};
+
+    if (config.text) {
+      content.text = form.content;
+    }
+
+    if (imageUrl) {
+      content.image = imageUrl;
+    }
 
     await addSectionTranslation({
       section_id: sectionId,
-      data: payload,
+
+      data: {
+        locale: form.locale,
+
+        ...(config.title && {
+          title: form.title,
+        }),
+
+        content,
+      },
     });
 
     setForm({
       locale: "en",
       title: "",
       content: "",
-      media: null,
     });
+
+    setMediaFile(null);
+    setMediaPreview(null);
 
     getSectionTranslationsBySectionId(sectionId);
   };
 
+  const isValid = () => {
+    if (config.title && !form.title) return false;
+
+    if (config.text && !form.content) return false;
+
+    if (config.media && !mediaFile) return false;
+
+    return true;
+  };
+
   return (
-    <Container sx={{ py: 6, maxWidth: "900px !important" }}>
-      {/* ================= SECTION HEADER ================= */}
+    <Container
+      sx={{
+        py: 6,
+        maxWidth: "900px !important",
+      }}
+    >
+      {/* SECTION INFO */}
+
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Title title={"Section Details"} caption={config.label} />
+          <Title title="Section Details" caption={config.label} />
 
           <Divider sx={{ my: 2 }} />
 
           <Stack direction="row" spacing={1} flexWrap="wrap">
-            <Chip label={`Type: ${section?.type || "loading"}`} />
+            <Chip label={`Type: ${section?.type || "-"}`} />
+
             <Chip label={`Template: ${section?.template_name || "-"}`} />
+
             <Chip label={`Status: ${section?.status || "-"}`} />
-            <Chip
-              label={`Visible: ${section?.is_visible ? "Yes" : "No"}`}
-              color={section?.is_visible ? "success" : "error"}
-            />
           </Stack>
         </CardContent>
       </Card>
 
-      {/* ================= PERMISSIONS ================= */}
+      {/* PERMISSIONS */}
+
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" fontWeight={600}>
-            Field Permissions
-          </Typography>
+          <Typography fontWeight={700}>Allowed Fields</Typography>
 
           <Divider sx={{ my: 2 }} />
 
-          <Stack direction="row" spacing={1} flexWrap="wrap">
-            <Chip label={`Title: ${config.title ? "Allowed" : "Disabled"}`} />
-            <Chip label={`Text: ${config.text ? "Allowed" : "Disabled"}`} />
-            <Chip label={`Media: ${config.media ? "Allowed" : "Disabled"}`} />
+          <Stack direction="row" spacing={1}>
+            <Chip label={`Title ${config.title ? "✓" : "✕"}`} />
+
+            <Chip label={`Text ${config.text ? "✓" : "✕"}`} />
+
+            <Chip label={`Image ${config.media ? "✓" : "✕"}`} />
           </Stack>
         </CardContent>
       </Card>
 
-      {/* ================= FORM ================= */}
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-        Create Translation
-      </Typography>
+      {/* FORM */}
 
-      <Card sx={{ mb: 4 }}>
+      <Card>
         <CardContent>
-          <Stack spacing={2}>
+          <Stack spacing={3}>
+            <Typography variant="h6" fontWeight={800}>
+              Create Translation
+            </Typography>
+
             <TextField
               select
-              label="Locale"
+              label="Language"
               value={form.locale}
-              onChange={(e) => setForm({ ...form, locale: e.target.value })}
-              fullWidth
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  locale: e.target.value,
+                })
+              }
             >
               <MenuItem value="en">English</MenuItem>
+
               <MenuItem value="ar">Arabic</MenuItem>
             </TextField>
 
@@ -187,8 +255,12 @@ export default function AddSectionTranlsations() {
               <TextField
                 label="Title"
                 value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                fullWidth
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    title: e.target.value,
+                  })
+                }
               />
             )}
 
@@ -198,22 +270,54 @@ export default function AddSectionTranlsations() {
                 multiline
                 rows={5}
                 value={form.content}
-                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                fullWidth
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    content: e.target.value,
+                  })
+                }
               />
             )}
 
-            {!config.text && (
+            {config.media && (
+              <Box>
+                <Button variant="outlined" component="label">
+                  Select Image
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/*"
+                    onChange={handleMediaChange}
+                  />
+                </Button>
+
+                {mediaPreview && (
+                  <Box
+                    component="img"
+                    src={mediaPreview}
+                    sx={{
+                      mt: 2,
+                      width: "100%",
+                      maxHeight: 350,
+                      objectFit: "cover",
+                      borderRadius: 3,
+                    }}
+                  />
+                )}
+              </Box>
+            )}
+
+            {!config.text && !config.media && (
               <Alert severity="info">
-                This section type does not support text content.
+                This section does not require content.
               </Alert>
             )}
 
             <Button
               variant="contained"
               size="large"
+              disabled={!isValid()}
               onClick={handleSubmit}
-              disabled={!isValid}
             >
               Save Translation
             </Button>
@@ -221,102 +325,52 @@ export default function AddSectionTranlsations() {
         </CardContent>
       </Card>
 
-      {/* ================= HISTORY ================= */}
-      <Typography
-        variant="h5"
-        fontWeight={800}
-        sx={{ mb: 3, fontSize: "1.5rem" }}
-      >
+      {/* HISTORY */}
+
+      <Typography variant="h5" fontWeight={800} sx={{ mt: 5, mb: 2 }}>
         Translation Records
       </Typography>
 
       {!sectionTranslations?.length ? (
-        <Card
-          sx={{
-            p: 5,
-            textAlign: "center",
-            borderRadius: 3,
-          }}
-        >
-          <Typography variant="body1" color="text.secondary">
-            No translations available for this section
+        <Card sx={{ p: 4, textAlign: "center" }}>
+          <Typography color="text.secondary">
+            No translations available
           </Typography>
         </Card>
       ) : (
-        <Stack spacing={2.5}>
+        <Stack spacing={2}>
           {sectionTranslations.map((t) => (
-            <Card
-              key={t.id}
-              sx={{
-                borderRadius: 3,
-                transition: "0.25s",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                  boxShadow: 4,
-                },
-              }}
-            >
+            <Card key={t.id}>
               <CardContent>
-                {/* TOP ROW */}
-                <Stack
-                  direction="row"
-                  sx={{
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    mb: 1,
-                  }}
-                >
-                  <Box>
-                    <Typography
-                      variant="h6"
-                      fontWeight={800}
-                      sx={{ fontSize: "1.15rem" }}
-                    >
-                      {t.title || "Untitled Translation"}
-                    </Typography>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography fontWeight={800}>
+                    {t.title || "Untitled"}
+                  </Typography>
 
-                    <Typography
-                      variant="caption"
-                      sx={{ color: "text.secondary", fontSize: "0.85rem" }}
-                    >
-                      ID: {t.id}
-                    </Typography>
-                  </Box>
-
-                  <Chip
-                    label={t.locale.toUpperCase()}
-                    size="medium"
-                    color={t.locale === "ar" ? "success" : "primary"}
-                    sx={{ fontWeight: 600 }}
-                  />
+                  <Chip label={t.locale.toUpperCase()} />
                 </Stack>
 
-                {/* DIVIDER */}
                 <Divider sx={{ my: 2 }} />
 
-                {/* CONTENT BOX */}
-                <Box
+                <Typography
                   sx={{
-                    backgroundColor: "grey.50",
-                    borderRadius: 2,
-                    p: 2.5,
-                    border: "1px solid",
-                    borderColor: "grey.200",
+                    whiteSpace: "pre-line",
                   }}
                 >
-                  <Typography
-                    variant="body1"
+                  {t.content?.text || "No text content"}
+                </Typography>
+
+                {t.content?.image && (
+                  <Box
+                    component="img"
+                    src={t.content.image}
                     sx={{
-                      fontSize: "1rem",
-                      lineHeight: 1.8,
-                      color: "text.secondary",
-                      whiteSpace: "pre-wrap",
-                      textAlign: "left",
+                      mt: 2,
+                      width: "100%",
+                      borderRadius: 2,
                     }}
-                  >
-                    {t.content?.text || "No content available"}
-                  </Typography>
-                </Box>
+                  />
+                )}
               </CardContent>
             </Card>
           ))}

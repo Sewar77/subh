@@ -36,10 +36,35 @@ export const createSection = async (page_id, type) => {
 export const getSectionsByPage = async (page_id) => {
   const result = await pool.query(
     `
-    SELECT id, page_id, type, position, is_visible
-    FROM sections
-    WHERE page_id = $1 AND is_visible = true
-    ORDER BY position ASC
+    SELECT 
+      s.id,
+      s.page_id,
+      s.type,
+      s.position,
+      s.is_visible,
+
+      COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', st.id,
+            'locale', st.locale,
+            'title', st.title,
+            'content', st.content,
+            'is_visible', st.is_visible
+          )
+        ) FILTER (WHERE st.id IS NOT NULL),
+        '[]'
+      ) AS translations
+
+    FROM sections s
+    LEFT JOIN section_translations st
+      ON s.id = st.section_id
+
+    WHERE s.page_id = $1
+      AND s.is_visible = true
+
+    GROUP BY s.id
+    ORDER BY s.position ASC
     `,
     [page_id],
   );

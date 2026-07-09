@@ -35,6 +35,9 @@ export default function About() {
         sections.map(async (section) => {
           const res = await getSectionTranslationsBySectionId(section.id);
 
+          console.log("section id:", section.id);
+          console.log("translations:", res);
+
           return {
             ...section,
             translations: res || [],
@@ -51,8 +54,9 @@ export default function About() {
   // 4. Get localized section
   const getLocalizedSection = (section, locale = "en") => {
     const trans = section.translations || [];
-
     const active = trans.find((t) => t.locale === locale);
+
+    console.log("active translation:", active);
 
     return {
       ...section,
@@ -70,25 +74,14 @@ export default function About() {
   return (
     <Box sx={{ p: 4 }}>
       <Typography sx={{ fontSize: "2.5rem", fontWeight: 800 }}>
-        {page?.title || "About Page"}
-      </Typography>
-
-      <Typography sx={{ mb: 4, color: "text.secondary" }}>
-        CMS-driven dynamic page
+        {page?.title || "About Subh"}
       </Typography>
 
       <Stack spacing={5}>
-        {hydratedSections
+        {sections
           ?.sort((a, b) => a.position - b.position)
           .map((section) => (
-            <Card
-              key={section.id}
-              sx={{
-                p: 3,
-                borderRadius: 3,
-                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-              }}
-            >
+            <Card key={section.id}>
               <CardContent>
                 <SectionRenderer
                   section={getLocalizedSection(
