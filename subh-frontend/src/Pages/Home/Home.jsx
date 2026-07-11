@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { Box } from "@mui/material";
+import { Box, Container } from "@mui/material";
 
 import SectionRenderer from "../../cms/SectionRenderer";
 import { usePages } from "../../Hooks/usePages";
@@ -27,18 +27,20 @@ export default function Home() {
   }, [sectionKey, language]);
 
   return (
-    <Box
-      sx={{
-        direction: language === "ar" ? "rtl" : "ltr",
-      }}
-    >
-      <Navbar />
+    <>
+      <Container
+        sx={{
+          direction: language === "ar" ? "rtl" : "ltr",
+          minHeight: "100vh",
+        }}
+      >
+        <Navbar />
 
-      {sections.map((section) => (
-        <SectionRenderer key={section.id} section={section} />
-      ))}
-
+        {sections.map((section) => (
+          <SectionRenderer key={section.id} section={section} />
+        ))}
+      </Container>
       <Footer />
-    </Box>
+    </>
   );
 }

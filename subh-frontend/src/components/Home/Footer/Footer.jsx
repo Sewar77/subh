@@ -4,11 +4,14 @@ import ConnectInfo from "./ConnectInfo";
 import CopyRight from "./CopyRight";
 import Pages from "./Pages";
 import Info from "./Info";
+import { useLanguage } from "../../../Context/LanguageContext";
 export default function Footer() {
+  const { language } = useLanguage();
   return (
     <>
       <Container
         sx={{
+          direction: language === "ar" ? "rtl" : "ltr",
           position: "static",
           bottom: 0,
           display: "inline-block",

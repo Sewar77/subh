@@ -1,6 +1,11 @@
 import { Box, Typography } from "@mui/material";
+import { useLanguage } from "../../../Context/LanguageContext";
+import { footerTranslations } from "../../../locales/footerTranlsations";
 
 export default function Info() {
+  const { language } = useLanguage();
+  const t = footerTranslations[language];
+
   return (
     <Box>
       <Box
@@ -10,6 +15,7 @@ export default function Info() {
         }}
       >
         <Box component="img" src="/subhlogo.png" width="50rem" />
+
         <Box
           sx={{
             position: "absolute",
@@ -18,14 +24,19 @@ export default function Info() {
             width: "100%",
             height: "4px",
             borderRadius: "4px",
-            background: "linear-gradient(90deg, #41f2c3, #102943)",
+            background: "linear-gradient(90deg,#41f2c3,#102943)",
           }}
         />
       </Box>
 
-      <Typography variant="body1" sx={{ mt: 2 }}>
-        A center dedicated to providing educational curricula and services for
-        schools, centers, and individuals across North America
+      <Typography
+        variant="body1"
+        sx={{
+          mt: 2,
+          direction: language === "ar" ? "rtl" : "ltr",
+        }}
+      >
+        {t.description}
       </Typography>
     </Box>
   );

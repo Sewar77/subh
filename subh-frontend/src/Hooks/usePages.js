@@ -14,7 +14,9 @@ export const usePages = () => {
   const [pageTranslations, setPageTranslations] = useState([]);
   const [sectionTranslations, setSectionTranslations] = useState([]);
 
-  const [loading, setLoading] = useState(false);
+  const [pagesLoading, setPagesLoading] = useState(false);
+  const [sectionsLoading, setSectionsLoading] = useState(false);
+  const [translationLoading, setTranslationLoading] = useState(false);
 
   const handleError = (error) => {
     const message =
@@ -25,9 +27,10 @@ export const usePages = () => {
     toast.error(message);
   };
 
-  const withLoading = async (callback) => {
+  const handleRequest = async (callback, setLoading) => {
     try {
       setLoading(true);
+
       return await callback();
     } catch (error) {
       handleError(error);
@@ -43,20 +46,19 @@ export const usePages = () => {
 
   const fetchPages = useCallback(
     () =>
-      withLoading(async () => {
+      handleRequest(async () => {
         const res = await api.get("/pages");
-        res;
 
         setPages(res.data.pages || []);
 
         return res.data.pages;
-      }),
+      }, setPagesLoading),
     [],
   );
 
   const fetchPageById = useCallback(
     (id) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         setPage(null);
 
         const res = await api.get(`/pages/${id}`);
@@ -64,13 +66,13 @@ export const usePages = () => {
         setPage(res.data.page);
 
         return res.data.page;
-      }),
+      }, setPagesLoading),
     [],
   );
 
   const fetchPageByKey = useCallback(
     (key) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         setPage(null);
 
         const res = await api.get(`/pages/key/${key}`);
@@ -78,7 +80,7 @@ export const usePages = () => {
         setPage(res.data.page);
 
         return res.data.page;
-      }),
+      }, setPagesLoading),
     [],
   );
 
@@ -88,49 +90,49 @@ export const usePages = () => {
 
   const getPageTranslations = useCallback(
     (pageId) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         const res = await api.get(`/page-translations/${pageId}`);
 
         setPageTranslations(res.data.translations || []);
 
         return res.data.translations;
-      }),
+      }, setTranslationLoading),
     [],
   );
 
   const createPageTranslation = useCallback(
     (pageId, data) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         const res = await api.post(`/page-translations/${pageId}`, data);
 
         toast.success("Page translation added");
 
         return res.data;
-      }),
+      }, setTranslationLoading),
     [],
   );
 
   const updatePageTranslation = useCallback(
     (id, data) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         const res = await api.put(`/page-translations/${id}`, data);
 
         toast.success("Page translation updated");
 
         return res.data;
-      }),
+      }, setTranslationLoading),
     [],
   );
 
   const deletePageTranslation = useCallback(
     (id) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         await api.delete(`/page-translations/${id}`);
 
         setPageTranslations((prev) => prev.filter((item) => item.id !== id));
 
         toast.success("Page translation deleted");
-      }),
+      }, setTranslationLoading),
     [],
   );
 
@@ -140,50 +142,57 @@ export const usePages = () => {
 
   const getSectionsByPageId = useCallback(
     (pageId) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         const res = await api.get(`/pages/${pageId}/sections`);
 
         setSections(res.data.sections || []);
 
         return res.data.sections;
-      }),
+      }, setSectionsLoading),
     [],
   );
+
   const getSectionsByPageKey = useCallback(
     (key) =>
-      withLoading(async () => {
+      handleRequest(async () => {
+        setSectionKey(null);
+
         const res = await api.get(`/pages/sections/${key}`);
+
         setSectionKey(res.data.sections || []);
+
         return res.data.sections;
-      }),
+      }, setSectionsLoading),
     [],
   );
+
   const getAllSections = useCallback(
     () =>
-      withLoading(async () => {
-        const res = await api.get(`/sections`);
-        res;
+      handleRequest(async () => {
+        const res = await api.get("/sections");
+
         setAllSections(res.data.sections || []);
+
         return res.data.sections;
-      }),
+      }, setSectionsLoading),
     [],
   );
 
   const fetchSectionById = useCallback(
     (id) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         const res = await api.get(`/sections/${id}`);
-        res;
 
         setSection(res.data.section);
 
         return res.data.section;
-      }),
+      }, setSectionsLoading),
     [],
   );
+
   const toggleSectionVisibility = useCallback(
     (id) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         const res = await api.patch(`/sections/${id}/toggle`);
 
         setSection(res.data.section);
@@ -203,7 +212,7 @@ export const usePages = () => {
         );
 
         return res.data.section;
-      }),
+      }, setSectionsLoading),
     [],
   );
 
@@ -213,31 +222,30 @@ export const usePages = () => {
 
   const getSectionTranslations = useCallback(
     (sectionId) =>
-      withLoading(async () => {
-        sectionId;
-
+      handleRequest(async () => {
         const res = await api.get(`/sections/${sectionId}/translations`);
 
         setSectionTranslations(res.data.translations || []);
+
         return res.data.translations;
-      }),
+      }, setTranslationLoading),
     [],
   );
 
   const updateSectionTranslation = useCallback(
     (id, data) =>
-      withLoading(async () => {
+      handleRequest(async () => {
         const res = await api.put(`/translations/${id}`, data);
 
         toast.success("Section content updated");
 
         return res.data;
-      }),
+      }, setTranslationLoading),
     [],
   );
 
   return {
-    // states
+    // STATES
 
     pages,
     page,
@@ -250,28 +258,34 @@ export const usePages = () => {
     pageTranslations,
     sectionTranslations,
 
-    loading,
+    // LOADING
 
-    // pages
+    pagesLoading,
+    sectionsLoading,
+    translationLoading,
+
+    // PAGES
 
     fetchPages,
     fetchPageById,
     fetchPageByKey,
 
-    // page translations
+    // PAGE TRANSLATIONS
 
     getPageTranslations,
+    createPageTranslation,
     updatePageTranslation,
+    deletePageTranslation,
 
-    // sections
+    // SECTIONS
 
     getSectionsByPageId,
-    fetchSectionById,
-    getAllSections,
-    toggleSectionVisibility,
     getSectionsByPageKey,
+    getAllSections,
+    fetchSectionById,
+    toggleSectionVisibility,
 
-    // section translations
+    // SECTION TRANSLATIONS
 
     getSectionTranslations,
     updateSectionTranslation,

@@ -1,17 +1,22 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "en",
+  );
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+  }, [language]);
 
   const changeLanguage = (lang) => {
     if (lang !== "en" && lang !== "ar") return;
 
     setLanguage(lang);
-
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    localStorage.setItem("language", lang);
   };
 
   return (
@@ -19,7 +24,7 @@ export function LanguageProvider({ children }) {
       value={{
         language,
         changeLanguage,
-        setLanguage,
+        setLanguage: changeLanguage,
       }}
     >
       {children}

@@ -1,11 +1,14 @@
 import { Typography } from "@mui/material";
+import { useLanguage } from "../../../Context/LanguageContext";
+import { footerTranslations } from "../../../locales/footerTranlsations";
 
 export default function CopyRight() {
+  const { language } = useLanguage();
+  const t = footerTranslations[language];
+
   return (
-    <>
-      <Typography variant="body1">
-        2026 - 2027 All Rights reserverd for Subh Educational Platform
-      </Typography>
-    </>
+    <Typography>
+      {t.copyright} || {t.year}
+    </Typography>
   );
 }

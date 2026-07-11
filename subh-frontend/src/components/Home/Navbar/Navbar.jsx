@@ -12,48 +12,90 @@ import {
   ListItemButton,
   Tooltip,
 } from "@mui/material";
+
 import MenuIcon from "@mui/icons-material/Menu";
 import TranslateIcon from "@mui/icons-material/Translate";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../Hooks/useAuth";
-import { usersContext } from "../../../Context/usersContext";
 import { authContext } from "../../../Context/authContext";
 import { useLanguage } from "../../../Context/LanguageContext";
+
 export default function Navbar() {
   const { language, setLanguage } = useLanguage();
+
+  const navigate = useNavigate();
+
+  const [open, setOpen] = useState(false);
+
+  const { logout } = useAuth();
+  const { user, loadUser } = useContext(authContext);
+
+  useEffect(() => {
+    loadUser();
+  }, []);
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "ar" : "en");
   };
+
   const pages = [
     {
-      name: "Home",
+      name: {
+        en: "Home",
+        ar: "الرئيسية",
+      },
       path: "/",
     },
-    { name: "Training Courses", path: "/courses" },
-    { name: "Books", path: "/subh/books" },
-    { name: "WorkShops", path: "/subh/books" },
-    { name: "Who We Are", path: "/about" },
-    { name: "Contact Us", path: "/contact" },
+    {
+      name: {
+        en: "Training Courses",
+        ar: "الدورات التدريبية",
+      },
+      path: "/courses",
+    },
+    {
+      name: {
+        en: "Books",
+        ar: "الكتب",
+      },
+      path: "/subh/books",
+    },
+    {
+      name: {
+        en: "Workshops",
+        ar: "ورش العمل",
+      },
+      path: "/workshops",
+    },
+    {
+      name: {
+        en: "Who We Are",
+        ar: "من نحن",
+      },
+      path: "/about",
+    },
+    {
+      name: {
+        en: "Contact Us",
+        ar: "اتصل بنا",
+      },
+      path: "/contact",
+    },
   ];
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const { logout } = useAuth();
-  const { user, loadUser } = useContext(authContext);
-  useEffect(() => {
-    loadUser();
-  }, []);
+
   return (
     <AppBar
       position="sticky"
       sx={{
+        direction: language === "ar" ? "rtl" : "ltr",
         mb: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
         width: "100%",
         mx: "auto",
         p: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
         borderRadius: 5,
-        background: "linear-gradient(90deg, #bb40bf, #613389, #102943 )",
+        background: "linear-gradient(90deg, #bb40bf, #613389, #102943)",
       }}
     >
       <Toolbar
@@ -62,9 +104,20 @@ export default function Navbar() {
           justifyContent: "space-between",
         }}
       >
-        <IconButton>
-          <Box component="img" src="/subhlogo.png" width="50rem" />
-        </IconButton>
+        {/* LOGO */}
+        <Tooltip title={language === "en" ? "Home Page" : "الصفحة الرئيسية"}>
+          <IconButton onClick={() => navigate("/")}>
+            <Box
+              component="img"
+              src="/subhlogo.png"
+              sx={{
+                width: "50px",
+              }}
+            />
+          </IconButton>
+        </Tooltip>
+
+        {/* DESKTOP MENU */}
         <Box
           sx={{
             display: { xs: "none", md: "flex" },
@@ -73,19 +126,23 @@ export default function Navbar() {
         >
           {pages.map((page) => (
             <Typography
-              key={page.name}
+              key={page.path}
               onClick={() => navigate(page.path)}
               sx={{
                 color: "text.secondary",
                 fontWeight: 500,
                 cursor: "pointer",
-                "&:hover": { color: "success.main" },
+                "&:hover": {
+                  color: "success.main",
+                },
               }}
             >
-              {page.name}
+              {page.name[language]}
             </Typography>
           ))}
         </Box>
+
+        {/* ACTIONS */}
         <Box
           sx={{
             display: "flex",
@@ -93,99 +150,131 @@ export default function Navbar() {
             gap: 1.5,
           }}
         >
-          <Tooltip title={`${language === "en" ? "ar" : "en"}`}>
+          {/* LANGUAGE */}
+          <Tooltip
+            title={language === "en" ? "Switch to Arabic" : "Switch to English"}
+          >
             <IconButton
               onClick={toggleLanguage}
               sx={{
                 bgcolor: "secondary.main",
-                fontSize: "25px",
                 color: "text.secondary",
+                gap: 1,
               }}
             >
-              {language === "en" ? "ar" : "en"}
-              {"     "}
-              <TranslateIcon sx={{ color: "text.secondary" }} />
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                }}
+              >
+                {language === "en" ? "عربي" : "English"}
+              </Typography>
+
+              <TranslateIcon />
             </IconButton>
           </Tooltip>
+
+          {/* USER */}
           {user ? (
             <>
-              <IconButton>
-                <PersonOutlinedIcon sx={{ color: "text.secondary" }} />
-              </IconButton>
+              <Tooltip title={language === "en" ? "Profile" : "الملف الشخصي"}>
+                <IconButton>
+                  <PersonOutlinedIcon
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  />
+                </IconButton>
+              </Tooltip>
+
               <Button
                 variant="contained"
                 sx={{
-                  background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
+                  background:
+                    "linear-gradient(45deg, rgb(0,255,255), rgb(255,0,255))",
                   color: "#fff",
                   fontWeight: 600,
                   borderRadius: 3,
                   textTransform: "none",
                   display: { xs: "none", sm: "flex" },
                   "&:hover": {
-                    background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
+                    background:
+                      "linear-gradient(90deg, rgb(255,0,255), #613389)",
                   },
                 }}
-                onClick={() => logout()}
+                onClick={logout}
               >
-                Logout
+                {language === "en" ? "Logout" : "تسجيل الخروج"}
               </Button>
             </>
           ) : (
-            <>
-              <Button
-                variant="contained"
-                sx={{
-                  background: `linear-gradient(45deg, rgb(0, 255, 255), rgb(255, 0, 255))`,
-                  color: "#fff",
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  textTransform: "none",
-                  display: { xs: "none", sm: "flex" },
-                  "&:hover": {
-                    background: `linear-gradient(90deg,  rgb(255, 0, 255),#613389)`,
-                  },
-                }}
-                onClick={() => navigate("/login")}
-              >
-                Login
-              </Button>
-            </>
+            <Button
+              variant="contained"
+              sx={{
+                background:
+                  "linear-gradient(45deg, rgb(0,255,255), rgb(255,0,255))",
+                color: "#fff",
+                fontWeight: 600,
+                borderRadius: 3,
+                textTransform: "none",
+                display: { xs: "none", sm: "flex" },
+                "&:hover": {
+                  background: "linear-gradient(90deg, rgb(255,0,255), #613389)",
+                },
+              }}
+              onClick={() => navigate("/login")}
+            >
+              {language === "en" ? "Login" : "تسجيل الدخول"}
+            </Button>
           )}
+
+          {/* MOBILE MENU */}
           <IconButton
             onClick={() => setOpen(true)}
-            sx={{ display: { xs: "flex", md: "none" }, color: "white" }}
+            sx={{
+              display: { xs: "flex", md: "none" },
+              color: "white",
+            }}
           >
             <MenuIcon />
           </IconButton>
         </Box>
       </Toolbar>
-      <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+
+      {/* MOBILE DRAWER */}
+      <Drawer
+        anchor={language === "ar" ? "left" : "right"}
+        open={open}
+        onClose={() => setOpen(false)}
+      >
         <Box
           sx={{
             width: 250,
             p: 2,
-            bgcolor: `linear-gradient(
-        90deg,
-        #bb40bf ,
-        #102943, 
-        #613389
-      )`,
             minHeight: "100vh",
-            color: "text.secondary",
+            direction: language === "ar" ? "rtl" : "ltr",
           }}
         >
-          <Typography sx={{ mb: 2, fontWeight: 700 }}>Menu</Typography>
+          <Typography
+            sx={{
+              mb: 2,
+              fontWeight: 700,
+            }}
+          >
+            {language === "en" ? "Menu" : "القائمة"}
+          </Typography>
 
           <List>
             {pages.map((page) => (
-              <ListItem key={page.name} disablePadding>
+              <ListItem key={page.path} disablePadding>
                 <ListItemButton
                   onClick={() => {
                     navigate(page.path);
                     setOpen(false);
                   }}
                 >
-                  {page.name}
+                  {page.name[language]}
                 </ListItemButton>
               </ListItem>
             ))}

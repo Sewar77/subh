@@ -32,6 +32,7 @@ export default function About() {
     <Box
       sx={{
         direction: language === "ar" ? "rtl" : "ltr",
+        minHeight: "100vh",
       }}
     >
       {sections.map((section) => (
