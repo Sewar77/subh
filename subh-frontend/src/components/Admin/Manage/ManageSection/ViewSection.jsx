@@ -10,7 +10,7 @@ import {
   Button,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import { usePages } from "../../../../Hooks/usePages";
+import { usePages } from "../../../../Context/pageContext";
 import Title from "../../Headers/Titles";
 
 export default function ViewSection() {

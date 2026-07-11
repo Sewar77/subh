@@ -21,9 +21,9 @@ import TranslateIcon from "@mui/icons-material/Translate";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useNavigate } from "react-router-dom";
-import { usePages } from "../../../../Hooks/usePages";
 import Title from "../../Headers/Titles";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";
+import { usePages } from "../../../../Context/pageContext";
 
 export default function ViewAllSections() {
   const { allSections, loading, getAllSections, deleteSection } = usePages();

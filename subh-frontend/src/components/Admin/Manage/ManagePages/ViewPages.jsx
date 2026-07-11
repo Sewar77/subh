@@ -20,7 +20,7 @@ import TranslateIcon from "@mui/icons-material/Translate";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { usePages } from "../../../../Hooks/usePages";
+import { usePages } from "../../../../Context/pageContext";
 import Title from "../../Headers/Titles";
 import AddButton from "../../Buttons/AddBtn";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";

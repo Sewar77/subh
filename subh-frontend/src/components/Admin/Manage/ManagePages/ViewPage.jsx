@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import { usePages } from "../../../../Hooks/usePages";
+import { usePages } from "../../../../Context/pageContext";
 import { useEffect, useState } from "react";
 import Title from "../../Headers/Titles";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal";

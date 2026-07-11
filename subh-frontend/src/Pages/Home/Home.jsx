@@ -2,12 +2,12 @@ import { useEffect, useMemo } from "react";
 import { Box, Container } from "@mui/material";
 
 import SectionRenderer from "../../cms/SectionRenderer";
-import { usePages } from "../../Hooks/usePages";
 import { useLanguage } from "../../Context/LanguageContext";
 import { prepareSection } from "../../Utils/sectionAdapter";
 
 import Navbar from "../../components/Home/Navbar/Navbar";
 import Footer from "../../components/Home/Footer/Footer";
+import { usePages } from "../../Context/pageContext";
 
 export default function Home() {
   const { getSectionsByPageKey, sectionKey } = usePages();

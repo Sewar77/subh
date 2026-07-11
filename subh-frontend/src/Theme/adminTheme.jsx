@@ -1,11 +1,5 @@
 import { createTheme } from "@mui/material/styles";
-export const getTheme = (language) =>
-  createTheme({
-    typography: {
-      fontFamily:
-        language === "ar" ? "DG Faseh, sans-serif" : "Montserrat, sans-serif",
-    },
-  });
+
 export const adminTheme = createTheme({
   palette: {
     mode: "light",

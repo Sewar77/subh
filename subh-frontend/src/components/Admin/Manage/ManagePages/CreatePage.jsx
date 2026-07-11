@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { usePages } from "../../../../Hooks/usePages.js";
+import { usePages } from "../../../../Context/pageContext";
 import ViewButton from "../../Buttons/ViewBtn.jsx";
 import Title from "../../Headers/Titles.jsx";
 

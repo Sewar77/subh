@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { usePages } from "../../../../Hooks/usePages";
+import { usePages } from "../../../../Context/pageContext";
 import Title from "../../Headers/Titles";
 
 export default function EditSectionContent() {
