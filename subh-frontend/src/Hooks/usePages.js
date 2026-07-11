@@ -9,6 +9,7 @@ export const usePages = () => {
   const [sections, setSections] = useState([]);
   const [allSections, setAllSections] = useState([]);
   const [section, setSection] = useState(null);
+  const [sectionKey, setSectionKey] = useState(null);
 
   const [pageTranslations, setPageTranslations] = useState([]);
   const [sectionTranslations, setSectionTranslations] = useState([]);
@@ -140,10 +141,19 @@ export const usePages = () => {
   const getSectionsByPageId = useCallback(
     (pageId) =>
       withLoading(async () => {
-        const res = await api.get(`/sections/page/${pageId}`);
+        const res = await api.get(`/pages/${pageId}/sections`);
 
         setSections(res.data.sections || []);
 
+        return res.data.sections;
+      }),
+    [],
+  );
+  const getSectionsByPageKey = useCallback(
+    (key) =>
+      withLoading(async () => {
+        const res = await api.get(`/pages/sections/${key}`);
+        setSectionKey(res.data.sections || []);
         return res.data.sections;
       }),
     [],
@@ -235,6 +245,7 @@ export const usePages = () => {
     sections,
     section,
     allSections,
+    sectionKey,
 
     pageTranslations,
     sectionTranslations,
@@ -258,6 +269,7 @@ export const usePages = () => {
     fetchSectionById,
     getAllSections,
     toggleSectionVisibility,
+    getSectionsByPageKey,
 
     // section translations
 

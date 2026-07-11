@@ -5,6 +5,7 @@ import {
   getSectionsByPageController,
   getSectionByIdController,
   toggleSectionVisibilityController,
+  getSectionsByPageKeyController,
 } from "../controller/section.Controller.js";
 import { protect } from "../middleware/protect.Middleware.js";
 import { adminOnly } from "../middleware/adminOnly.Middleware.js";
@@ -21,6 +22,7 @@ GET PAGE SECTIONS
 Frontend
 */
 router.get("/pages/:page_id/sections", getSectionsByPageController);
+router.get("/pages/sections/:key", getSectionsByPageKeyController);
 
 /*
 GET ONE SECTION

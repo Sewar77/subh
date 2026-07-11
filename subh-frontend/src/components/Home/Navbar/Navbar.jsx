@@ -10,6 +10,7 @@ import {
   List,
   ListItem,
   ListItemButton,
+  Tooltip,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import TranslateIcon from "@mui/icons-material/Translate";
@@ -18,7 +19,13 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../Hooks/useAuth";
 import { usersContext } from "../../../Context/usersContext";
 import { authContext } from "../../../Context/authContext";
+import { useLanguage } from "../../../Context/LanguageContext";
 export default function Navbar() {
+  const { language, setLanguage } = useLanguage();
+
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "ar" : "en");
+  };
   const pages = [
     {
       name: "Home",
@@ -86,9 +93,20 @@ export default function Navbar() {
             gap: 1.5,
           }}
         >
-          <IconButton sx={{ bgcolor: "secondary.main" }}>
-            <TranslateIcon sx={{ color: "text.secondary" }} />
-          </IconButton>
+          <Tooltip title={`${language === "en" ? "ar" : "en"}`}>
+            <IconButton
+              onClick={toggleLanguage}
+              sx={{
+                bgcolor: "secondary.main",
+                fontSize: "25px",
+                color: "text.secondary",
+              }}
+            >
+              {language === "en" ? "ar" : "en"}
+              {"     "}
+              <TranslateIcon sx={{ color: "text.secondary" }} />
+            </IconButton>
+          </Tooltip>
           {user ? (
             <>
               <IconButton>

@@ -10,19 +10,22 @@ import AuthProvider from "./Context/authContext.jsx";
 import UsersProvider from "./Context/usersContext.jsx";
 import CategoriesProvider from "./Context/categoriesContext.jsx";
 import BooksProvider from "./Context/booksContext.jsx";
+import { LanguageProvider } from "./Context/LanguageContext.jsx";
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
-    <AuthProvider>
-      <UsersProvider>
-        <CategoriesProvider>
-          <BooksProvider>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <App />
-            </ThemeProvider>
-          </BooksProvider>
-        </CategoriesProvider>
-      </UsersProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <UsersProvider>
+          <CategoriesProvider>
+            <BooksProvider>
+              <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <App />
+              </ThemeProvider>
+            </BooksProvider>
+          </CategoriesProvider>
+        </UsersProvider>
+      </AuthProvider>
+    </LanguageProvider>
   </BrowserRouter>,
 );

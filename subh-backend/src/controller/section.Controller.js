@@ -3,6 +3,7 @@ import {
   getSectionById,
   getAllSections,
   toggleSectionVisibility,
+  getSectionsByPageKey,
 } from "../models/section.Model.js";
 
 /**
@@ -35,6 +36,30 @@ export const getSectionsByPageController = async (req, res) => {
     const { page_id } = req.params;
 
     const sections = await getSectionsByPage(page_id);
+
+    return res.status(200).json({
+      success: true,
+      sections,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to fetch page sections",
+    });
+  }
+};
+
+/**
+ * GET SECTIONS BY PAGE
+ * Frontend rendering
+ */
+export const getSectionsByPageKeyController = async (req, res) => {
+  try {
+    const key = req.params.key;
+    console.log(key);
+
+    const sections = await getSectionsByPageKey(key);
 
     return res.status(200).json({
       success: true,

@@ -1,13 +1,26 @@
+import { useLanguage } from "../Context/LanguageContext";
 import { SECTION_COMPONENTS } from "./sectionRegistry";
 
 export default function SectionRenderer({ section }) {
+  const { language } = useLanguage();
+
   const Component = SECTION_COMPONENTS[section.type];
 
-  if (!Component) {
-    console.warn(`Unknown section type: ${section.type}`);
+  if (!Component) return null;
 
-    return null;
-  }
+  const translation =
+    section.translations?.find((t) => t.locale === language) ||
+    section.translations?.[0];
 
-  return <Component section={section} />;
+  if (!translation) return null;
+
+  return (
+    <Component
+      section={{
+        ...section,
+        title: translation.title,
+        content: translation.content,
+      }}
+    />
+  );
 }

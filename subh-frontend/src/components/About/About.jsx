@@ -1,101 +1,42 @@
-import { useEffect, useState } from "react";
-import { Box, Typography, Stack, Card, CardContent } from "@mui/material";
+import { useEffect, useMemo } from "react";
+import { Box } from "@mui/material";
+
 import { usePages } from "../../Hooks/usePages";
+import { useLanguage } from "../../Context/LanguageContext";
+
 import SectionRenderer from "../../cms/SectionRenderer";
+import { prepareSection } from "../../Utils/sectionAdapter";
 
 export default function About() {
-  const {
-    page,
-    sections,
-    fetchPageByKey,
-    getSectionsByPageId,
-    getSectionTranslationsBySectionId,
-  } = usePages();
+  const { getSectionsByPageKey, sectionKey } = usePages();
 
-  const [hydratedSections, setHydratedSections] = useState([]);
+  const { language } = useLanguage();
 
-  // 1. Load page
   useEffect(() => {
-    fetchPageByKey("about-page");
+    getSectionsByPageKey("about-page");
   }, []);
 
-  // 2. Load sections
-  useEffect(() => {
-    if (page?.id) {
-      getSectionsByPageId(page.id);
-    }
-  }, [page?.id]);
+  const sections = useMemo(() => {
+    return (sectionKey || [])
 
-  // 3. Merge translations INTO sections
-  useEffect(() => {
-    if (!sections?.length) return;
+      .filter((section) => section.is_visible)
 
-    const load = async () => {
-      const enriched = await Promise.all(
-        sections.map(async (section) => {
-          const res = await getSectionTranslationsBySectionId(section.id);
+      .sort((a, b) => a.position - b.position)
 
-          ("section id:", section.id);
-          ("translations:", res);
+      .map((section) => prepareSection(section, language))
 
-          return {
-            ...section,
-            translations: res || [],
-          };
-        }),
-      );
-
-      setHydratedSections(enriched);
-    };
-
-    load();
-  }, [sections]);
-
-  // 4. Get localized section
-  const getLocalizedSection = (section, locale = "en") => {
-    const trans = section.translations || [];
-    const active = trans.find((t) => t.locale === locale);
-
-    ("active translation:", active);
-
-    return {
-      ...section,
-      title: active?.title || "",
-      content: active?.content?.text || "",
-    };
-  };
-
-  // 5. normalize types
-  const normalizeType = (type) => {
-    if (type === "text_image") return "image_text";
-    return type;
-  };
+      .filter(Boolean);
+  }, [sectionKey, language]);
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography sx={{ fontSize: "2.5rem", fontWeight: 800 }}>
-        {page?.title || "About Subh"}
-      </Typography>
-
-      <Stack spacing={5}>
-        {sections
-          ?.sort((a, b) => a.position - b.position)
-          .map((section) => (
-            <Card key={section.id}>
-              <CardContent>
-                <SectionRenderer
-                  section={getLocalizedSection(
-                    {
-                      ...section,
-                      type: normalizeType(section.type),
-                    },
-                    "en",
-                  )}
-                />
-              </CardContent>
-            </Card>
-          ))}
-      </Stack>
+    <Box
+      sx={{
+        direction: language === "ar" ? "rtl" : "ltr",
+      }}
+    >
+      {sections.map((section) => (
+        <SectionRenderer key={section.id} section={section} />
+      ))}
     </Box>
   );
 }
