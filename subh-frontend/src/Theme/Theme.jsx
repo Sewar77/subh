@@ -27,7 +27,6 @@ export const getTheme = (language) =>
       success: {
         main: "#41f2c3",
       },
-
       background: {
         default: "#d9d6e6",
         paper: "#bb40bf",

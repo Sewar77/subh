@@ -1,11 +1,33 @@
 import { Box, Typography } from "@mui/material";
 
 export default function HeroSection({ section }) {
-  return (
-    <Box py={8}>
-      <Typography variant="h2">Hero Section</Typography>
+  if (!section) return null;
 
-      <pre>{JSON.stringify(section, null, 2)}</pre>
+  return (
+    <Box
+      sx={{
+        py: 8,
+        textAlign: "center",
+      }}
+    >
+      <Typography
+        variant="h2"
+        sx={{
+          fontWeight: 800,
+        }}
+      >
+        {section.title}
+      </Typography>
+
+      {section.content?.text && (
+        <Typography
+          sx={{
+            mt: 2,
+          }}
+        >
+          {section.content.text}
+        </Typography>
+      )}
     </Box>
   );
 }

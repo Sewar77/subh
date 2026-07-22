@@ -13,7 +13,7 @@ const route = express.Router();
 
 route.get("/user/email", protect, getUserByEmailController);
 route.get("/users", protect, adminOnly, getAllUsersController);
-route.get("/user/:id", protect, getUserByIdController);
+route.get("/user/:id", protect, adminOnly, getUserByIdController);
 route.delete("/user/delete/:id", protect, deleteUserController);
 route.post("/user/add", protect, adminOnly, addNewUserController);
 route.put("/user/update/:id", protect, adminOnly, updateUserController);

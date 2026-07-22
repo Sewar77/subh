@@ -60,6 +60,7 @@ export const getSectionsByPageKeyController = async (req, res) => {
     console.log(key);
 
     const sections = await getSectionsByPageKey(key);
+    console.log(sections);
 
     return res.status(200).json({
       success: true,

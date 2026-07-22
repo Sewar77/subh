@@ -5,6 +5,7 @@ export default function SectionRenderer({ section }) {
   const { language } = useLanguage();
 
   const Component = SECTION_COMPONENTS[section.type];
+  console.log(section.type);
 
   if (!Component) return null;
 

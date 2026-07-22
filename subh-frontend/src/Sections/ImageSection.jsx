@@ -1,10 +1,8 @@
 import { Box } from "@mui/material";
 
 export default function ImageSection({ section }) {
-  const imageUrl = section?.image_url;
-
+  const imageUrl = section.content.image;
   if (!imageUrl) return null;
-
   return (
     <Box
       sx={{
@@ -16,7 +14,7 @@ export default function ImageSection({ section }) {
       <Box
         component="img"
         src={imageUrl}
-        alt=""
+        alt={section.content.alt}
         sx={{
           width: "100%",
           maxWidth: "1200px",

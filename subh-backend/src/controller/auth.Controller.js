@@ -5,10 +5,12 @@ import {
 } from "../models/auth.Models.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { serializeUser } from "../utils/userSerializer.js";
 
 export const registerUserController = async (req, res) => {
   try {
-    const { name, email, password, userType, phoneNumber, role } = req.body;
+    const { name, email, password, confirmPassword, userType, phoneNumber } =
+      req.body;
     const isUserExist = await getUserByEmail(email);
 
     if (isUserExist) {
@@ -17,7 +19,10 @@ export const registerUserController = async (req, res) => {
         message: "Email already exists",
       });
     }
-
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "passwords should match" });
+    }
+    const role = "user";
     const hashed_password = await bcrypt.hash(password, 10);
 
     const user = await registerUserModel({
@@ -32,9 +37,10 @@ export const registerUserController = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
-      user,
     });
   } catch (err) {
+    console.log(err);
+
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -69,8 +75,8 @@ export const loginUserController = async (req, res) => {
     });
     return res.status(200).json({
       message: "Login successful",
-      user: isUserExist,
-      token,
+      user: serializeUser(isUserExist),
+      token
     });
   } catch (err) {
     return res.status(500).json({ message: "Internal server error", err });
@@ -80,12 +86,17 @@ export const loginUserController = async (req, res) => {
 export const currentUser = async (req, res) => {
   try {
     const me = req.user.id;
+    console.log(me);
+    
     const user = await getUserById(me);
     if (!user) {
-      return res.status(401).json({ message: "unautherzed", err });
+      return res.status(401).json({ message: "unautherzed" });
     }
-    return res.status(200).json({ message: "user infor", user: user });
+    return res
+      .status(200)
+      .json({ message: "user infor", user: serializeUser(user) });
   } catch (err) {
+    console.log(err);
     return res.status(500).json({ message: "Internal server error", err });
   }
 };

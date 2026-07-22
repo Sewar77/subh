@@ -15,7 +15,7 @@ const route = express.Router();
 
 route.get("/books", getAllBooksController);
 route.get("/book/:id", getBookByIdController);
-route.delete("/book/:id", protect, deleteBookController);
+route.delete("/book/:id", protect, adminOnly, deleteBookController);
 route.post(
   "/book/create",
   protect,

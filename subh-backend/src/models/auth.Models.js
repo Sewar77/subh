@@ -9,27 +9,31 @@ export const registerUserModel = async ({
   phoneNumber,
 }) => {
   const result = await pool.query(
-    `insert into users(name, email, hashed_password, role, user_type, phoneNumber) values($1, $2, $3, $4, $5, $6)`,
+    `insert into users (name, email, hashed_password, role, user_type, phoneNumber) values($1, $2, $3, $4, $5, $6)`,
     [name, email, hashed_password, role, userType, phoneNumber],
   );
   return result.rows[0];
 };
 
 export const getUserById = async (userId) => {
-  const result = await pool.query(`select * from users where id = $1`, [
-    userId,
-  ]);
+  const result = await pool.query(
+    `select name, email, hashed_password, role, user_type, phoneNumber from users where id = $1`,
+    [userId],
+  );
   return result.rows[0];
 };
 
 export const getUserByEmail = async (email) => {
-  const result = await pool.query(`select * from users where email = $1`, [
-    email,
-  ]);
+  const result = await pool.query(
+    `select name, email, hashed_password, role, user_type, phoneNumber from users where email = $1`,
+    [email],
+  );
   return result.rows[0];
 };
 
 export const getAllUsers = async () => {
-  const result = await pool.query(`select * from users`);
+  const result = await pool.query(
+    `select name, email, role, user_type, phoneNumber from users`,
+  );
   return result.rows;
 };

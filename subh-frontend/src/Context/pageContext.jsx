@@ -28,131 +28,200 @@ export function PagesProvider({ children }) {
     );
   };
 
+  const handleRequest = async (callback, setLoading) => {
+    try {
+      setLoading(true);
+      return await callback();
+    } catch (error) {
+      handleError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ======================
   // PAGES
   // ======================
 
-  const fetchPages = useCallback(async () => {
-    try {
-      setPagesLoading(true);
+  const fetchPages = useCallback(
+    () =>
+      handleRequest(async () => {
+        const res = await api.get("/pages");
+        setPages(res.data.pages || []);
+        return res.data.pages;
+      }, setPagesLoading),
+    [],
+  );
 
-      const res = await api.get("/pages");
+  const fetchPageById = useCallback(
+    (id) =>
+      handleRequest(async () => {
+        setPage(null);
+        const res = await api.get(`/pages/${id}`);
+        setPage(res.data.page);
+        return res.data.page;
+      }, setPagesLoading),
+    [],
+  );
 
-      setPages(res.data.pages || []);
+  const fetchPageByKey = useCallback(
+    (key) =>
+      handleRequest(async () => {
+        setPage(null);
+        const res = await api.get(`/pages/key/${key}`);
+        setPage(res.data.page);
+        return res.data.page;
+      }, setPagesLoading),
+    [],
+  );
 
-      return res.data.pages;
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setPagesLoading(false);
-    }
-  }, []);
+  // ======================
+  // PAGE TRANSLATIONS
+  // ======================
 
-  const fetchPageByKey = useCallback(async (key) => {
-    try {
-      setPagesLoading(true);
+  const getPageTranslations = useCallback(
+    (pageId) =>
+      handleRequest(async () => {
+        const res = await api.get(`/page-translations/${pageId}`);
+        setPageTranslations(res.data.translations || []);
+        return res.data.translations;
+      }, setTranslationsLoading),
+    [],
+  );
 
-      const res = await api.get(`/pages/key/${key}`);
+  const createPageTranslation = useCallback(
+    (pageId, data) =>
+      handleRequest(async () => {
+        const res = await api.post(`/page-translations/${pageId}`, data);
+        toast.success("Page translation added");
+        return res.data;
+      }, setTranslationsLoading),
+    [],
+  );
 
-      setPage(res.data.page);
+  const updatePageTranslation = useCallback(
+    (id, data) =>
+      handleRequest(async () => {
+        const res = await api.put(`/page-translations/${id}`, data);
+        toast.success("Page translation updated");
+        return res.data;
+      }, setTranslationsLoading),
+    [],
+  );
 
-      return res.data.page;
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setPagesLoading(false);
-    }
-  }, []);
+  const deletePageTranslation = useCallback(
+    (id) =>
+      handleRequest(async () => {
+        await api.delete(`/page-translations/${id}`);
+        setPageTranslations((prev) => prev.filter((item) => item.id !== id));
+        toast.success("Page translation deleted");
+      }, setTranslationsLoading),
+    [],
+  );
 
   // ======================
   // SECTIONS
   // ======================
 
-  const getSectionsByPageKey = useCallback(async (key) => {
-    try {
-      setSectionsLoading(true);
+  const getSectionsByPageId = useCallback(
+    (pageId) =>
+      handleRequest(async () => {
+        const res = await api.get(`/pages/${pageId}/sections`);
+        setSections(res.data.sections || []);
+        return res.data.sections;
+      }, setSectionsLoading),
+    [],
+  );
 
-      const res = await api.get(`/pages/sections/${key}`);
+  const getSectionsByPageKey = useCallback(
+    (key) =>
+      handleRequest(async () => {
+        setSectionKey([]);
+        const res = await api.get(`/pages/sections/${key}`);
+        setSectionKey(res.data.sections || []);
+        return res.data.sections;
+      }, setSectionsLoading),
+    [],
+  );
 
-      setSectionKey(res.data.sections || []);
+  const getAllSections = useCallback(
+    () =>
+      handleRequest(async () => {
+        const res = await api.get("/sections");
+        setAllSections(res.data.sections || []);
+        return res.data.sections;
+      }, setSectionsLoading),
+    [],
+  );
 
-      return res.data.sections;
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setSectionsLoading(false);
-    }
-  }, []);
+  const fetchSectionById = useCallback(
+    (id) =>
+      handleRequest(async () => {
+        const res = await api.get(`/sections/${id}`);
+        setSection(res.data.section);
+        return res.data.section;
+      }, setSectionsLoading),
+    [],
+  );
 
-  const getSectionsByPageId = useCallback(async (id) => {
-    try {
-      setSectionsLoading(true);
+  const toggleSectionVisibility = useCallback(
+    (id) =>
+      handleRequest(async () => {
+        const res = await api.patch(`/sections/${id}/toggle`);
 
-      const res = await api.get(`/pages/${id}/sections`);
+        setSection(res.data.section);
 
-      setSections(res.data.sections || []);
+        setAllSections((prev) =>
+          prev.map((item) => (item.id === id ? res.data.section : item)),
+        );
 
-      return res.data.sections;
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setSectionsLoading(false);
-    }
-  }, []);
-  const getAllSections = useCallback(async () => {
-    try {
-      setSectionsLoading(true);
-      const res = await api.get("/sections");
-      setAllSections(res.data.sections || []);
-      return res.data.sections;
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setSectionsLoading(false);
-    }
-  }, []);
-  const fetchSectionById = useCallback(async (id) => {
-    try {
-      setSectionsLoading(true);
+        setSections((prev) =>
+          prev.map((item) => (item.id === id ? res.data.section : item)),
+        );
 
-      const res = await api.get(`/sections/${id}`);
+        toast.success(
+          res.data.section.is_visible
+            ? "Section is now visible"
+            : "Section is now hidden",
+        );
 
-      setSection(res.data.section);
-
-      return res.data.section;
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setSectionsLoading(false);
-    }
-  }, []);
+        return res.data.section;
+      }, setSectionsLoading),
+    [],
+  );
 
   // ======================
-  // TRANSLATIONS
+  // SECTION TRANSLATIONS
   // ======================
 
-  const getSectionTranslations = useCallback(async (id) => {
-    try {
-      setTranslationsLoading(true);
+  const getSectionTranslations = useCallback(
+    (sectionId) =>
+      handleRequest(async () => {
+        const res = await api.get(`/sections/${sectionId}/translations`);
+        setSectionTranslations(res.data.translations || []);
+        return res.data.translations;
+      }, setTranslationsLoading),
+    [],
+  );
 
-      const res = await api.get(`/sections/${id}/translations`);
+  const updateSectionTranslation = useCallback(
+    (id, data) =>
+      handleRequest(async () => {
+        const res = await api.put(`/translations/${id}`, data);
+        console.log(data);
 
-      setSectionTranslations(res.data.translations || []);
-
-      return res.data.translations;
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setTranslationsLoading(false);
-    }
-  }, []);
+        toast.success("Section content updated");
+        return res.data;
+      }, setTranslationsLoading),
+    [],
+  );
 
   return (
     <PagesContext.Provider
       value={{
         pages,
         page,
-
         sections,
         section,
         sectionKey,
@@ -165,14 +234,22 @@ export function PagesProvider({ children }) {
         translationsLoading,
 
         fetchPages,
+        fetchPageById,
         fetchPageByKey,
 
-        getSectionsByPageKey,
-        getSectionsByPageId,
+        getPageTranslations,
+        createPageTranslation,
+        updatePageTranslation,
+        deletePageTranslation,
 
-        fetchSectionById,
+        getSectionsByPageId,
+        getSectionsByPageKey,
         getAllSections,
+        fetchSectionById,
+        toggleSectionVisibility,
+
         getSectionTranslations,
+        updateSectionTranslation,
       }}
     >
       {children}

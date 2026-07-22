@@ -25,6 +25,7 @@ export default function Home() {
       .map((section) => prepareSection(section, language))
       .filter(Boolean);
   }, [sectionKey, language]);
+  console.log(sections);
 
   return (
     <>
