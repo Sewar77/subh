@@ -26,6 +26,8 @@ import UserLayout from "./Layout/UserLayout.jsx";
 import ManageWorkshops from "./components/Admin/Manage/ManageWorkshops/ManageWorkshops.jsx";
 import AdminRouteGuard from "./components/Admin/Auth/AdminRouteGuard.jsx";
 import CmsAdminPage from "./Pages/Admin/CmsAdminPage.jsx";
+import CategoriesPage from "./Pages/Categories/CategoriesPage.jsx";
+import CategoryDetailPage from "./Pages/Categories/CategoryDetailPage.jsx";
 function App() {
   return (
     <>
@@ -37,6 +39,8 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/educational/courses" element={<EducationalPrograms />} />
+        <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/categories/:id" element={<CategoryDetailPage />} />
         {/* User routes */}
         <Route path="/subh" element={<UserLayout />}>
           <Route index element={<LandingPage />} />
@@ -51,14 +55,17 @@ function App() {
             <Route path="categories" element={<DisplayCategories />} />
             <Route path="workshops" element={<ManageWorkshops />} />
             <Route path="new-category" element={<AddCategory />} />
-            <Route path="view/category/:id" element={<ViewCategory />} />
-            <Route path="view/user/:id" element={<ViewUser />} />
+            <Route path="categories/:id" element={<ViewCategory />} />
+            <Route path="users/:id" element={<ViewUser />} />
             <Route path="books" element={<ManageBooks />} />
             <Route path="book/new" element={<AddBook />} />
-            <Route path="view/book/:id" element={<ViewBook />} />
+            <Route path="books/:id" element={<ViewBook />} />
             <Route path="category/update/:id" element={<UpdateCategory />} />
             <Route path="book/update/:id" element={<UpdateBook />} />
             <Route path="user/update/:id" element={<UpdateBook />} />
+            <Route path="view/category/:id" element={<Navigate to="/admin/categories" replace />} />
+            <Route path="view/book/:id" element={<Navigate to="/admin/books" replace />} />
+            <Route path="view/user/:id" element={<Navigate to="/admin/users" replace />} />
             <Route path="cms" element={<CmsAdminPage />} />
             <Route path="cms/:pageId" element={<CmsAdminPage />} />
             <Route

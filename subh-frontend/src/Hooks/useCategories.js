@@ -1,57 +1,32 @@
-import { useContext, useEffect, useState } from "react";
-import { api } from "../../api";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import { categoriesContext } from "../Context/categoriesContext";
+import { useContext, useEffect } from "react";
+import * as categoryService from "../Services/categoryService.js";
+import { categoriesContext } from "../Context/categoriesContextValue.js";
 export const useCategories = () => {
   const { categories, setCategories, loadCategories, category, setCategory } =
     useContext(categoriesContext);
-  const navigate = useNavigate();
   const createCategories = async (catData) => {
-    if (!catData.name_en || !catData.name_ar) {
-      toast.error("Name is required feild");
-      return;
-    }
-    const res = await api.post("/categories/create", catData);
-    try {
-      setCategories(res.data.categories);
-      toast.success("created categories ! ");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
-    }
+    const created = await categoryService.createCategory(catData);
+    setCategories((previous) => [created, ...previous]);
+    return created;
   };
   const updateCategory = async (id, catData) => {
-    try {
-      const res = await api.put(`/category/update/${id}`, catData);
-      setCategories((prev) =>
-        prev.map((cat) => (cat.id === id ? res.data.category : cat)),
-      );
-      toast.success("Category updated!");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
-    }
+    const updated = await categoryService.updateCategory(id, catData);
+    setCategories((prev) => prev.map((cat) => (cat.id === id ? updated : cat)));
+    setCategory(updated);
+    return updated;
   };
   const getCategory = async (catId) => {
-    try {
-      const res = await api.get(`/category/${catId}`);
-      setCategory(res.data.category);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
-    }
+    const found = await categoryService.getCategory(catId);
+    setCategory(found);
+    return found;
   };
   const deleteCategoryById = async (catId) => {
-    const res = await api.delete(`/category/delete/${catId}`);
-    try {
-      toast.success("delete categoery!");
-      navigate("/admin/categories");
-      loadCategories();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
-    }
+    await categoryService.deleteCategory(catId);
+    setCategories((previous) => previous.filter((item) => item.id !== catId));
   };
   useEffect(() => {
-    loadCategories();
-  }, []);
+    loadCategories().catch(() => {});
+  }, [loadCategories]);
   return {
     createCategories,
     categories,

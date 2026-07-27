@@ -1,19 +1,17 @@
-import { useState } from "react";
-import { createContext } from "react";
-import { api } from "../../api";
-import toast from "react-hot-toast";
-export const categoriesContext = createContext();
+import { useCallback, useState } from "react";
+import { getCategories } from "../Services/categoryService.js";
+import { categoriesContext } from "./categoriesContextValue.js";
 export default function CategoriesProvider({ children }) {
   const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState({});
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
-      const res = await api.get("/categories/all");
-      setCategories(res.data.categories);
+      setCategories(await getCategories());
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      setCategories([]);
+      throw error;
     }
-  };
+  }, []);
 
   return (
     <categoriesContext.Provider

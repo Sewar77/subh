@@ -103,31 +103,6 @@ export default function AddBook() {
     await barcodeUpload.uploadImage(barcodeFile);
   };
 
-  const resetForm = () => {
-    setBookData({
-      name_en: "",
-      name_ar: "",
-      description_en: "",
-      description_ar: "",
-      author_name_en: "",
-      author_name_ar: "",
-      category_id: "",
-      price: "",
-      isbn: "",
-      shipping_cost: "",
-      weight_kg: "",
-      length_cm: "",
-      width_cm: "",
-      height_cm: "",
-    });
-
-    setCoverFile(null);
-    setBarcodeFile(null);
-
-    setCoverPreview("");
-    setBarcodePreview("");
-  };
-
   const handleSubmit = async () => {
     if (!coverUpload.uploadedUrl) {
       toast.error("Upload cover image");
@@ -224,6 +199,7 @@ export default function AddBook() {
         <Divider />
 
         <Typography fontWeight={700}>المعلومات العربية</Typography>
+        <Typography variant="caption" color="text.secondary">Arabic content is recommended, but English text is allowed when needed.</Typography>
 
         <TextField
           label="اسم الكتاب"
@@ -372,7 +348,7 @@ export default function AddBook() {
               disabled={coverUpload.loading}
               fullWidth
             >
-              Upload Cover
+              Upload image
             </Button>
 
             {coverUpload.loading && (

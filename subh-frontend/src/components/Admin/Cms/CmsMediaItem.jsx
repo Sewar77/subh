@@ -5,10 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   IconButton,
   Stack,
   TextField,
@@ -19,6 +15,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 // import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import ConfirmDeleteModal from "../Modal/ConfirmDeleteModal.jsx";
 
 const metadataFromItem = (item) => ({
   altEn: item.altEn || "",
@@ -237,30 +234,7 @@ export default function CmsMediaItem({
         </Stack>
       </CardContent>
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Remove media item?</DialogTitle>
-        <DialogContent>
-          This removes the item from this section. The section itself is not
-          deleted.
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
-          <Button
-            color="error"
-            onClick={async () => {
-              setConfirmOpen(false);
-              try {
-                setError("");
-                await onDelete(item);
-              } catch (requestError) {
-                setError(requestError.message);
-              }
-            }}
-          >
-            Remove media
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmDeleteModal open={confirmOpen} title="Remove media item?" message="This removes the media item from this section. The section itself is not deleted." confirmLabel="Remove media" loading={busy} error={error} onCancel={() => setConfirmOpen(false)} onConfirm={async () => { try { setError(""); await onDelete(item); setConfirmOpen(false); } catch (requestError) { setError(requestError.message); } }} />
     </Card>
   );
 }

@@ -11,5 +11,6 @@ export const serializeCategory = (category) => {
     descriptionAr: category.description_ar,
     image: category.image,
     createdAt: category.created_at,
+    ...(category.updated_at ? { updatedAt: category.updated_at } : {}),
   };
 };

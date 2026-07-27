@@ -15,7 +15,7 @@ import Title from "../../Headers/Titles";
 
 export default function ViewSection() {
   const { sectionId } = useParams();
-  const { fetchSectionById, deleteSection, section, toggleSectionVisibility } =
+  const { fetchSectionById, section, toggleSectionVisibility } =
     usePages();
   const navigate = useNavigate();
   useEffect(() => {
@@ -379,14 +379,6 @@ export default function ViewSection() {
               Toggle Visibility
             </Button>
 
-            <Button
-              color="error"
-              variant="outlined"
-              size="large"
-              onClick={async () => deleteSection(section.id)}
-            >
-              Delete Section
-            </Button>
           </Box>
         </CardContent>
       </Card>

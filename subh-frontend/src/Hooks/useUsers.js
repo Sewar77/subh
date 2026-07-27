@@ -11,7 +11,7 @@ export const useUser = () => {
       toast.success("User Added successfully");
       setUser(res.data.user);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "The user could not be added. Check the user fields and try again.");
     }
   };
   const getUserById = async (userId) => {
@@ -19,16 +19,16 @@ export const useUser = () => {
       const res = await api.get(`/user/${userId}`);
       setUser(res.data.user);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "The user details could not be loaded.");
     }
   };
   const deleteUserById = async (userId) => {
     try {
       await api.delete(`/user/delete/${userId}`);
-      toast.success("delete user!");
+      toast.success("User deactivated.");
       loadUsers();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      throw new Error(error.response?.data?.message || "The user could not be deactivated. The final active administrator cannot be deactivated.", { cause: error });
     }
   };
   const updateUserData = async (userId, newUserData) => {
@@ -37,7 +37,7 @@ export const useUser = () => {
       toast.success(" user updated!");
       loadUsers();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "The user could not be updated. Check the selected role and try again.");
     }
   };
   return {

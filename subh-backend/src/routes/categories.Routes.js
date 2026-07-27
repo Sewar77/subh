@@ -32,42 +32,17 @@ route.post(
 );
 route.patch(
   "/categories/:id",
-  validate(categoryIdParamSchema, "params"),
   protect,
   adminOnly,
+  validate(categoryIdParamSchema, "params"),
   validate(updateCategorySchema, "body"),
   updateCategoryController,
 );
 route.delete(
   "/categories/:id",
+  protect,
+  adminOnly,
   validate(categoryIdParamSchema, "params"),
-  protect,
-  adminOnly,
-  deleteCategoryController,
-);
-
-route.get("/categories/all", getAllCategoriesController);
-route.get("/category/:id", getCategoryByIdController);
-route.post(
-  "/categories/create",
-  protect,
-  adminOnly,
-  validate(createCategorySchema, "body"),
-  createCategoryController,
-);
-route.put(
-  "/category/update/:id",
-  validate(categoryIdParamSchema, "params"),
-  protect,
-  adminOnly,
-  validate(updateCategorySchema, "body"),
-  updateCategoryController,
-);
-route.delete(
-  "/category/delete/:id",
-  validate(categoryIdParamSchema, "params"),
-  protect,
-  adminOnly,
   deleteCategoryController,
 );
 

@@ -1,56 +1,66 @@
-import { Box, Modal, Typography, Button, Stack } from "@mui/material";
+import {
+  Alert,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 
 export default function ConfirmDeleteModal({
   open,
   onClose,
+  onCancel = onClose,
   onConfirm,
   label,
+  title = "Confirm deletion",
+  message,
+  confirmLabel = "Delete",
+  cancelLabel = "Cancel",
+  loading = false,
+  severity = "error",
+  error = "",
 }) {
+  const description =
+    message ||
+    `Are you sure you want to delete this ${label || "item"}? This action cannot be undone.`;
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 600,
-          bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 24,
-          p: 5,
-          textAlign: "center",
-          m: "auto",
-          alignContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          Confirm Deletion
-        </Typography>
-
-        <Typography variant="body2" sx={{ mb: 3 }}>
-          Are you sure you want to delete this {label}?
-          <br />
-          <span sx={{ color: "error.main" }}>
-            This action cannot be undone.
-          </span>
-        </Typography>
-
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{ justifyContent: "center", mt: 3 }}
+    <Dialog
+      open={open}
+      onClose={loading ? undefined : onCancel}
+      fullWidth
+      maxWidth="xs"
+      aria-labelledby="confirm-action-title"
+    >
+      <DialogTitle id="confirm-action-title">{title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{description}</DialogContentText>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onCancel} disabled={loading}>
+          {cancelLabel}
+        </Button>
+        <Button
+          variant="contained"
+          color={severity === "error" ? "error" : "primary"}
+          onClick={onConfirm}
+          disabled={loading}
+          autoFocus
         >
-          <Button variant="outlined" onClick={onClose}>
-            Cancel
-          </Button>
-
-          <Button variant="contained" color="error" onClick={onConfirm}>
-            Delete
-          </Button>
-        </Stack>
-      </Box>
-    </Modal>
+          {loading ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : (
+            confirmLabel
+          )}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

@@ -57,6 +57,7 @@ export default function UpdateBook() {
   useEffect(() => {
     if (!book) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBookData({
       name_en: book.name_en || "",
       name_ar: book.name_ar || "",
@@ -193,6 +194,7 @@ export default function UpdateBook() {
 
         {/* ARABIC */}
         <Typography fontWeight={700}>العربية</Typography>
+        <Typography variant="caption" color="text.secondary">Arabic content is recommended, but English text is allowed when needed.</Typography>
 
         <TextField
           label="الاسم"
@@ -300,7 +302,7 @@ export default function UpdateBook() {
           {coverPreview && <img src={coverPreview} width="120" />}
 
           <Button onClick={handleCoverUpload} sx={{ mt: 1 }}>
-            Upload Cover
+            {currentCover ? "Replace image" : "Upload image"}
           </Button>
 
           {coverUpload.loading && <CircularProgress size={18} />}

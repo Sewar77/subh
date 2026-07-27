@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import {
   Box,
   Card,
@@ -16,7 +16,7 @@ import Title from "../../Headers/Titles";
 export default function ViewPageSections() {
   const { pageId } = useParams();
 
-  const { page, sections, fetchPageById, getSectionsByPageId, deleteSection } =
+  const { page, sections, fetchPageById, getSectionsByPageId } =
     usePages();
 
   // -----------------------------
@@ -174,13 +174,6 @@ export default function ViewPageSections() {
           <Box sx={{ display: "flex", gap: 2 }}>
             <Button variant="contained">Edit</Button>
             <Button variant="outlined">Toggle</Button>
-            <Button
-              color="error"
-              variant="outlined"
-              onClick={() => deleteSection(section.id)}
-            >
-              Delete
-            </Button>
           </Box>
         </CardContent>
       </Card>

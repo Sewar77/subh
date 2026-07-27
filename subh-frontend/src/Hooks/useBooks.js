@@ -23,18 +23,18 @@ export const useBooks = () => {
       if (Array.isArray(errors)) {
         toast.error(errors.join("\n"));
       } else {
-        toast.error("Something went wrong");
+        toast.error("The book could not be created. Check the required book fields and try again.");
       }
     }
   };
 
   const deleteBook = async (bookId) => {
     try {
-      const res = await api.delete(`/book/${bookId}`);
+      await api.delete(`/book/${bookId}`);
       loadBooks();
-      toast.success("deleted");
+      toast.success("Book deleted.");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      throw new Error(error.response?.data?.message || "The book could not be deleted. Check whether it is used elsewhere and try again.", { cause: error });
     }
   };
 
@@ -43,7 +43,7 @@ export const useBooks = () => {
       const res = await api.get(`/book/${bookId}`);
       setBook(res.data.book);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "The book details could not be loaded.");
     }
   };
 
@@ -52,7 +52,7 @@ export const useBooks = () => {
     try {
       setBook(res.data.book);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "The book could not be saved. Check the book fields and try again.");
     }
   };
 

@@ -17,10 +17,10 @@ const normalizeCategoryPayload = (body = {}) => {
   if (nameEn !== undefined) payload.name_en = String(nameEn).trim();
   if (nameAr !== undefined) payload.name_ar = String(nameAr).trim();
   if (descriptionEn !== undefined)
-    payload.description_en = String(descriptionEn).trim();
+    payload.description_en = descriptionEn === null ? null : descriptionEn.trim();
   if (descriptionAr !== undefined)
-    payload.description_ar = String(descriptionAr).trim();
-  if (image !== undefined) payload.image = String(image).trim();
+    payload.description_ar = descriptionAr === null ? null : descriptionAr.trim();
+  if (image !== undefined) payload.image = image === null ? null : image.trim();
 
   return payload;
 };

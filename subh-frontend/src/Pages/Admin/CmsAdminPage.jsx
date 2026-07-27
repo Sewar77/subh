@@ -16,6 +16,8 @@ import toast from "react-hot-toast";
 import CmsPageSelector from "../../components/Admin/Cms/CmsPageSelector.jsx";
 import CmsSectionEditor from "../../components/Admin/Cms/CmsSectionEditor.jsx";
 import CmsSectionList from "../../components/Admin/Cms/CmsSectionList.jsx";
+import ConfirmDeleteModal from "../../components/Admin/Modal/ConfirmDeleteModal.jsx";
+import AdminInstructions from "../../components/Admin/AdminInstructions.jsx";
 import {
   addSectionMedia,
   archiveSection,
@@ -33,12 +35,6 @@ import {
   uploadCmsFile,
 } from "../../Services/cmsService.js";
 
-const confirmDiscard = (dirty) =>
-  !dirty ||
-  window.confirm(
-    "You have unsaved content changes. Discard them and continue?",
-  );
-
 export default function CmsAdminPage() {
   const { pageId, sectionId } = useParams();
   const navigate = useNavigate();
@@ -51,6 +47,7 @@ export default function CmsAdminPage() {
   const [mutating, setMutating] = useState(false);
   const [error, setError] = useState("");
   const [dirty, setDirty] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
 
   const orderedSections = useMemo(
     () =>
@@ -183,16 +180,31 @@ export default function CmsAdminPage() {
   }, [pageId, sectionId]);
 
   const changePage = (nextPageId) => {
-    if (!confirmDiscard(dirty)) return;
+    if (dirty) {
+      setPendingNavigation({ type: "page", value: nextPageId });
+      return;
+    }
     setDirty(false);
     setSection(null);
     navigate(`/admin/cms/${nextPageId}`);
   };
 
   const editSection = (nextSection) => {
-    if (!confirmDiscard(dirty)) return;
+    if (dirty) {
+      setPendingNavigation({ type: "section", value: nextSection.id });
+      return;
+    }
     setDirty(false);
     navigate(`/admin/cms/${pageId}/sections/${nextSection.id}`);
+  };
+
+  const discardAndNavigate = () => {
+    const pending = pendingNavigation;
+    setPendingNavigation(null);
+    setDirty(false);
+    setSection(null);
+    if (pending.type === "page") navigate(`/admin/cms/${pending.value}`);
+    else navigate(`/admin/cms/${pageId}/sections/${pending.value}`);
   };
 
   const runMutation = async (operation, successMessage) => {
@@ -331,6 +343,7 @@ export default function CmsAdminPage() {
             editing schema.
           </Typography>
         </Box>
+        <AdminInstructions>Use the page selector to manage fixed sections. Content and media fields are developer-defined. Hidden sections stay editable; archived sections are not public and can be restored. Destructive media changes require confirmation.</AdminInstructions>
 
         <Breadcrumbs aria-label="CMS location">
           <Link component={RouterLink} to="/admin">
@@ -429,6 +442,7 @@ export default function CmsAdminPage() {
           </Grid>
         ) : null}
       </Stack>
+      <ConfirmDeleteModal open={Boolean(pendingNavigation)} title="Discard unsaved changes?" message="You have unsaved content changes. Discard them and continue?" confirmLabel="Discard changes" severity="warning" onCancel={() => setPendingNavigation(null)} onConfirm={discardAndNavigate} />
     </Container>
   );
 }
