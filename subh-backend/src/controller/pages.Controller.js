@@ -24,7 +24,7 @@ export const createPageController = async (req, res) => {
       page,
     });
   } catch (error) {
-     (error);
+    error;
 
     return res.status(500).json({
       message: formatError(error),
@@ -112,7 +112,7 @@ export const updatePageController = async (req, res) => {
 
     const { key, name, status } = req.body;
 
-    const page = await updatePage(id, key, name, status);
+    const page = await updatePage(id, key, status, name);
 
     if (!page) {
       return res.status(404).json({

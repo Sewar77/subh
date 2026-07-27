@@ -25,11 +25,7 @@ export default function AdminSidebar() {
     },
     {
       title: "Pages",
-      items: [
-        { label: "View Template", path: "/admin/view-template" },
-        { label: "View Pages", path: "/admin/pages/view" },
-        { label: "View All Sections", path: "/admin/view-sections" },
-      ],
+      items: [{ label: "Structured CMS", path: "/admin/cms" }],
     },
     {
       title: "Text Books",

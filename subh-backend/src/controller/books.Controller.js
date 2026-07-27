@@ -1,15 +1,76 @@
+import pool from "../config/db.js";
 import {
-  createAuthor,
+  addAuthorToBook,
   createBook,
   deleteBook,
-  findAuthorByName,
-  getAllBooks,
+  getAuthorById,
+  getAuthorsByIds,
   getBookById,
+  getBookByIsbn,
+  listAuthorsForBook,
+  listBooks,
   linkBookAuthor,
-  updateBookById,
+  replaceBookAuthors,
+  updateBook,
 } from "../models/books.Models.js";
-import pool from "../config/db.js";
-import { getCategoryById } from "../models/categories.Models.js";
+import {
+  categoryExists,
+  getCategoryById,
+} from "../models/categories.Models.js";
+import { serializeBook, serializeBookAuthor } from "../utils/bookSerializer.js";
+import { serializeCategory } from "../utils/categorySerializer.js";
+
+const isDuplicateISBNError = (error) => error?.code === "23505";
+const isForeignKeyViolation = (error) => error?.code === "23503";
+const isInvalidSyntaxError = (error) => error?.code === "22P02";
+
+const normalizeBookPayload = (body = {}) => {
+  const payload = {};
+
+  const {
+    nameEn,
+    nameAr,
+    descriptionEn,
+    descriptionAr,
+    weightKg,
+    barcodeImage,
+    categoryId,
+    price,
+    shippingCost,
+    lengthCm,
+    widthCm,
+    heightCm,
+    coverImage,
+    isbn,
+    authorIds,
+  } = body;
+
+  if (nameEn !== undefined) payload.name_en = String(nameEn).trim();
+  if (nameAr !== undefined) payload.name_ar = String(nameAr).trim();
+  if (descriptionEn !== undefined)
+    payload.description_en = String(descriptionEn).trim();
+  if (descriptionAr !== undefined)
+    payload.description_ar = String(descriptionAr).trim();
+  if (weightKg !== undefined) payload.weight_kg = Number(weightKg);
+  if (barcodeImage !== undefined)
+    payload.barcode_image = String(barcodeImage).trim();
+  if (categoryId !== undefined)
+    payload.category_id = categoryId === null ? null : Number(categoryId);
+  if (price !== undefined) payload.price = Number(price);
+  if (shippingCost !== undefined)
+    payload.shipping_cost = shippingCost === null ? null : Number(shippingCost);
+  if (lengthCm !== undefined)
+    payload.length_cm = lengthCm === null ? null : Number(lengthCm);
+  if (widthCm !== undefined)
+    payload.width_cm = widthCm === null ? null : Number(widthCm);
+  if (heightCm !== undefined)
+    payload.height_cm = heightCm === null ? null : Number(heightCm);
+  if (coverImage !== undefined) payload.cover_image = String(coverImage).trim();
+  if (isbn !== undefined) payload.isbn = String(isbn).trim();
+  if (authorIds !== undefined) payload.authorIds = authorIds;
+
+  return payload;
+};
 
 export const createBookController = async (req, res) => {
   const client = await pool.connect();
@@ -17,60 +78,68 @@ export const createBookController = async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    const {
-      name_en,
-      name_ar,
-      description_en,
-      description_ar,
-      weight_kg,
-      cover_image,
-      barcode_image,
-      category_id,
-      price,
-      isbn,
-      shipping_cost,
-      length_cm,
-      width_cm,
-      height_cm,
-      author_name_en,
-      author_name_ar,
-    } = req.body;
-    let author = await findAuthorByName(client, author_name_en, author_name_ar);
-    if (!author) {
-      author = await createAuthor(client, author_name_en, author_name_ar);
-    }
-    const book = await createBook(client, {
-      name_en,
-      name_ar,
-      description_en,
-      description_ar,
-      weight_kg,
-      cover_image,
-      barcode_image,
-      category_id,
-      price,
-      isbn,
-      shipping_cost,
-      length_cm,
-      width_cm,
-      height_cm,
-    });
+    const payload = normalizeBookPayload(req.body);
+    const { authorIds = [] } = req.body;
 
-    await linkBookAuthor(client, book.id, author.id);
+    if (payload.category_id !== null && payload.category_id !== undefined) {
+      const existingCategory = await getCategoryById(payload.category_id);
+      if (!existingCategory) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+    }
+
+    const normalizedIsbn = String(payload.isbn || "").trim();
+    if (normalizedIsbn) {
+      const existingBook = await getBookByIsbn(normalizedIsbn);
+      if (existingBook) {
+        return res.status(409).json({ message: "Book ISBN already exists" });
+      }
+    }
+
+    if (Array.isArray(authorIds) && authorIds.length > 0) {
+      const authors = await getAuthorsByIds(authorIds);
+      if (authors.length !== new Set(authorIds.map((id) => Number(id))).size) {
+        return res
+          .status(404)
+          .json({ message: "One or more authors were not found" });
+      }
+    }
+
+    const createdBook = await createBook(client, payload);
+    if (!createdBook) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    for (const authorId of authorIds) {
+      await linkBookAuthor(client, createdBook.id, Number(authorId));
+    }
 
     await client.query("COMMIT");
 
+    const category = payload.category_id
+      ? await getCategoryById(payload.category_id)
+      : null;
+    const authors = await listAuthorsForBook(createdBook.id);
+    const serializedBook = serializeBook(createdBook, {
+      category: category ? serializeCategory(category) : null,
+      authors: authors.map((author) => serializeBookAuthor(author)),
+    });
+
     return res.status(201).json({
-      book,
-      author,
+      book: serializedBook,
     });
   } catch (error) {
     await client.query("ROLLBACK");
 
-    return res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-    });
+    if (isDuplicateISBNError(error)) {
+      return res.status(409).json({ message: "Book ISBN already exists" });
+    }
+
+    if (isForeignKeyViolation(error) || isInvalidSyntaxError(error)) {
+      return res.status(400).json({ message: "Invalid book payload" });
+    }
+
+    return res.status(500).json({ message: "Internal server error" });
   } finally {
     client.release();
   }
@@ -78,103 +147,159 @@ export const createBookController = async (req, res) => {
 
 export const getAllBooksController = async (req, res) => {
   try {
-    const books = await getAllBooks();
+    const { books, pagination } = await listBooks(req.query);
+    const serializedBooks = books.map((book) => serializeBook(book));
 
     return res.status(200).json({
-      message: "books fetched",
-      books,
+      books: serializedBooks,
+      pagination,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-    });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const deleteBookController = async (req, res) => {
-  const bookId = req.params.id;
+  const client = await pool.connect();
+
   try {
-    await deleteBook(bookId);
-    return res.status(200).json({ message: "deleted" });
+    await client.query("BEGIN");
+
+    const bookId = Number(req.params.id);
+    const existingBook = await getBookById(bookId);
+    if (!existingBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    await client.query(`DELETE FROM book_authors WHERE book_id = $1`, [bookId]);
+    const deletedBook = await deleteBook(bookId);
+
+    await client.query("COMMIT");
+
+    if (!deletedBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    return res.status(204).send();
   } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-    });
+    await client.query("ROLLBACK");
+    return res.status(500).json({ message: "Internal server error" });
+  } finally {
+    client.release();
   }
 };
 
 export const getBookByIdController = async (req, res) => {
-  const bookId = req.params.id;
   try {
+    const bookId = Number(req.params.id);
     const book = await getBookById(bookId);
+
     if (!book) {
-      return res.status(404).json({ message: "book not found" });
+      return res.status(404).json({ message: "Book not found" });
     }
-    return res.status(200).json({ message: "gets", book: book });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
+
+    const category = book.category_id
+      ? await getCategoryById(book.category_id)
+      : null;
+    const authors = await listAuthorsForBook(bookId);
+
+    return res.status(200).json({
+      book: serializeBook(book, {
+        category: category ? serializeCategory(category) : null,
+        authors: authors.map((author) => serializeBookAuthor(author)),
+      }),
     });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const updateBookByIdController = async (req, res) => {
-  const bookId = req.params.id;
+  const client = await pool.connect();
+
   try {
-    const {
-      name_en,
-      name_ar,
-      description_en,
-      description_ar,
-      weight_kg,
-      cover_image,
-      barcode_image,
-      category_id,
-      isbn,
-      price,
-      shipping_cost,
-      length_cm,
-      width_cm,
-      height_cm,
-    } = req.body;
-    if (category_id) {
-      const categoryCheck = await getCategoryById(category_id);
-      if (categoryCheck.rowCount === 0) {
-        return res.status(400).json({
-          message: "Invalid category_id - category does not exist",
-        });
+    await client.query("BEGIN");
+
+    const bookId = Number(req.params.id);
+    const existingBook = await getBookById(bookId);
+
+    if (!existingBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    const payload = normalizeBookPayload(req.body);
+    if (Object.keys(payload).length === 0) {
+      return res.status(400).json({ message: "No fields provided to update" });
+    }
+
+    if (payload.category_id !== undefined && payload.category_id !== null) {
+      const category = await getCategoryById(payload.category_id);
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
       }
     }
-    const updated = await updateBookById(
-      {
-        name_en,
-        name_ar,
-        description_en,
-        description_ar,
-        weight_kg,
-        cover_image,
-        barcode_image,
-        category_id,
-        price,
-        isbn,
-        shipping_cost,
-        length_cm,
-        width_cm,
-        height_cm,
-      },
-      bookId,
-    );
+
+    if (payload.isbn !== undefined) {
+      const bookWithIsbn = await getBookByIsbn(payload.isbn);
+      if (bookWithIsbn && bookWithIsbn.id !== bookId) {
+        return res.status(409).json({ message: "Book ISBN already exists" });
+      }
+    }
+
+    if (req.body.authorIds !== undefined) {
+      const requestedAuthorIds = Array.isArray(req.body.authorIds)
+        ? req.body.authorIds
+        : [];
+      const authors = await getAuthorsByIds(requestedAuthorIds);
+      if (
+        authors.length !==
+        new Set(requestedAuthorIds.map((id) => Number(id))).size
+      ) {
+        return res
+          .status(404)
+          .json({ message: "One or more authors were not found" });
+      }
+    }
+
+    const updatedBook = await updateBook(bookId, payload);
+    if (!updatedBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    if (req.body.authorIds !== undefined) {
+      await replaceBookAuthors(
+        client,
+        bookId,
+        Array.isArray(req.body.authorIds) ? req.body.authorIds : [],
+      );
+    }
+
+    await client.query("COMMIT");
+
+    const category = updatedBook.category_id
+      ? await getCategoryById(updatedBook.category_id)
+      : null;
+    const authors = await listAuthorsForBook(bookId);
+
     return res.status(200).json({
-      message: "Book updated",
-      book: updated,
+      book: serializeBook(updatedBook, {
+        category: category ? serializeCategory(category) : null,
+        authors: authors.map((author) => serializeBookAuthor(author)),
+      }),
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-    });
+    await client.query("ROLLBACK");
+
+    if (isDuplicateISBNError(error)) {
+      return res.status(409).json({ message: "Book ISBN already exists" });
+    }
+
+    if (isForeignKeyViolation(error) || isInvalidSyntaxError(error)) {
+      return res.status(400).json({ message: "Invalid book payload" });
+    }
+
+    return res.status(500).json({ message: "Internal server error" });
+  } finally {
+    client.release();
   }
 };

@@ -1,0 +1,68 @@
+const normalizeNumeric = (value) => {
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed === "") {
+      return null;
+    }
+
+    return Number(trimmed);
+  }
+
+  return Number(value);
+};
+
+export const serializeBookAuthor = (author) => {
+  if (!author) {
+    return null;
+  }
+
+  return {
+    id: author.id,
+    nameEn: author.name_en,
+    nameAr: author.name_ar,
+    authorDescriptionEn: author.author_description_en,
+    authorDescriptionAr: author.author_description_ar,
+    email: author.email,
+    phoneNumber: author.phone_number,
+    createdAt: author.created_at,
+  };
+};
+
+export const serializeBook = (book, options = {}) => {
+  if (!book) {
+    return null;
+  }
+
+  const serialized = {
+    id: book.id,
+    nameEn: book.name_en,
+    nameAr: book.name_ar,
+    descriptionEn: book.description_en,
+    descriptionAr: book.description_ar,
+    weightKg: normalizeNumeric(book.weight_kg),
+    barcodeImage: book.barcode_image,
+    categoryId: book.category_id,
+    price: normalizeNumeric(book.price),
+    shippingCost: normalizeNumeric(book.shipping_cost),
+    lengthCm: normalizeNumeric(book.length_cm),
+    widthCm: normalizeNumeric(book.width_cm),
+    heightCm: normalizeNumeric(book.height_cm),
+    createdAt: book.created_at,
+    coverImage: book.cover_image,
+    isbn: book.isbn,
+  };
+
+  if (options.category !== undefined) {
+    serialized.category = options.category;
+  }
+
+  if (options.authors !== undefined) {
+    serialized.authors = options.authors;
+  }
+
+  return serialized;
+};

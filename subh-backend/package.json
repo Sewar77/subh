@@ -1,7 +1,12 @@
 {
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "cms:verify": "node scripts/verify-cms.js",
+    "auth:verify": "node scripts/verify-auth.js",
+    "admin:bootstrap": "node scripts/bootstrap-admin.js",
+    "db:migrate": "node database/migrations/run-migrations.js",
+    "db:seed": "node database/seeds/dev-users-seed.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

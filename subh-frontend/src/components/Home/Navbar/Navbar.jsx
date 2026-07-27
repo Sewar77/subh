@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
@@ -19,7 +19,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../Hooks/useAuth";
-import { authContext } from "../../../Context/authContext";
+import { authContext } from "../../../Context/authContextValue.js";
 import { useLanguage } from "../../../Context/LanguageContext";
 
 export default function Navbar() {
@@ -30,11 +30,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   const { logout } = useAuth();
-  const { user, loadUser } = useContext(authContext);
-
-  useEffect(() => {
-    loadUser();
-  }, []);
+  const { user } = useContext(authContext);
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "ar" : "en");

@@ -21,6 +21,7 @@ app.use(
     methods: ["PUT", "DELETE", "POST", "CREATE", "PATCH"],
   }),
 );
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

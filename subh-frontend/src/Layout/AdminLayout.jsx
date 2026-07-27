@@ -1,5 +1,5 @@
 import { ThemeProvider, CssBaseline, Box } from "@mui/material";
-import { adminTheme } from "../theme/adminTheme.jsx";
+import { adminTheme } from "../Theme/adminTheme.jsx";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "../components/Admin/Layout/AdminSidebar";
 import AdminNavbar from "../components/Admin/Layout/AdminNavbar";

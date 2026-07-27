@@ -1,149 +1,192 @@
-import {
-  getAllUsers,
-  getUserByEmail,
-  getUserById,
-  registerUserModel,
-} from "../models/auth.Models.js";
-import { deleteUser, updateUser } from "../models/user.Model.js";
 import bcrypt from "bcryptjs";
+import {
+  createUser,
+  getAllUsers,
+  getUserByEmailForAuth,
+  getUserByEmailSafe,
+  getUserById,
+  normalizeEmail,
+  normalizeFullName,
+} from "../models/auth.Models.js";
+import {
+  deactivateUser,
+  updateUser,
+  updateUserPassword,
+} from "../models/user.Model.js";
+import { serializeUser } from "../utils/userSerializer.js";
+
+const isDuplicateEmailError = (error) => error?.code === "23505";
+const isLastActiveAdminError = (error) => error?.code === "LAST_ACTIVE_ADMIN";
+
+const errorResponse = (res, error) => {
+  if (isDuplicateEmailError(error)) {
+    return res.status(409).json({ message: "Email already exists" });
+  }
+  if (isLastActiveAdminError(error)) {
+    return res.status(409).json({ message: error.message });
+  }
+  return res.status(500).json({ message: "Internal server error" });
+};
+
 export const getAllUsersController = async (req, res) => {
   try {
     const users = await getAllUsers();
-    if (users.length === 0) {
-      return res.status(200).json({ message: "No users yert", users: [] });
-    }
-    return res.status(200).json({ message: "users found", users: users });
-  } catch (err) {
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(200).json({
+      message: "Users found",
+      users: users.map(serializeUser),
+    });
+  } catch (error) {
+    return errorResponse(res, error);
   }
 };
 
 export const getUserByIdController = async (req, res) => {
-  const userId = req.params.id;
   try {
-    const user = await getUserById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "user not found" });
-    }
-    return res.status(200).json({ message: "user found", user: user });
-  } catch (err) {
-    return res.status(500).json({ message: "Internal server error" });
+    const user = await getUserById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json({
+      message: "User found",
+      user: serializeUser(user),
+    });
+  } catch (error) {
+    return errorResponse(res, error);
   }
 };
 
 export const getUserByEmailController = async (req, res) => {
-  const email = req.body;
   try {
-    const user = await getUserByEmail(email);
-    if (!user) {
-      return res.status(404).json({ message: "user not found" });
+    const user = await getUserByEmailSafe(req.query.email);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json({
+      message: "User found",
+      user: serializeUser(user),
+    });
+  } catch (error) {
+    return errorResponse(res, error);
+  }
+};
+
+export const addNewUserController = async (req, res) => {
+  try {
+    const {
+      name,
+      fullName,
+      email,
+      password,
+      phoneNumber,
+      phone_Number: legacyPhoneNumber,
+      userType,
+      role,
+      userRole,
+      isActive,
+      emailVerified,
+    } = req.body;
+    const normalizedEmail = normalizeEmail(email);
+
+    if (await getUserByEmailForAuth(normalizedEmail)) {
+      return res.status(409).json({ message: "Email already exists" });
     }
-    return res.status(200).json({ message: "user found", user: user });
-  } catch (err) {
-    return res.status(500).json({ message: "Internal server error" });
+
+    const user = await createUser({
+      fullName: normalizeFullName(fullName ?? name),
+      email: normalizedEmail,
+      phoneNumber: phoneNumber ?? legacyPhoneNumber ?? null,
+      hashedPassword: await bcrypt.hash(password, 10),
+      role: role ?? userRole ?? "user",
+      userType,
+      isActive,
+      emailVerified,
+    });
+
+    return res.status(201).json({
+      message: "User added",
+      user: serializeUser(user),
+    });
+  } catch (error) {
+    return errorResponse(res, error);
+  }
+};
+
+export const updateUserController = async (req, res) => {
+  try {
+    const payload = {};
+    const {
+      name,
+      fullName,
+      email,
+      phoneNumber,
+      userType,
+      role,
+      userRole,
+      isActive,
+      emailVerified,
+    } = req.body;
+
+    if (name !== undefined || fullName !== undefined) {
+      payload.fullName = normalizeFullName(fullName ?? name);
+    }
+    if (email !== undefined) payload.email = normalizeEmail(email);
+    if (phoneNumber !== undefined) payload.phoneNumber = phoneNumber;
+    if (userType !== undefined) payload.userType = userType;
+    if (role !== undefined || userRole !== undefined) {
+      payload.role = role ?? userRole;
+    }
+    if (isActive !== undefined) payload.isActive = isActive;
+    if (emailVerified !== undefined) payload.emailVerified = emailVerified;
+
+    const user = await updateUser(req.params.id, payload);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json({
+      message: "User updated successfully",
+      user: serializeUser(user),
+    });
+  } catch (error) {
+    return errorResponse(res, error);
   }
 };
 
 export const deleteUserController = async (req, res) => {
-  const userId = req.params.id;
   try {
-    const user = await getUserById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "user not found" });
-    }
-    await deleteUser(userId);
-    return res.status(200).json({ message: "user eleted" });
-  } catch (err) {
-    return res.status(500).json({ message: "Internal server error" });
+    const user = await deactivateUser(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    return res.status(204).send();
+  } catch (error) {
+    return errorResponse(res, error);
   }
 };
-export const addNewUserController = async (req, res) => {
-  const {
-    name,
-    password,
-    confirmPassword,
-    email,
-    userRole,
-    phone_Number,
-    userType,
-    address,
-  } = req.body;
+
+export const updateUserStatusController = async (req, res) => {
   try {
-    if (
-      !name ||
-      !email ||
-      !confirmPassword ||
-      !password ||
-      !userRole ||
-      !userType
-    ) {
-      return res.status(400).json({ message: "Should fill all info" });
-    }
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: "passwords should match" });
-    }
-    const isUserExist = await getUserByEmail(email);
-    if (isUserExist) {
-      return res.status(400).json({ message: "email registed already" });
-    }
-    const hashed_password = await bcrypt.hash(password, 10);
-    const user = await registerUserModel({
-      name,
-      email,
-      hashed_password,
-      phone_Number,
-      address,
-      userType: userType,
-      role: userRole,
+    const user = await updateUser(req.params.id, {
+      isActive: req.body.isActive,
     });
-    return res.status(201).json({ message: "user added", user: user });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Internal server error in register", err });
-  }
-};
-export const updateUserController = async (req, res) => {
-  const userId = req.params.id;
-  const { userType, userRole } = req.body;
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-  try {
-    const existingUser = await getUserById(userId);
-
-    if (!existingUser) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
-    const updateFields = {};
-
-    if (userType !== undefined && userType !== "") {
-      updateFields.user_type = userType;
-    }
-
-    if (userRole !== undefined && userRole !== "") {
-      updateFields.role = userRole;
-    }
-    if (Object.keys(updateFields).length === 0) {
-      return res.status(400).json({
-        message: "No fields provided to update",
-      });
-    }
-
-    const updatedUser = await updateUser(
-      userId,
-      updateFields.user_type,
-      updateFields.role,
-    );
     return res.status(200).json({
-      message: "User updated successfully",
-      user: updatedUser,
+      message: "User status updated successfully",
+      user: serializeUser(user),
     });
-  } catch (err) {
-    return res.status(500).json({
-      message: "Internal server error",
-      err,
+  } catch (error) {
+    return errorResponse(res, error);
+  }
+};
+
+export const updateUserPasswordController = async (req, res) => {
+  try {
+    const user = await updateUserPassword(
+      req.params.id,
+      await bcrypt.hash(req.body.password, 10),
+    );
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json({
+      message: "User password updated successfully",
+      user: serializeUser(user),
     });
+  } catch (error) {
+    return errorResponse(res, error);
   }
 };

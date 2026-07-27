@@ -1,3 +1,15 @@
+create table user(
+  id serial primary key, 
+
+    name text not null, 
+    email text unique not null, 
+    phoneNumber text , 
+    hashed_password text not null, 
+    role , 
+user_type
+
+)
+
 create table categories (
     id serial primary key, 
 

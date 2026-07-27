@@ -1,73 +1,29 @@
 import express from "express";
-
 import {
-  createPageController,
   getAllPagesController,
   getPageByIdController,
-  updatePageController,
-  deletePageController,
   getPageByKeyController,
-} from "../controller/pages.controller.js";
-
-import { protect } from "../middleware/protect.Middleware.js";
-import { adminOnly } from "../middleware/adminOnly.Middleware.js";
+} from "../controller/pages.Controller.js";
 import { validate } from "../middleware/validate.Middleware.js";
-
 import {
-  createPageSchema,
-  updatePageSchema,
-} from "../validation/pagesSchema.Validation.js";
+  pageKeyParamSchema,
+  sectionIdParamSchema,
+} from "../validation/sectionContent.Validation.js";
 
 const router = express.Router();
 
-// =========================
-// CREATE PAGE
-// (Developer/Admin only)
-// =========================
-
-router.post(
-  "/create-page",
-  protect,
-  adminOnly,
-  validate(createPageSchema),
-  createPageController,
-);
-
-// =========================
-// GET ALL PAGES
-// =========================
-
+// Fixed pages are developer-owned. No page creation, deletion, key, route, or
+// status mutation endpoint is exposed to administrators.
 router.get("/pages", getAllPagesController);
-
-// =========================
-// GET PAGE BY ID
-// =========================
-
-router.get("/pages/:id", getPageByIdController);
-
-// =========================
-// GET PAGE BY KEY
-// Frontend uses this
-// =========================
-
-router.get("/pages/key/:key", getPageByKeyController);
-
-// =========================
-// UPDATE PAGE
-// =========================
-
-router.put(
+router.get(
   "/pages/:id",
-  protect,
-  adminOnly,
-  validate(updatePageSchema),
-  updatePageController,
+  validate(sectionIdParamSchema, "params"),
+  getPageByIdController,
 );
-
-// =========================
-// DELETE PAGE
-// =========================
-
-router.delete("/pages/:id", protect, adminOnly, deletePageController);
+router.get(
+  "/pages/key/:key",
+  validate(pageKeyParamSchema, "params"),
+  getPageByKeyController,
+);
 
 export default router;

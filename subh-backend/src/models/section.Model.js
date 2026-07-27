@@ -1,341 +1,377 @@
 import pool from "../config/db.js";
+import { hasSectionTemplate } from "../cms/sectionTemplateRegistry.js";
 
-// =========================
-// CREATE SECTION
-// =========================
-
-export const createSection = async (page_id, type) => {
-  const allowedTypes = ["image", "image-text", "text-image", "text"];
-
-  if (!allowedTypes.includes(type)) {
-    throw new Error("Invalid section type");
+export const createSection = async (pageId, templateKey) => {
+  if (!hasSectionTemplate(templateKey)) {
+    const error = new Error("Section template is not registered");
+    error.code = "CMS_TEMPLATE_UNKNOWN";
+    throw error;
   }
-
   const positionResult = await pool.query(
     `
-    SELECT COALESCE(MAX(position),0)+1 AS next_position
-    FROM sections
-    WHERE page_id=$1
+      SELECT COALESCE(MAX(position), 0) + 1 AS next_position
+      FROM sections
+      WHERE page_id = $1
     `,
-    [page_id],
+    [pageId],
   );
 
-  const position = positionResult.rows[0].next_position;
+  const nextPosition = positionResult.rows[0]?.next_position || 1;
 
   const result = await pool.query(
     `
-    INSERT INTO sections
-    (
-      page_id,
-      type,
-      position
-    )
-    VALUES($1,$2,$3)
-    RETURNING *
+      INSERT INTO sections (page_id, type, position, is_visible, is_archived)
+      VALUES ($1, $2, $3, true, false)
+      RETURNING id, page_id, type, position, is_visible, is_archived, created_at, updated_at
     `,
-    [page_id, type, position],
+    [pageId, templateKey, nextPosition],
   );
 
-  return result.rows[0];
+  return result.rows[0] || null;
 };
 
-// =========================
-// GET SECTIONS BY PAGE
-// Used by frontend
-// =========================
-
-export const getSectionsByPage = async (page_id) => {
+export const sectionExists = async (id) => {
   const result = await pool.query(
     `
-SELECT
+      SELECT id
+      FROM sections
+      WHERE id = $1
+    `,
+    [id],
+  );
 
-s.id,
-s.page_id,
-s.type,
-s.position,
-s.is_visible,
+  return result.rows[0] || null;
+};
 
+export const lockSectionForUpdate = async (id, client) => {
+  const result = await client.query(
+    `
+      SELECT id, page_id, type, position, is_visible, is_archived
+      FROM sections
+      WHERE id = $1
+      FOR UPDATE
+    `,
+    [id],
+  );
+  return result.rows[0] || null;
+};
 
-COALESCE(
-
-json_agg(
-
-jsonb_build_object(
-
-'id',st.id,
-'locale',st.locale,
-'title',st.title,
-'content',st.content,
-'is_visible',st.is_visible
-
-)
-
-)
-
-FILTER(
-WHERE st.id IS NOT NULL
-),
-
-'[]'
-
-) AS translations
-
-
-
-FROM sections s
-
-
-LEFT JOIN section_translations st
-
-ON s.id=st.section_id
-
-
-
-WHERE 
-s.page_id=$1
-AND s.is_visible=true
-
-
-
-GROUP BY s.id
-
-
-ORDER BY s.position ASC
-
-`,
-    [page_id],
+export const listSectionsByPageId = async (pageId) => {
+  const result = await pool.query(
+    `
+      SELECT
+        s.id,
+        s.page_id,
+        s.type AS template_key,
+        s.position,
+        s.is_visible,
+        s.is_archived,
+        s.created_at,
+        s.updated_at
+      FROM sections s
+      WHERE s.page_id = $1
+      ORDER BY s.position ASC, s.id ASC
+    `,
+    [pageId],
   );
 
   return result.rows;
 };
 
-// =========================
-// GET SECTION BY ID
-// Admin editing
-// =========================
+export const getSectionsByPage = listSectionsByPageId;
+
+export const getPublicSectionsByPageId = async (pageId) => {
+  const result = await pool.query(
+    `
+      SELECT
+        s.id,
+        s.page_id,
+        s.type AS template_key,
+        s.position,
+        s.is_visible,
+        s.is_archived,
+        s.created_at,
+        s.updated_at
+      FROM sections s
+      WHERE s.page_id = $1
+        AND s.is_visible = true
+        AND COALESCE(s.is_archived, false) = false
+      ORDER BY s.position ASC, s.id ASC
+    `,
+    [pageId],
+  );
+
+  return result.rows;
+};
 
 export const getSectionById = async (id) => {
   const result = await pool.query(
     `
-    SELECT
-
+      SELECT
         s.id,
         s.page_id,
-        s.type,
+        s.type AS template_key,
         s.position,
         s.is_visible,
+        s.is_archived,
         s.created_at,
-
+        s.updated_at,
         p.key AS page_key,
         p.name AS page_name,
-        p.status AS page_status,
-
-        COALESCE(
-            json_agg(
-                jsonb_build_object(
-                    'id', st.id,
-                    'locale', st.locale,
-                    'title', st.title,
-                    'content', st.content,
-                    'is_visible', st.is_visible
-                )
-            )
-            FILTER(
-                WHERE st.id IS NOT NULL
-            ),
-            '[]'
-        ) AS translations
-
-    FROM sections s
-
-    JOIN pages p
-    ON s.page_id = p.id
-
-    LEFT JOIN section_translations st
-    ON s.id = st.section_id
-
-    WHERE s.id = $1
-
-    GROUP BY
-        s.id,
-        p.id
-
+        p.status AS page_status
+      FROM sections s
+      JOIN pages p ON p.id = s.page_id
+      WHERE s.id = $1
     `,
     [id],
   );
 
-  const section = result.rows[0];
-
-  if (!section) {
-    return null;
-  }
-
-  return section;
+  return result.rows[0] || null;
 };
 
-// =========================
-// UPDATE SECTION
-// =========================
-
-export const updateSection = async (id, type, position, is_visible) => {
+export const getSectionForAdmin = async (id) => {
   const result = await pool.query(
     `
-UPDATE sections
-
-SET
-
-type=COALESCE($2,type),
-
-position=COALESCE($3,position),
-
-is_visible=COALESCE($4,is_visible)
-
-
-WHERE id=$1
-
-
-RETURNING *
-
-`,
-    [id, type, position, is_visible],
+      SELECT
+        s.id,
+        s.page_id,
+        s.type AS template_key,
+        s.position,
+        s.is_visible,
+        s.is_archived,
+        s.created_at,
+        s.updated_at,
+        p.key AS page_key,
+        p.name AS page_name,
+        p.status AS page_status
+      FROM sections s
+      JOIN pages p ON p.id = s.page_id
+      WHERE s.id = $1
+    `,
+    [id],
   );
 
-  return result.rows[0];
+  return result.rows[0] || null;
 };
 
-// =========================
-// DELETE SECTION
-// =========================
+export const updateSectionPosition = async (id, position) => {
+  const result = await pool.query(
+    `
+      UPDATE sections
+      SET position = $2,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING id, page_id, type, position, is_visible, is_archived, created_at, updated_at
+    `,
+    [id, position],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const reorderPageSections = async (pageId, items = []) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+    const currentResult = await client.query(
+      `
+        SELECT id
+        FROM sections
+        WHERE page_id = $1
+        ORDER BY id ASC
+        FOR UPDATE
+      `,
+      [pageId],
+    );
+    const currentIds = currentResult.rows
+      .map(({ id }) => Number(id))
+      .sort((a, b) => a - b);
+    const submittedIds = items
+      .map(({ id }) => Number(id))
+      .sort((a, b) => a - b);
+
+    if (
+      currentIds.length !== submittedIds.length ||
+      currentIds.some((id, index) => id !== submittedIds[index])
+    ) {
+      const error = new Error("Reorder payload must include every page section");
+      error.code = "CMS_SECTION_REORDER_MISMATCH";
+      throw error;
+    }
+
+    for (const item of items) {
+      await client.query(
+        `
+          UPDATE sections
+          SET position = $2,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = $1 AND page_id = $3
+        `,
+        [item.id, item.position, pageId],
+      );
+    }
+
+    const result = await client.query(
+      `
+        SELECT
+          id,
+          page_id,
+          type AS template_key,
+          position,
+          is_visible,
+          is_archived,
+          created_at,
+          updated_at
+        FROM sections
+        WHERE page_id = $1
+        ORDER BY position ASC, id ASC
+      `,
+      [pageId],
+    );
+    await client.query("COMMIT");
+    return result.rows;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const updateSectionVisibility = async (id, isVisible) => {
+  const result = await pool.query(
+    `
+      UPDATE sections
+      SET is_visible = $2,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING id, page_id, type, position, is_visible, is_archived, created_at, updated_at
+    `,
+    [id, isVisible],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const toggleSectionVisibility = async (id) => {
+  const result = await pool.query(
+    `
+      UPDATE sections
+      SET is_visible = NOT is_visible,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING id, page_id, type, position, is_visible, is_archived, created_at, updated_at
+    `,
+    [id],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const archiveSection = async (id) => {
+  const result = await pool.query(
+    `
+      UPDATE sections
+      SET is_archived = true,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING id, page_id, type, position, is_visible, is_archived, created_at, updated_at
+    `,
+    [id],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const restoreSection = async (id) => {
+  const result = await pool.query(
+    `
+      UPDATE sections
+      SET is_archived = false,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING id, page_id, type, position, is_visible, is_archived, created_at, updated_at
+    `,
+    [id],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const updateSection = async (id, position, isVisible) => {
+  const result = await pool.query(
+    `
+      UPDATE sections
+      SET
+        position = COALESCE($2, position),
+        is_visible = COALESCE($3, is_visible),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING id, page_id, type, position, is_visible, is_archived, created_at, updated_at
+    `,
+    [id, position, isVisible],
+  );
+
+  return result.rows[0] || null;
+};
 
 export const deleteSection = async (id) => {
   const result = await pool.query(
     `
-DELETE FROM sections
-
-WHERE id=$1
-
-RETURNING *
-
-`,
+      DELETE FROM sections
+      WHERE id = $1
+      RETURNING id, page_id, type, position, is_visible, is_archived, created_at, updated_at
+    `,
     [id],
   );
 
-  return result.rows[0];
+  return result.rows[0] || null;
 };
-
-// =========================
-// GET ALL SECTIONS
-// Admin dashboard
-// =========================
 
 export const getAllSections = async () => {
   const result = await pool.query(
-    `SELECT
-    s.id,
-    s.page_id,
-    s.type,
-    s.position,
-    s.is_visible,
-
-    p.key AS page_key,
-    p.status AS page_status,
-
-    COALESCE(
-        json_agg(
-            DISTINCT jsonb_build_object(
-                'id', st.id,
-                'locale', st.locale,
-                'title', st.title,
-                'content', st.content,
-                'is_visible', st.is_visible
-            )
-        )
-        FILTER(
-            WHERE st.id IS NOT NULL
-        ),
-        '[]'
-    ) AS translations
-
-FROM sections s
-
-JOIN pages p
-ON s.page_id = p.id
-
-LEFT JOIN section_translations st
-ON s.id = st.section_id
-
-GROUP BY
-    s.id,
-    p.id
-
-ORDER BY
-    s.position ASC;
-`,
+    `
+      SELECT
+        s.id,
+        s.page_id,
+        s.type AS template_key,
+        s.position,
+        s.is_visible,
+        s.is_archived,
+        s.created_at,
+        s.updated_at,
+        p.key AS page_key,
+        p.status AS page_status
+      FROM sections s
+      JOIN pages p ON p.id = s.page_id
+      ORDER BY s.position ASC, s.id ASC
+    `,
   );
 
   return result.rows;
 };
 
-// =========================
-// TOGGLE SECTION VISIBILITY
-// =========================
-
-export const toggleSectionVisibility = async (id) => {
+export const getSectionsByPageKey = async (pageKey) => {
   const result = await pool.query(
     `
-    UPDATE sections
-
-    SET 
-      is_visible = NOT is_visible
-
-    WHERE id=$1
-
-    RETURNING *
+      SELECT
+        s.id,
+        s.page_id,
+        s.type AS template_key,
+        s.position,
+        s.is_visible,
+        s.is_archived,
+        s.created_at,
+        s.updated_at
+      FROM sections s
+      JOIN pages p ON p.id = s.page_id
+      WHERE p.key = $1
+        AND s.is_visible = true
+        AND COALESCE(s.is_archived, false) = false
+      ORDER BY s.position ASC, s.id ASC
     `,
-    [id],
-  );
-
-  return result.rows[0];
-};
-// =========================
-// GET SECTIONS BY PAGE
-// Used by frontend
-// =========================
-export const getSectionsByPageKey = async (page_key) => {
-  const result = await pool.query(
-    `
-   SELECT
-      s.id,
-      s.page_id,
-      s.type,
-      s.position,
-      s.is_visible,
-
-      COALESCE(
-        json_agg(
-          jsonb_build_object(
-            'id', st.id,
-            'locale', st.locale,
-            'title', st.title,
-            'content', st.content,
-            'is_visible', st.is_visible
-          )
-        ) FILTER (WHERE st.id IS NOT NULL),
-        '[]'
-      ) AS translations
-
-    FROM sections s
-    JOIN pages p
-      ON s.page_id = p.id
-    LEFT JOIN section_translations st
-      ON s.id = st.section_id
-
-    WHERE p.key = $1
-      AND s.is_visible = true
-
-    GROUP BY s.id
-    ORDER BY s.position ASC`,
-    [page_key],
+    [pageKey],
   );
 
   return result.rows;

@@ -12,16 +12,12 @@ import {
   Paper,
   Chip,
   Button,
-  IconButton,
   Tooltip,
   Select,
   MenuItem,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import { useContext, useEffect, useState } from "react";
-import { usersContext } from "../../../../Context/usersContext.jsx";
+import { useEffect, useState } from "react";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal.jsx";
 import { useUser } from "../../../../Hooks/useUsers.js";
 import DeleteButton from "../../Buttons/DeleteBtn";
@@ -34,7 +30,7 @@ export default function ManageUsers() {
   const theme = useTheme();
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [loadUsers]);
   const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [selectedId, setSelectedId] = useState(null);

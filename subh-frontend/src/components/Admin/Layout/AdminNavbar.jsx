@@ -13,17 +13,14 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import SearchIcon from "@mui/icons-material/Search";
 import { useAuth } from "../../../Hooks/useAuth";
 import { useContext, useEffect } from "react";
-import { authContext } from "../../../Context/authContext";
-import { usersContext } from "../../../Context/usersContext";
+import { usersContext } from "../../../Context/usersContextValue.js";
 import LogoutIcon from "@mui/icons-material/Logout";
 export default function AdminNavbar() {
   const { user, logout } = useAuth();
-  const { loadUser } = useContext(authContext);
   const { loadUsers } = useContext(usersContext);
   useEffect(() => {
-    loadUser();
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
   const handleLogout = () => {
     logout();

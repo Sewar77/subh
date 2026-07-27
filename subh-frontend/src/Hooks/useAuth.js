@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import { authContext } from "../Context/authContext";
+import { useContext } from "react";
+import { authContext } from "../Context/authContextValue.js";
 import { api } from "../../api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +33,6 @@ export const useAuth = () => {
       }
       toast.error(data?.message || "Something went wrong");
 
-      error;
     }
   };
 
@@ -45,6 +44,7 @@ export const useAuth = () => {
     try {
       const res = await api.post("/auth/login", userData);
       const role = res.data.user.role;
+      setUser(res.data.user);
       if (role === "admin") navigate("/admin");
       if (role === "user") navigate("/subh");
       toast.success(res.data.message);
@@ -57,12 +57,11 @@ export const useAuth = () => {
         return;
       }
       toast.error(data?.message || "Something went wrong");
-      error;
     }
   };
   const logout = async () => {
     try {
-      const res = await api.post("/auth/logout");
+      await api.post("/auth/logout");
       setUser(null);
       toast.success("Logout Successfully");
       navigate("/");

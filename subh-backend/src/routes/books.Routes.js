@@ -9,20 +9,74 @@ import {
   updateBookByIdController,
 } from "../controller/books.Controller.js";
 import { validate } from "../middleware/validate.Middleware.js";
-import { createBookSchema } from "../validation/books.Validation.js";
+import {
+  bookIdParamSchema,
+  createBookSchema,
+  listBooksQuerySchema,
+  updateBookSchema,
+} from "../validation/books.Validation.js";
 
 const route = express.Router();
 
-route.get("/books", getAllBooksController);
-route.get("/book/:id", getBookByIdController);
-route.delete("/book/:id", protect, adminOnly, deleteBookController);
+route.get(
+  "/books",
+  validate(listBooksQuerySchema, "query"),
+  getAllBooksController,
+);
+route.get(
+  "/books/:id",
+  validate(bookIdParamSchema, "params"),
+  getBookByIdController,
+);
+route.post(
+  "/books",
+  protect,
+  adminOnly,
+  validate(createBookSchema, "body"),
+  createBookController,
+);
+route.patch(
+  "/books/:id",
+  validate(bookIdParamSchema, "params"),
+  protect,
+  adminOnly,
+  validate(updateBookSchema, "body"),
+  updateBookByIdController,
+);
+route.delete(
+  "/books/:id",
+  validate(bookIdParamSchema, "params"),
+  protect,
+  adminOnly,
+  deleteBookController,
+);
+
+route.get(
+  "/book/:id",
+  validate(bookIdParamSchema, "params"),
+  getBookByIdController,
+);
 route.post(
   "/book/create",
   protect,
   adminOnly,
-  validate(createBookSchema),
+  validate(createBookSchema, "body"),
   createBookController,
 );
-route.put("/book/update/:id", protect, adminOnly, updateBookByIdController);
+route.put(
+  "/book/update/:id",
+  validate(bookIdParamSchema, "params"),
+  protect,
+  adminOnly,
+  validate(updateBookSchema, "body"),
+  updateBookByIdController,
+);
+route.delete(
+  "/book/:id",
+  validate(bookIdParamSchema, "params"),
+  protect,
+  adminOnly,
+  deleteBookController,
+);
 
 export default route;

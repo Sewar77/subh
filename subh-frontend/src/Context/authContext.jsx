@@ -1,22 +1,48 @@
-import { useState } from "react";
-import { createContext } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api";
-import toast from "react-hot-toast";
-export const authContext = createContext();
-export default function AuthProvider({ children }) {
-  const [user, setUser] = useState([]);
+import { authContext } from "./authContextValue.js";
 
-  const loadUser = async () => {
+export default function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  const loadUser = useCallback(async () => {
     try {
       const res = await api.get("/auth/me");
       setUser(res.data.user);
-    } catch (error) {
-      // toast.error(error.response?.data?.message || "Something went wrong");
-    
+      return res.data.user;
+    } catch {
+      setUser(null);
+      return null;
+    } finally {
+      setAuthLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    api
+      .get("/auth/me")
+      .then((response) => {
+        if (active) setUser(response.data.user);
+      })
+      .catch(() => {
+        if (active) setUser(null);
+      })
+      .finally(() => {
+        if (active) setAuthLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
-    <authContext.Provider value={{ loadUser, user, setUser }}>
+    <authContext.Provider
+      value={{ loadUser, user, setUser, authLoading, setAuthLoading }}
+    >
       {children}
     </authContext.Provider>
   );

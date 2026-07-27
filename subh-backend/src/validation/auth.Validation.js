@@ -1,89 +1,101 @@
 import Joi from "joi";
-export const registerUserSchema = Joi.object({
-  name: Joi.string().min(10).required().messages({
-    "string.base": "Name must be text",
-    "string.empty": "Name is required",
-    "string.min": "Name must be First and Last Name",
-    "any.required": "Name is required",
+
+const passwordPattern =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const phonePattern = /^\+?[0-9\s-]{7,20}$/;
+
+const fullNameSchema = Joi.string().trim().min(2).max(100);
+const emailSchema = Joi.string().trim().lowercase().email();
+const phoneSchema = Joi.string().trim().pattern(phonePattern);
+const passwordSchema = Joi.string().min(8).pattern(passwordPattern);
+const userTypeSchema = Joi.string()
+  .valid("individual", "company")
+  .allow(null);
+const roleSchema = Joi.string().valid("user", "admin");
+
+const withNameAlias = (schema) => schema.xor("name", "fullName");
+const withOptionalNameAlias = (schema) => schema.oxor("name", "fullName");
+
+export const registerUserSchema = withNameAlias(
+  Joi.object({
+    name: fullNameSchema,
+    fullName: fullNameSchema,
+    email: emailSchema.required(),
+    phoneNumber: phoneSchema.required(),
+    userType: userTypeSchema.required(),
+    password: passwordSchema.required(),
+    confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
   }),
-
-  address: Joi.string().alphanum().min(3).allow("", null).messages({
-    "string.base": "Address must be text",
-    "string.alphanum": "Address must contain only letters and numbers",
-    "string.min": "Address must be at least 3 characters",
-  }),
-
-  userType: Joi.string()
-    .valid("individual", "company")
-    .default("individual")
-    .required()
-    .messages({
-      "any.only": "User type must be either individual or company",
-      "any.required": "User type is required",
-      "string.base": "User type must be text",
-    }),
-
-  password: Joi.string()
-    .pattern(
-      new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-      ),
-    )
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must be at least 8 characters, include uppercase, lowercase, number, and special character",
-      "string.empty": "Password is required",
-      "any.required": "Password is required",
-    }),
-
-  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
-    "any.only": "Passwords do not match",
-    "any.required": "Confirm password is required",
-    "string.empty": "Confirm password is required",
-  }),
-
-  email: Joi.string().email().required().messages({
-    "string.email": "Please enter a valid email address",
-    "string.empty": "Email is required",
-    "any.required": "Email is required",
-  }),
-
-  phoneNumber: Joi.string()
-    .min(7)
-    .max(15)
-    .pattern(/^[0-9]+$/)
-    .required()
-    .messages({
-      "string.empty": "Phone number is required",
-      "string.min": "Phone number must be at least 7 digits",
-      "string.max": "Phone number must not exceed 15 digits",
-      "string.pattern.base": "Phone number must contain digits only",
-      "any.required": "Phone number is required",
-    }),
-
-  role: Joi.string().valid("user", "admin").default("user").messages({
-    "any.only": "Role must be user or admin",
-  }),
-});
+).unknown(false);
 
 export const loginUserSchema = Joi.object({
-  email: Joi.string().email().required().messages({
-    "string.email": "Please enter a valid email address",
-    "string.empty": "Email is required",
-    "any.required": "Email is required",
-  }),
-  password: Joi.string()
-    .pattern(
-      new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-      ),
-    )
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must be at least 8 characters, include uppercase, lowercase, number, and special character",
-      "string.empty": "Password is required",
-      "any.required": "Password is required",
-    }),
-});
+  email: emailSchema.required(),
+  password: Joi.string().min(8).required(),
+}).unknown(false);
+
+export const adminCreateUserSchema = withNameAlias(
+  Joi.object({
+    name: fullNameSchema,
+    fullName: fullNameSchema,
+    email: emailSchema.required(),
+    phoneNumber: phoneSchema,
+    // Legacy admin UI compatibility only; it maps to phone_number server-side.
+    phone_Number: phoneSchema,
+    password: passwordSchema.required(),
+    confirmPassword: Joi.string().valid(Joi.ref("password")),
+    role: roleSchema,
+    // Legacy admin UI compatibility only; it maps to role server-side.
+    userRole: roleSchema,
+    userType: userTypeSchema.required(),
+    isActive: Joi.boolean().default(true),
+    emailVerified: Joi.boolean().default(false),
+    // Existing admin form submits this field; it is accepted only as empty
+    // compatibility data and is never persisted.
+    address: Joi.valid("", null),
+  })
+    .xor("phoneNumber", "phone_Number")
+    .oxor("role", "userRole"),
+).unknown(false);
+
+export const adminUpdateUserSchema = withOptionalNameAlias(
+  Joi.object({
+    name: fullNameSchema,
+    fullName: fullNameSchema,
+    email: emailSchema,
+    phoneNumber: phoneSchema.allow(null),
+    userType: userTypeSchema,
+    role: roleSchema,
+    userRole: roleSchema,
+    isActive: Joi.boolean(),
+    emailVerified: Joi.boolean(),
+  })
+    .oxor("role", "userRole")
+    .or(
+      "name",
+      "fullName",
+      "email",
+      "phoneNumber",
+      "userType",
+      "role",
+      "userRole",
+      "isActive",
+      "emailVerified",
+    ),
+).unknown(false);
+
+export const userStatusSchema = Joi.object({
+  isActive: Joi.boolean().required(),
+}).unknown(false);
+
+export const adminPasswordUpdateSchema = Joi.object({
+  password: passwordSchema.required(),
+  confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
+}).unknown(false);
+
+export const userIdParamSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
+}).unknown(false);
+
+export const emailLookupSchema = Joi.object({
+  email: emailSchema.required(),
+}).unknown(false);

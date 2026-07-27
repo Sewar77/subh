@@ -1,114 +1,108 @@
-import {
-  getUserByEmail,
-  getUserById,
-  registerUserModel,
-} from "../models/auth.Models.js";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import {
+  createUser,
+  getUserByEmailForAuth,
+  normalizeEmail,
+  normalizeFullName,
+} from "../models/auth.Models.js";
 import { serializeUser } from "../utils/userSerializer.js";
+
+const AUTH_COOKIE_NAME = "token";
+const AUTH_COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+const getCookieOptions = (isClear = false) => ({
+  httpOnly: true,
+  path: "/",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  secure: process.env.NODE_ENV === "production",
+  ...(isClear ? { expires: new Date(0) } : { maxAge: AUTH_COOKIE_MAX_AGE_MS }),
+});
+
+const isDuplicateEmailError = (error) => error?.code === "23505";
 
 export const registerUserController = async (req, res) => {
   try {
-    const { name, email, password, confirmPassword, userType, phoneNumber } =
-      req.body;
-    const isUserExist = await getUserByEmail(email);
-
-    if (isUserExist) {
-      return res.status(409).json({
-        success: false,
-        message: "Email already exists",
-      });
-    }
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: "passwords should match" });
-    }
-    const role = "user";
-    const hashed_password = await bcrypt.hash(password, 10);
-
-    const user = await registerUserModel({
+    const {
       name,
+      fullName,
       email,
-      hashed_password,
-      userType,
+      password,
+      confirmPassword,
       phoneNumber,
-      role,
+      userType,
+    } = req.body;
+    const normalizedEmail = normalizeEmail(email);
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    if (await getUserByEmailForAuth(normalizedEmail)) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+
+    const user = await createUser({
+      fullName: normalizeFullName(fullName ?? name),
+      email: normalizedEmail,
+      phoneNumber,
+      hashedPassword: await bcrypt.hash(password, 10),
+      role: "user",
+      userType,
     });
 
     return res.status(201).json({
-      success: true,
       message: "User registered successfully",
+      user: serializeUser(user),
     });
-  } catch (err) {
-    console.log(err);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+  } catch (error) {
+    if (isDuplicateEmailError(error)) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const loginUserController = async (req, res) => {
-  const { password, email } = req.body;
-
   try {
-    if (!email || !password) {
-      return res.status(400).json({ message: "Should fill all info" });
+    const user = await getUserByEmailForAuth(normalizeEmail(req.body.email));
+
+    if (!user || user.is_active !== true) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
-    const isUserExist = await getUserByEmail(email);
-    if (!isUserExist) {
-      return res.status(400).json({ message: "email not found" });
-    }
-    const isMatch = await bcrypt.compare(password, isUserExist.hashed_password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "password not correct" });
-    }
-    const token = jwt.sign(
-      { id: isUserExist.id, email: isUserExist.email, role: isUserExist.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" },
+
+    const passwordMatches = await bcrypt.compare(
+      req.body.password,
+      user.hashed_password,
     );
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+    if (!passwordMatches) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
     });
+    res.cookie(AUTH_COOKIE_NAME, token, getCookieOptions());
+
     return res.status(200).json({
       message: "Login successful",
-      user: serializeUser(isUserExist),
-      token
+      user: serializeUser(user),
     });
-  } catch (err) {
-    return res.status(500).json({ message: "Internal server error", err });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export const currentUser = async (req, res) => {
-  try {
-    const me = req.user.id;
-    console.log(me);
-    
-    const user = await getUserById(me);
-    if (!user) {
-      return res.status(401).json({ message: "unautherzed" });
-    }
-    return res
-      .status(200)
-      .json({ message: "user infor", user: serializeUser(user) });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: "Internal server error", err });
+export const currentUser = (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
+
+  return res.status(200).json({
+    message: "User info",
+    user: req.user,
+  });
 };
 
-export const logout = async (req, res) => {
-  try {
-    res.cookie("token", "", {
-      httpOnly: true,
-      expires: new Date(0),
-    });
-    return res.status(200).json({ message: "logged out" });
-  } catch (err) {
-    return res.status(500).json({ message: "Internal server error", err });
-  }
-};
+export const logout = (req, res) =>
+  res.clearCookie(AUTH_COOKIE_NAME, getCookieOptions(true)).status(204).send();

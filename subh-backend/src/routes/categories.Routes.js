@@ -9,23 +9,66 @@ import {
   updateCategoryController,
 } from "../controller/categories.Controller.js";
 import { validate } from "../middleware/validate.Middleware.js";
-import { createCategorySchema } from "../validation/category.Validation.js";
+import {
+  categoryIdParamSchema,
+  createCategorySchema,
+  updateCategorySchema,
+} from "../validation/category.Validation.js";
+
 const route = express.Router();
 
+route.get("/categories", getAllCategoriesController);
+route.get(
+  "/categories/:id",
+  validate(categoryIdParamSchema, "params"),
+  getCategoryByIdController,
+);
 route.post(
-  "/categories/create",
+  "/categories",
   protect,
   adminOnly,
-  validate(createCategorySchema),
+  validate(createCategorySchema, "body"),
   createCategoryController,
 );
-route.get("/categories/all", getAllCategoriesController);
+route.patch(
+  "/categories/:id",
+  validate(categoryIdParamSchema, "params"),
+  protect,
+  adminOnly,
+  validate(updateCategorySchema, "body"),
+  updateCategoryController,
+);
 route.delete(
-  "/category/delete/:id",
+  "/categories/:id",
+  validate(categoryIdParamSchema, "params"),
   protect,
   adminOnly,
   deleteCategoryController,
 );
-route.get("/category/:id", protect, getCategoryByIdController);
-route.put("/category/update/:id", protect, adminOnly, updateCategoryController);
+
+route.get("/categories/all", getAllCategoriesController);
+route.get("/category/:id", getCategoryByIdController);
+route.post(
+  "/categories/create",
+  protect,
+  adminOnly,
+  validate(createCategorySchema, "body"),
+  createCategoryController,
+);
+route.put(
+  "/category/update/:id",
+  validate(categoryIdParamSchema, "params"),
+  protect,
+  adminOnly,
+  validate(updateCategorySchema, "body"),
+  updateCategoryController,
+);
+route.delete(
+  "/category/delete/:id",
+  validate(categoryIdParamSchema, "params"),
+  protect,
+  adminOnly,
+  deleteCategoryController,
+);
+
 export default route;

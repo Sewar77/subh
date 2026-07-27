@@ -1,129 +1,123 @@
+import { getAdminEditingMetadata } from "../cms/sectionTemplateRegistry.js";
 import {
-  getSectionsByPage,
-  getSectionById,
+  archiveSection,
   getAllSections,
-  toggleSectionVisibility,
+  getPublicSectionsByPageId,
+  getSectionForAdmin,
   getSectionsByPageKey,
+  reorderPageSections,
+  restoreSection,
+  toggleSectionVisibility,
+  updateSectionVisibility,
 } from "../models/section.Model.js";
+import {
+  hydrateSection,
+  hydrateSections,
+} from "../services/cms/sectionReadService.js";
 
-/**
- * GET ALL SECTIONS
- * Admin dashboard
- */
+export const getSectionTemplatesController = async (req, res) =>
+  res.status(200).json({ templates: getAdminEditingMetadata() });
+
 export const getAllSectionsController = async (req, res) => {
   try {
-    const sections = await getAllSections();
-
-    return res.status(200).json({
-      success: true,
-      sections,
+    const sections = await hydrateSections(await getAllSections(), {
+      admin: true,
     });
+    return res.status(200).json({ success: true, sections });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      message: "Failed to fetch sections",
-    });
+    return res.status(500).json({ message: "Failed to fetch sections" });
   }
 };
 
-/**
- * GET SECTIONS BY PAGE
- * Frontend rendering
- */
 export const getSectionsByPageController = async (req, res) => {
   try {
-    const { page_id } = req.params;
-
-    const sections = await getSectionsByPage(page_id);
-
-    return res.status(200).json({
-      success: true,
-      sections,
-    });
+    const sections = await hydrateSections(
+      await getPublicSectionsByPageId(req.params.page_id),
+    );
+    return res.status(200).json({ success: true, sections });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      message: "Failed to fetch page sections",
-    });
+    return res.status(500).json({ message: "Failed to fetch page sections" });
   }
 };
 
-/**
- * GET SECTIONS BY PAGE
- * Frontend rendering
- */
 export const getSectionsByPageKeyController = async (req, res) => {
   try {
-    const key = req.params.key;
-    console.log(key);
-
-    const sections = await getSectionsByPageKey(key);
-    console.log(sections);
-
-    return res.status(200).json({
-      success: true,
-      sections,
-    });
+    const sections = await hydrateSections(
+      await getSectionsByPageKey(req.params.key),
+    );
+    return res.status(200).json({ success: true, sections });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      message: "Failed to fetch page sections",
-    });
+    return res.status(500).json({ message: "Failed to fetch page sections" });
   }
 };
 
-/**
- * GET SINGLE SECTION
- * Admin editing page
- */
 export const getSectionByIdController = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const section = await getSectionById(id);
-
-    if (!section) {
-      return res.status(404).json({
-        message: "Section not found",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      section,
-    });
+    const section = await hydrateSection(
+      await getSectionForAdmin(req.params.id),
+      { admin: true },
+    );
+    if (!section) return res.status(404).json({ message: "Section not found" });
+    return res.status(200).json({ success: true, section });
   } catch (error) {
-    console.error(error);
+    return res.status(500).json({ message: "Failed to fetch section" });
+  }
+};
 
-    return res.status(500).json({
-      message: "Failed to fetch section",
-    });
+export const updateSectionVisibilityController = async (req, res) => {
+  try {
+    const updated = await updateSectionVisibility(
+      req.params.id,
+      req.body.isVisible,
+    );
+    if (!updated) return res.status(404).json({ message: "Section not found" });
+    const section = await hydrateSection(updated, { admin: true });
+    return res.status(200).json({ success: true, section });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to update visibility" });
   }
 };
 
 export const toggleSectionVisibilityController = async (req, res) => {
   try {
-    const section = await toggleSectionVisibility(req.params.id);
-    ("yes");
-
-    if (!section) {
-      return res.status(404).json({
-        message: "Section not found",
-      });
-    }
-
-    return res.json({
-      success: true,
-      section,
-    });
+    const updated = await toggleSectionVisibility(req.params.id);
+    if (!updated) return res.status(404).json({ message: "Section not found" });
+    const section = await hydrateSection(updated, { admin: true });
+    return res.status(200).json({ success: true, section });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      message: "Server error",
-    });
+    return res.status(500).json({ message: "Failed to update visibility" });
   }
 };
+
+export const reorderPageSectionsController = async (req, res) => {
+  try {
+    const rows = await reorderPageSections(
+      req.params.pageId,
+      req.body.sections.map(({ id, position }) => ({ id, position })),
+    );
+    const sections = await hydrateSections(rows, { admin: true });
+    return res.status(200).json({ success: true, sections });
+  } catch (error) {
+    if (error?.code === "CMS_SECTION_REORDER_MISMATCH") {
+      return res.status(409).json({ message: error.message });
+    }
+    return res.status(500).json({ message: "Failed to reorder sections" });
+  }
+};
+
+const setArchiveState = async (req, res, action, message) => {
+  try {
+    const updated = await action(req.params.id);
+    if (!updated) return res.status(404).json({ message: "Section not found" });
+    const section = await hydrateSection(updated, { admin: true });
+    return res.status(200).json({ success: true, section });
+  } catch (error) {
+    return res.status(500).json({ message });
+  }
+};
+
+export const archiveSectionController = (req, res) =>
+  setArchiveState(req, res, archiveSection, "Failed to archive section");
+
+export const restoreSectionController = (req, res) =>
+  setArchiveState(req, res, restoreSection, "Failed to restore section");

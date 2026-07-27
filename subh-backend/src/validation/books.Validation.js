@@ -1,67 +1,116 @@
 import Joi from "joi";
 
 const arabicRegex = /^[\u0600-\u06FF0-9\s\-.,()]+$/;
+const positiveNumber = Joi.number().min(0);
+const optionalImage = Joi.string().trim().max(500).allow(null, "");
+const optionalDescription = Joi.string().trim().max(5000).allow(null, "");
+
+const authorIdsArray = Joi.array()
+  .items(Joi.number().integer().positive())
+  .unique()
+  .max(50)
+  .default([]);
 
 export const createBookSchema = Joi.object({
-  name_en: Joi.string().min(2).max(255).required().messages({
+  nameEn: Joi.string().trim().min(2).max(255).required().messages({
     "string.empty": "English name is required",
     "string.min": "English name must be at least 2 characters",
-    "string.max": "English name is too long",
+    "any.required": "English name is required",
   }),
-
-  name_ar: Joi.string()
+  nameAr: Joi.string()
+    .trim()
     .pattern(arabicRegex)
     .min(2)
     .max(255)
-    .allow("", null)
+    .required()
     .messages({
+      "string.empty": "Arabic name is required",
       "string.pattern.base":
         "Arabic name must contain only Arabic letters, numbers, and allowed symbols",
-      "string.min": "Arabic name is too short",
-      "string.max": "Arabic name is too long",
+      "string.min": "Arabic name must be at least 2 characters",
+      "any.required": "Arabic name is required",
     }),
-
-  description_en: Joi.string().allow("", null),
-
-  description_ar: Joi.string().pattern(arabicRegex).allow("", null).messages({
+  descriptionEn: optionalDescription,
+  descriptionAr: optionalDescription.pattern(arabicRegex).messages({
     "string.pattern.base": "Arabic description must contain only Arabic text",
   }),
-
-  weight_kg: Joi.number().positive().required().messages({
+  weightKg: Joi.number().min(0).required().messages({
     "number.base": "Weight must be a number",
-    "number.positive": "Weight must be greater than 0",
+    "number.min": "Weight must be zero or greater",
     "any.required": "Weight is required",
   }),
-
-  author_name_en: Joi.string().allow("", null),
-
-  author_name_ar: Joi.string().pattern(arabicRegex).allow("", null).messages({
-    "string.pattern.base": "Arabic author name must contain only Arabic text",
-  }),
-
-  barcode_image: Joi.string().uri().required().messages({
-    "string.uri": "Barcode image must be a valid URL",
-    "any.required": "Barcode image is required",
-  }),
-
-  cover_image: Joi.string().uri().required().messages({
-    "string.uri": "Cover image must be a valid URL",
-    "any.required": "Cover image is required",
-  }),
-
-  category_id: Joi.number().integer().positive().allow(null),
-  isbn: Joi.string().min(13).max(26).required(),
-
-  price: Joi.number().positive().required().messages({
-    "number.positive": "Price must be greater than 0",
+  barcodeImage: optionalImage,
+  categoryId: Joi.number().integer().positive().allow(null),
+  price: Joi.number().min(0).required().messages({
+    "number.base": "Price must be a number",
+    "number.min": "Price must be zero or greater",
     "any.required": "Price is required",
   }),
+  shippingCost: Joi.number().min(0).allow(null),
+  lengthCm: positiveNumber.allow(null),
+  widthCm: positiveNumber.allow(null),
+  heightCm: positiveNumber.allow(null),
+  coverImage: optionalImage,
+  isbn: Joi.string().trim().min(13).max(26).required().messages({
+    "string.empty": "ISBN is required",
+    "string.min": "ISBN must be at least 13 characters",
+    "string.max": "ISBN must be at most 26 characters",
+    "any.required": "ISBN is required",
+  }),
+  authorIds: authorIdsArray,
+}).unknown(false);
 
-  shipping_cost: Joi.number().min(0).allow(null),
+export const updateBookSchema = Joi.object({
+  nameEn: Joi.string().trim().min(2).max(255),
+  nameAr: Joi.string().trim().pattern(arabicRegex).min(2).max(255),
+  descriptionEn: optionalDescription,
+  descriptionAr: optionalDescription.pattern(arabicRegex).messages({
+    "string.pattern.base": "Arabic description must contain only Arabic text",
+  }),
+  weightKg: Joi.number().min(0),
+  barcodeImage: optionalImage,
+  categoryId: Joi.number().integer().positive().allow(null),
+  price: Joi.number().min(0),
+  shippingCost: Joi.number().min(0),
+  lengthCm: positiveNumber.allow(null),
+  widthCm: positiveNumber.allow(null),
+  heightCm: positiveNumber.allow(null),
+  coverImage: optionalImage,
+  isbn: Joi.string().trim().min(13).max(26),
+  authorIds: authorIdsArray,
+})
+  .or(
+    "nameEn",
+    "nameAr",
+    "descriptionEn",
+    "descriptionAr",
+    "weightKg",
+    "barcodeImage",
+    "categoryId",
+    "price",
+    "shippingCost",
+    "lengthCm",
+    "widthCm",
+    "heightCm",
+    "coverImage",
+    "isbn",
+    "authorIds",
+  )
+  .unknown(false);
 
-  length_cm: Joi.number().positive().allow(null),
+export const bookIdParamSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
+}).unknown(false);
 
-  width_cm: Joi.number().positive().allow(null),
-
-  height_cm: Joi.number().positive().allow(null),
-});
+export const listBooksQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(20),
+  search: Joi.string().trim().max(100).allow("", null),
+  categoryId: Joi.number().integer().positive().allow(null),
+  minPrice: Joi.number().min(0).allow(null),
+  maxPrice: Joi.number().min(0).allow(null),
+  sortBy: Joi.string()
+    .valid("createdAt", "price", "nameEn", "nameAr")
+    .default("createdAt"),
+  sortOrder: Joi.string().valid("asc", "desc").default("desc"),
+}).unknown(false);
