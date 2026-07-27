@@ -1,13 +1,19 @@
-import { Alert, Box, Button, CircularProgress, Container, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Paper, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getCategory } from "../../Services/categoryService.js";
+import { getBooksForCategory } from "../../Services/bookService.js";
 import { useLanguage } from "../../Context/LanguageContext.jsx";
+import BookCardGrid from "../../components/Books/BookCardGrid.jsx";
+
 export default function CategoryDetailPage() {
-  const { id } = useParams(); const { language } = useLanguage(); const [category, setCategory] = useState(null); const [error, setError] = useState("");
-  useEffect(() => { getCategory(id).then(setCategory).catch((requestError) => setError(requestError.status === 404 ? "not-found" : requestError.message)); }, [id]);
-  if (error) return <Container sx={{ py: 5 }}><Alert severity={error === "not-found" ? "info" : "error"}>{error === "not-found" ? (language === "ar" ? "التصنيف غير موجود." : "Category not found.") : error}</Alert><Button component={Link} to="/categories">{language === "ar" ? "العودة للتصنيفات" : "Back to categories"}</Button></Container>;
-  if (!category) return <Container sx={{ py: 5 }}><CircularProgress /></Container>;
-  const name = language === "ar" ? category.nameAr : category.nameEn; const description = language === "ar" ? category.descriptionAr : category.descriptionEn;
-  return <Container maxWidth="md" sx={{ py: 5 }}>{category.image && <Box component="img" src={category.image} alt={name} sx={{ width: "100%", maxHeight: 400, objectFit: "cover", borderRadius: 2 }} />}<Typography variant="h3" dir={language === "ar" ? "rtl" : "ltr"} sx={{ mt: 3 }}>{name}</Typography>{description && <Typography dir={language === "ar" ? "rtl" : "ltr"} sx={{ mt: 2 }}>{description}</Typography>}</Container>;
+  const { id } = useParams();
+  const { language } = useLanguage();
+  const [state, setState] = useState({ category: null, books: [], bookCount: 0, error: "" });
+  useEffect(() => { let active = true; getBooksForCategory(id).then((response) => active && setState({ category: response.category, books: response.books, bookCount: response.bookCount, error: "" })).catch((requestError) => active && setState({ category: null, books: [], bookCount: 0, error: requestError.status === 404 ? "not-found" : requestError.message })); return () => { active = false; }; }, [id]);
+  if (state.error) return <Stack spacing={2}><Alert severity={state.error === "not-found" ? "info" : "error"}>{state.error === "not-found" ? "Category not found." : state.error}</Alert><Box><Button component={Link} to="/categories" variant="contained">Back to categories</Button></Box></Stack>;
+  if (!state.category) return <Box sx={{ py: 8, textAlign: "center" }}><CircularProgress /><Typography sx={{ mt: 2 }}>Loading category...</Typography></Box>;
+  const isArabic = language === "ar";
+  const name = isArabic ? state.category.nameAr : state.category.nameEn;
+  const description = isArabic ? state.category.descriptionAr : state.category.descriptionEn;
+  return <Stack spacing={{ xs: 3, md: 5 }}><Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 2, alignItems: "end" }}><Box><Typography variant="overline" color="secondary.main">CATEGORY</Typography><Typography variant="h2" component="h1" dir={isArabic ? "rtl" : "ltr"}>{name || "Category"}</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>{state.bookCount} book{state.bookCount === 1 ? "" : "s"} in this category</Typography></Box><Button component={Link} to="/categories" variant="outlined">Back to categories</Button></Box><Paper sx={{ overflow: "hidden" }}><Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "minmax(260px, .75fr) 1.25fr" } }}>{state.category.image && <Box component="img" src={state.category.image} alt={name || "Category"} loading="lazy" sx={{ width: "100%", minHeight: { xs: 220, md: 320 }, height: "100%", objectFit: "cover" }} />}<Box sx={{ p: { xs: 3, md: 4 } }}><Typography variant="h5">Names</Typography><Typography sx={{ mt: 1 }}>English: {state.category.nameEn || "Not provided"}</Typography><Typography dir="rtl">العربية: {state.category.nameAr || "غير متوفر"}</Typography><Typography variant="h5" sx={{ mt: 3 }}>Description</Typography><Typography dir={isArabic ? "rtl" : "ltr"} color="text.secondary" sx={{ mt: 1, whiteSpace: "pre-wrap" }}>{description || "No description available."}</Typography></Box></Box></Paper><Box><Typography variant="h4" component="h2" sx={{ mb: 2.5 }}>Books</Typography>{state.books.length ? <BookCardGrid books={state.books} /> : <Alert severity="info">No books are available in this category yet.</Alert>}</Box></Stack>;
 }

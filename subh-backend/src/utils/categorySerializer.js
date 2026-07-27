@@ -12,5 +12,8 @@ export const serializeCategory = (category) => {
     image: category.image,
     createdAt: category.created_at,
     ...(category.updated_at ? { updatedAt: category.updated_at } : {}),
+    ...(category.book_count !== undefined
+      ? { bookCount: Number(category.book_count) }
+      : {}),
   };
 };

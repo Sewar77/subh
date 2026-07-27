@@ -6,11 +6,13 @@ import {
   deleteBookController,
   getAllBooksController,
   getBookByIdController,
+  getBooksByCategoryController,
   updateBookByIdController,
 } from "../controller/books.Controller.js";
 import { validate } from "../middleware/validate.Middleware.js";
 import {
   bookIdParamSchema,
+  categoryIdParamSchema,
   createBookSchema,
   listBooksQuerySchema,
   updateBookSchema,
@@ -28,6 +30,11 @@ route.get(
   validate(bookIdParamSchema, "params"),
   getBookByIdController,
 );
+route.get(
+  "/categories/:categoryId/books",
+  validate(categoryIdParamSchema, "params"),
+  getBooksByCategoryController,
+);
 route.post(
   "/books",
   protect,
@@ -37,45 +44,17 @@ route.post(
 );
 route.patch(
   "/books/:id",
-  validate(bookIdParamSchema, "params"),
   protect,
   adminOnly,
+  validate(bookIdParamSchema, "params"),
   validate(updateBookSchema, "body"),
   updateBookByIdController,
 );
 route.delete(
   "/books/:id",
-  validate(bookIdParamSchema, "params"),
   protect,
   adminOnly,
-  deleteBookController,
-);
-
-route.get(
-  "/book/:id",
   validate(bookIdParamSchema, "params"),
-  getBookByIdController,
-);
-route.post(
-  "/book/create",
-  protect,
-  adminOnly,
-  validate(createBookSchema, "body"),
-  createBookController,
-);
-route.put(
-  "/book/update/:id",
-  validate(bookIdParamSchema, "params"),
-  protect,
-  adminOnly,
-  validate(updateBookSchema, "body"),
-  updateBookByIdController,
-);
-route.delete(
-  "/book/:id",
-  validate(bookIdParamSchema, "params"),
-  protect,
-  adminOnly,
   deleteBookController,
 );
 

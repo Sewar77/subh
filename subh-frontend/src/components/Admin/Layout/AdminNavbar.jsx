@@ -1,93 +1,45 @@
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  IconButton,
-  InputBase,
-  Tooltip,
-} from "@mui/material";
+import { AppBar, Box, Button, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
+import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import MenuIcon from "@mui/icons-material/Menu";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import SearchIcon from "@mui/icons-material/Search";
-import { useAuth } from "../../../Hooks/useAuth";
-import { useContext, useEffect } from "react";
-import { usersContext } from "../../../Context/usersContextValue.js";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
-export default function AdminNavbar() {
-  const { user, logout } = useAuth();
-  const { loadUsers } = useContext(usersContext);
-  useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../Hooks/useAuth";
 
-  const handleLogout = () => {
-    logout();
-  };
+export default function AdminNavbar({ collapsed, onToggleSidebar, onOpenMobileNavigation }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
   return (
-    <AppBar
-      position="sticky"
-      elevation={3}
-      sx={{
-        bgcolor: "primary.main",
-      }}
-    >
-      <Toolbar
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <IconButton color="inherit">
+    <AppBar position="sticky" elevation={2} sx={{ bgcolor: "primary.main" }}>
+      <Toolbar sx={{ minHeight: { xs: 64, md: 72 }, gap: { xs: 0.5, md: 1.5 }, px: { xs: 1, sm: 2, md: 3 } }}>
+        <Tooltip title={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
+          <IconButton aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} color="inherit" onClick={onToggleSidebar} sx={{ display: { xs: "none", md: "inline-flex" } }}>
+            <MenuOpenIcon sx={{ transform: collapsed ? "rotate(180deg)" : "none", transition: "transform 180ms ease" }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Open navigation">
+          <IconButton aria-label="Open administrator navigation" color="inherit" onClick={onOpenMobileNavigation} sx={{ display: { xs: "inline-flex", md: "none" } }}>
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" fontWeight={600}>
-            Hi, {user?.name}
-          </Typography>
+        </Tooltip>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+          <Typography variant="h6" noWrap>Administrator</Typography>
+          <Typography variant="body2" noWrap sx={{ color: "rgba(255,255,255,.76)" }}>Signed in as {user?.name || user?.email || "administrator"}</Typography>
         </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "primary.contrastText",
-            px: 2,
-            py: 0.5,
-            borderRadius: 2,
-            width: "300px",
-          }}
-        >
-          <SearchIcon sx={{ mr: 1, color: "text.primary" }} />
-          <InputBase
-            placeholder="Search..."
-            sx={{ color: "text.primary", width: "100%" }}
-          />
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            flexWrap: "wrap",
-          }}
-        >
-          <IconButton color="inherit">
-            <Tooltip title="Notifications" arrow describeChild>
-              <NotificationsIcon />
-            </Tooltip>
-          </IconButton>
-          <IconButton color="inherit">
-            <Tooltip title="Account" arrow describeChild>
-              <AccountCircle />
-            </Tooltip>
-          </IconButton>
-          <IconButton color="inherit" onClick={handleLogout}>
-            <Tooltip title="Logout" arrow describeChild>
-              <LogoutIcon />
-            </Tooltip>
-          </IconButton>
-        </Box>
+        <Tooltip title="Preview site">
+          <Button aria-label="Preview public website" color="inherit" startIcon={<VisibilityOutlinedIcon />} onClick={() => navigate("/")} sx={{ display: { xs: "none", sm: "inline-flex" }, border: "1px solid rgba(255,255,255,.5)" }}>Preview site</Button>
+        </Tooltip>
+        <Tooltip title="Preview site">
+          <IconButton aria-label="Preview public website" color="inherit" onClick={() => navigate("/")} sx={{ display: { xs: "inline-flex", sm: "none" } }}><VisibilityOutlinedIcon /></IconButton>
+        </Tooltip>
+        <Tooltip title="Profile">
+          <IconButton aria-label="Open administrator profile" color="inherit" onClick={() => navigate("/admin/profile")}><AccountCircleOutlinedIcon /></IconButton>
+        </Tooltip>
+        <Tooltip title="Logout">
+          <IconButton aria-label="Logout" color="inherit" onClick={logout}><LogoutIcon /></IconButton>
+        </Tooltip>
       </Toolbar>
     </AppBar>
   );

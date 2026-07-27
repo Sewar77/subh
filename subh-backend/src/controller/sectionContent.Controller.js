@@ -3,6 +3,7 @@ import { getSectionForAdmin } from "../models/section.Model.js";
 import { hydrateSection } from "../services/cms/sectionReadService.js";
 import { writeStructuredContentPatch } from "../services/cms/sectionWriteService.js";
 import { validateContentPatchForTemplate } from "../validation/sectionContent.Validation.js";
+import { getValidated } from "../middleware/validate.Middleware.js";
 
 const loadEditableSection = async (id) => {
   const section = await getSectionForAdmin(id);
@@ -14,7 +15,7 @@ const loadEditableSection = async (id) => {
 
 export const getSectionContentController = async (req, res) => {
   try {
-    const loaded = await loadEditableSection(req.params.id);
+    const loaded = await loadEditableSection(getValidated(req, "params").id);
     if (loaded.error === "not_found") {
       return res.status(404).json({ message: "Section not found" });
     }
@@ -30,7 +31,7 @@ export const getSectionContentController = async (req, res) => {
 
 export const patchSectionContentController = async (req, res) => {
   try {
-    const loaded = await loadEditableSection(req.params.id);
+    const loaded = await loadEditableSection(getValidated(req, "params").id);
     if (loaded.error === "not_found") {
       return res.status(404).json({ message: "Section not found" });
     }
@@ -40,7 +41,7 @@ export const patchSectionContentController = async (req, res) => {
 
     const validation = validateContentPatchForTemplate(
       loaded.section.template_key,
-      req.body.content,
+      getValidated(req, "body").content,
     );
     if (!validation.ok) {
       return res.status(400).json({ message: "Invalid section content", errors: validation.errors });

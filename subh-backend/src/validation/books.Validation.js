@@ -1,6 +1,5 @@
 import Joi from "joi";
 
-const arabicRegex = /^[\u0600-\u06FF0-9\s\-.,()]+$/;
 const positiveNumber = Joi.number().min(0);
 const optionalImage = Joi.string().trim().max(500).allow(null, "");
 const optionalDescription = Joi.string().trim().max(5000).allow(null, "");
@@ -17,23 +16,13 @@ export const createBookSchema = Joi.object({
     "string.min": "English name must be at least 2 characters",
     "any.required": "English name is required",
   }),
-  nameAr: Joi.string()
-    .trim()
-    .pattern(arabicRegex)
-    .min(2)
-    .max(255)
-    .required()
-    .messages({
-      "string.empty": "Arabic name is required",
-      "string.pattern.base":
-        "Arabic name must contain only Arabic letters, numbers, and allowed symbols",
-      "string.min": "Arabic name must be at least 2 characters",
-      "any.required": "Arabic name is required",
-    }),
-  descriptionEn: optionalDescription,
-  descriptionAr: optionalDescription.pattern(arabicRegex).messages({
-    "string.pattern.base": "Arabic description must contain only Arabic text",
+  nameAr: Joi.string().trim().min(2).max(255).required().messages({
+    "string.empty": "Arabic name is required",
+    "string.min": "Arabic name must be at least 2 characters",
+    "any.required": "Arabic name is required",
   }),
+  descriptionEn: optionalDescription,
+  descriptionAr: optionalDescription,
   weightKg: Joi.number().min(0).required().messages({
     "number.base": "Weight must be a number",
     "number.min": "Weight must be zero or greater",
@@ -62,11 +51,9 @@ export const createBookSchema = Joi.object({
 
 export const updateBookSchema = Joi.object({
   nameEn: Joi.string().trim().min(2).max(255),
-  nameAr: Joi.string().trim().pattern(arabicRegex).min(2).max(255),
+  nameAr: Joi.string().trim().min(2).max(255),
   descriptionEn: optionalDescription,
-  descriptionAr: optionalDescription.pattern(arabicRegex).messages({
-    "string.pattern.base": "Arabic description must contain only Arabic text",
-  }),
+  descriptionAr: optionalDescription,
   weightKg: Joi.number().min(0),
   barcodeImage: optionalImage,
   categoryId: Joi.number().integer().positive().allow(null),
@@ -100,6 +87,10 @@ export const updateBookSchema = Joi.object({
 
 export const bookIdParamSchema = Joi.object({
   id: Joi.number().integer().positive().required(),
+}).unknown(false);
+
+export const categoryIdParamSchema = Joi.object({
+  categoryId: Joi.number().integer().positive().required(),
 }).unknown(false);
 
 export const listBooksQuerySchema = Joi.object({

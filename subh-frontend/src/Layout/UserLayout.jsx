@@ -1,16 +1,20 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Home/Navbar/Navbar.jsx";
 import Footer from "../components/Home/Footer/Footer.jsx";
-import { Container } from "@mui/material";
+import { Box, Container } from "@mui/material";
 
 export default function UserLayout() {
   return (
-    <>
-      <Container>
-        <Navbar />
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <Navbar />
+      <Container
+        component="main"
+        maxWidth="xl"
+        sx={{ flex: 1, width: "100%", py: { xs: 3, md: 5 } }}
+      >
         <Outlet />
-        <Footer />
       </Container>
-    </>
+      <Footer />
+    </Box>
   );
 }

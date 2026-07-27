@@ -8,6 +8,7 @@ import {
   getPageByKeyModel,
   updatePage,
 } from "../models/pages.Models.js";
+import { getValidated } from "../middleware/validate.Middleware.js";
 
 // =========================
 // CREATE PAGE
@@ -56,7 +57,7 @@ export const getAllPagesController = async (req, res) => {
 
 export const getPageByIdController = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = getValidated(req, "params");
 
     const page = await getPageById(id);
 
@@ -82,7 +83,7 @@ export const getPageByIdController = async (req, res) => {
 
 export const getPageByKeyController = async (req, res) => {
   try {
-    const { key } = req.params;
+    const { key } = getValidated(req, "params");
 
     const page = await getPageByKeyModel(key);
 

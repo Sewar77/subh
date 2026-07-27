@@ -36,11 +36,37 @@ const normalizeText = (value) => {
 };
 
 const SORT_FIELDS = {
-  createdAt: "created_at",
-  price: "price",
-  nameEn: "name_en",
-  nameAr: "name_ar",
+  createdAt: "b.created_at",
+  price: "b.price",
+  nameEn: "b.name_en",
+  nameAr: "b.name_ar",
 };
+
+const BOOK_WITH_CATEGORY_COLUMNS = `
+  b.id,
+  b.name_en,
+  b.name_ar,
+  b.description_en,
+  b.description_ar,
+  b.weight_kg,
+  b.barcode_image,
+  b.category_id,
+  b.price,
+  b.shipping_cost,
+  b.length_cm,
+  b.width_cm,
+  b.height_cm,
+  b.created_at,
+  b.cover_image,
+  b.isbn,
+  c.id AS category_join_id,
+  c.name_en AS category_name_en,
+  c.name_ar AS category_name_ar,
+  c.description_en AS category_description_en,
+  c.description_ar AS category_description_ar,
+  c.image AS category_image,
+  c.created_at AS category_created_at
+`;
 
 export const listBooks = async ({
   page = 1,
@@ -83,8 +109,9 @@ export const listBooks = async ({
   const total = countResult.rows[0]?.total ?? 0;
 
   const query = `
-    SELECT ${BOOK_COLUMNS}
+    SELECT ${BOOK_WITH_CATEGORY_COLUMNS}
     FROM books b
+    LEFT JOIN categories c ON c.id = b.category_id
     ${whereClause}
     ORDER BY ${safeSortBy} ${safeSortOrder}, b.id DESC
     LIMIT $${values.length + 1} OFFSET $${values.length + 2}
@@ -188,7 +215,7 @@ export const createBook = async (client, data) => {
   return result.rows[0] || null;
 };
 
-export const updateBook = async (bookId, payload = {}) => {
+export const updateBook = async (client, bookId, payload = {}) => {
   const updates = [];
   const values = [bookId];
   let parameterIndex = 2;
@@ -236,7 +263,7 @@ export const updateBook = async (bookId, payload = {}) => {
     return null;
   }
 
-  const result = await pool.query(
+  const result = await client.query(
     `UPDATE books
      SET ${updates.join(", ")}
      WHERE id = $1
@@ -247,8 +274,8 @@ export const updateBook = async (bookId, payload = {}) => {
   return result.rows[0] || null;
 };
 
-export const deleteBook = async (bookId) => {
-  const result = await pool.query(
+export const deleteBook = async (client, bookId) => {
+  const result = await client.query(
     `DELETE FROM books WHERE id = $1 RETURNING ${BOOK_COLUMNS}`,
     [bookId],
   );
@@ -262,6 +289,16 @@ export const listBooksByCategory = async (categoryId) => {
     [categoryId],
   );
 
+  return result.rows;
+};
+
+export const getBookCountsByCategory = async () => {
+  const result = await pool.query(
+    `SELECT category_id, COUNT(*)::int AS book_count
+     FROM books
+     WHERE category_id IS NOT NULL
+     GROUP BY category_id`,
+  );
   return result.rows;
 };
 

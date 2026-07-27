@@ -1,145 +1,23 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardHeader,
-  CardMedia,
-  Chip,
-  Divider,
-  Grid,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { useContext, useEffect } from "react";
-import { booksContext } from "../../Context/booksContext";
+import { Alert, CircularProgress, Container, Pagination, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useLanguage } from "../../Context/LanguageContext.jsx";
+import { getBooksForCategory, getPublicBooks } from "../../Services/bookService.js";
+import BookCardGrid from "./BookCardGrid.jsx";
+
 export default function DisplayBooks() {
-  const { loadBooks, books } = useContext(booksContext);
+  const { language } = useLanguage();
+  const { id: categoryId } = useParams();
+  const [page, setPage] = useState(1);
+  const [state, setState] = useState({ loading: true, books: [], error: "", category: null, bookCount: 0 });
   useEffect(() => {
-    loadBooks();
-  }, []);
-  return (
-    <Grid
-      container
-      spacing={3}
-      sx={{
-        justifyContent: "center",
-      }}
-    >
-      {books.map((book) => (
-        <Grid
-          xs={12}
-          sm={12}
-          md={6}
-          key={book.id}
-          sx={{
-            display: "flex",
-            width: 350,
-            height: "600",
-          }}
-        >
-          <Card
-            sx={{
-              width: "100%",
-              minHeight: 600,
-              borderRadius: 3,
-              bgcolor: "primary.secondary",
-              color: "black",
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              p: 2,
-              alignItems: "center",
-              textAlign: "center",
-            }}
-          >
-            <CardHeader
-              title={"ISBN: " + book.isbn}
-              slotProps={{
-                title: {
-                  sx: {
-                    fontSize: "14px",
-                    fontWeight: 900,
-                  },
-                },
-              }}
-            />
-
-            <CardMedia
-              component="img"
-              src={book.cover_image}
-              sx={{
-                width: 250,
-                height: 250,
-                borderRadius: 2,
-                objectFit: "cover",
-              }}
-            />
-
-            <CardContent
-              sx={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                flexGrow: 1,
-              }}
-            >
-              <Typography sx={{ my: 3 }}>
-                <b>Name:</b>
-                <br />
-                {book.name_en} || {book.name_ar}
-              </Typography>
-
-              <Typography
-                sx={{
-                  my: 3,
-                  overflow: "hidden",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 4,
-                  WebkitBoxOrient: "vertical",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                <b>Category:</b>
-                <br />
-                {book.category_name_en} - {book.category_name_ar}
-              </Typography>
-
-              <Box sx={{ mt: "auto" }}>
-                <Typography
-                  sx={{
-                    mt: 3,
-                    overflow: "hidden",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 4,
-                    WebkitBoxOrient: "vertical",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  <b>Price:</b>
-                </Typography>
-                <Chip
-                  label={`$ ${book.price}`}
-                  size="large"
-                  sx={{
-                    p: 2,
-                    mt: 1,
-                    bgcolor: "background.paper",
-                    color: "primary.secondary",
-                  }}
-                />
-              </Box>
-            </CardContent>
-            <CardActions>
-              <Button variant="contained">View</Button>
-              <Button variant="contained">Request</Button>
-            </CardActions>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
-  );
+    let active = true;
+    const request = categoryId ? getBooksForCategory(categoryId) : getPublicBooks({ page, limit: 20 });
+    request.then((data) => active && setState({ loading: false, books: data.books, error: "", category: data.category || null, bookCount: data.bookCount ?? data.pagination?.total ?? data.books.length, pagination: data.pagination || null })).catch((error) => active && setState({ loading: false, books: [], error: error.message, category: null, bookCount: 0, pagination: null }));
+    return () => { active = false; };
+  }, [categoryId, page]);
+  if (state.loading) return <Container sx={{ py: 6, textAlign: "center" }}><CircularProgress /><Typography sx={{ mt: 2 }}>Loading books...</Typography></Container>;
+  if (state.error) return <Container sx={{ py: 4 }}><Alert severity="error">{state.error}</Alert></Container>;
+  const heading = state.category ? (language === "ar" ? state.category.nameAr : state.category.nameEn) : "Books";
+  return <Container sx={{ py: 4 }}><Typography variant="h3" sx={{ mb: 1 }}>{heading}</Typography><Typography sx={{ mb: 3 }}>{state.bookCount} book{state.bookCount === 1 ? "" : "s"}</Typography>{state.books.length ? <BookCardGrid books={state.books} /> : <Alert severity="info">No books are available in this category yet.</Alert>}{!categoryId && state.pagination?.totalPages > 1 && <Pagination count={state.pagination.totalPages} page={page} onChange={(_, nextPage) => setPage(nextPage)} sx={{ mt: 3 }} aria-label="Books pagination" />}</Container>;
 }

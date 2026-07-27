@@ -1,6 +1,9 @@
+export const getValidated = (req, target) =>
+  req.validated?.[target] ?? req[target];
+
 export const validate = (schema, target = "body") => {
   return (req, res, next) => {
-    const { error, value } = schema.validate(req[target], {
+    const { error, value } = schema.validate(getValidated(req, target), {
       abortEarly: false,
       allowUnknown: false,
     });
@@ -15,7 +18,10 @@ export const validate = (schema, target = "body") => {
       });
     }
 
-    req[target] = value;
-    next();
+    req.validated = {
+      ...(req.validated || {}),
+      [target]: value,
+    };
+    return next();
   };
 };

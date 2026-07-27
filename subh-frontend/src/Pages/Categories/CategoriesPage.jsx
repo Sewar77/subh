@@ -1,13 +1,15 @@
-import { Alert, Box, Card, CardActionArea, CardContent, CircularProgress, Container, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { getCategories } from "../../Services/categoryService.js";
 import { useLanguage } from "../../Context/LanguageContext.jsx";
+import CategoryCard from "../../components/Categories/CategoryCard.jsx";
+
 export default function CategoriesPage() {
-  const { language } = useLanguage(); const [categories, setCategories] = useState(null); const [error, setError] = useState("");
-  useEffect(() => { getCategories().then(setCategories).catch((requestError) => setError(requestError.message)); }, []);
-  if (error) return <Container sx={{ py: 5 }}><Alert severity="error">{error}</Alert></Container>;
-  if (!categories) return <Container sx={{ py: 5 }}><CircularProgress /></Container>;
-  if (!categories.length) return <Container sx={{ py: 5 }}><Typography>{language === "ar" ? "لا توجد تصنيفات حالياً." : "No categories are available yet."}</Typography></Container>;
-  return <Container sx={{ py: 5 }}><Typography variant="h3" sx={{ mb: 3 }}>{language === "ar" ? "التصنيفات" : "Categories"}</Typography><Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 2 }}>{categories.map((category) => <Card key={category.id}><CardActionArea component={Link} to={`/categories/${category.id}`}>{category.image ? <Box component="img" src={category.image} alt={language === "ar" ? category.nameAr : category.nameEn} sx={{ width: "100%", height: 160, objectFit: "cover" }} /> : <Box sx={{ height: 160, display: "grid", placeItems: "center", bgcolor: "action.hover" }}><Typography>{language === "ar" ? "لا توجد صورة" : "No image"}</Typography></Box>}<CardContent><Typography variant="h6" dir={language === "ar" ? "rtl" : "ltr"}>{language === "ar" ? category.nameAr : category.nameEn}</Typography><Typography dir={language === "ar" ? "rtl" : "ltr"}>{language === "ar" ? category.descriptionAr : category.descriptionEn}</Typography></CardContent></CardActionArea></Card>)}</Box></Container>;
+  const { language } = useLanguage();
+  const [categories, setCategories] = useState(null);
+  const [error, setError] = useState("");
+  useEffect(() => { let active = true; getCategories().then((items) => active && setCategories(items)).catch((requestError) => active && setError(requestError.message)); return () => { active = false; }; }, []);
+  if (error) return <Alert severity="error">{error}</Alert>;
+  if (!categories) return <Box sx={{ py: 8, textAlign: "center" }}><CircularProgress /><Typography sx={{ mt: 2 }}>Loading categories...</Typography></Box>;
+  return <Box><Box sx={{ maxWidth: 720, mb: { xs: 3, md: 5 } }}><Typography variant="overline" color="secondary.main">EXPLORE SUBH</Typography><Typography variant="h2" component="h1" dir={language === "ar" ? "rtl" : "ltr"}>{language === "ar" ? "التصنيفات" : "Browse categories"}</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>{language === "ar" ? "اكتشف الكتب المنظمة حسب الموضوع والاهتمام." : "Discover books organised by subject and interest."}</Typography></Box>{categories.length ? <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: { xs: 2, md: 3 } }}>{categories.map((category) => <CategoryCard key={category.id} category={category} />)}</Box> : <Alert severity="info">No categories are available yet.</Alert>}</Box>;
 }

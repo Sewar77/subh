@@ -58,6 +58,16 @@ export const serializeBook = (book, options = {}) => {
 
   if (options.category !== undefined) {
     serialized.category = options.category;
+  } else if (book.category_join_id) {
+    serialized.category = {
+      id: book.category_join_id,
+      nameEn: book.category_name_en,
+      nameAr: book.category_name_ar,
+      descriptionEn: book.category_description_en,
+      descriptionAr: book.category_description_ar,
+      image: book.category_image,
+      createdAt: book.category_created_at,
+    };
   }
 
   if (options.authors !== undefined) {

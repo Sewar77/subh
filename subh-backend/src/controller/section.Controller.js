@@ -14,6 +14,7 @@ import {
   hydrateSection,
   hydrateSections,
 } from "../services/cms/sectionReadService.js";
+import { getValidated } from "../middleware/validate.Middleware.js";
 
 export const getSectionTemplatesController = async (req, res) =>
   res.status(200).json({ templates: getAdminEditingMetadata() });
@@ -32,7 +33,7 @@ export const getAllSectionsController = async (req, res) => {
 export const getSectionsByPageController = async (req, res) => {
   try {
     const sections = await hydrateSections(
-      await getPublicSectionsByPageId(req.params.page_id),
+      await getPublicSectionsByPageId(getValidated(req, "params").page_id),
     );
     return res.status(200).json({ success: true, sections });
   } catch (error) {
@@ -43,7 +44,7 @@ export const getSectionsByPageController = async (req, res) => {
 export const getSectionsByPageKeyController = async (req, res) => {
   try {
     const sections = await hydrateSections(
-      await getSectionsByPageKey(req.params.key),
+      await getSectionsByPageKey(getValidated(req, "params").key),
     );
     return res.status(200).json({ success: true, sections });
   } catch (error) {
@@ -54,7 +55,7 @@ export const getSectionsByPageKeyController = async (req, res) => {
 export const getSectionByIdController = async (req, res) => {
   try {
     const section = await hydrateSection(
-      await getSectionForAdmin(req.params.id),
+      await getSectionForAdmin(getValidated(req, "params").id),
       { admin: true },
     );
     if (!section) return res.status(404).json({ message: "Section not found" });
@@ -67,8 +68,8 @@ export const getSectionByIdController = async (req, res) => {
 export const updateSectionVisibilityController = async (req, res) => {
   try {
     const updated = await updateSectionVisibility(
-      req.params.id,
-      req.body.isVisible,
+      getValidated(req, "params").id,
+      getValidated(req, "body").isVisible,
     );
     if (!updated) return res.status(404).json({ message: "Section not found" });
     const section = await hydrateSection(updated, { admin: true });
@@ -80,7 +81,7 @@ export const updateSectionVisibilityController = async (req, res) => {
 
 export const toggleSectionVisibilityController = async (req, res) => {
   try {
-    const updated = await toggleSectionVisibility(req.params.id);
+    const updated = await toggleSectionVisibility(getValidated(req, "params").id);
     if (!updated) return res.status(404).json({ message: "Section not found" });
     const section = await hydrateSection(updated, { admin: true });
     return res.status(200).json({ success: true, section });
@@ -92,8 +93,8 @@ export const toggleSectionVisibilityController = async (req, res) => {
 export const reorderPageSectionsController = async (req, res) => {
   try {
     const rows = await reorderPageSections(
-      req.params.pageId,
-      req.body.sections.map(({ id, position }) => ({ id, position })),
+      getValidated(req, "params").pageId,
+      getValidated(req, "body").sections.map(({ id, position }) => ({ id, position })),
     );
     const sections = await hydrateSections(rows, { admin: true });
     return res.status(200).json({ success: true, sections });
@@ -107,7 +108,7 @@ export const reorderPageSectionsController = async (req, res) => {
 
 const setArchiveState = async (req, res, action, message) => {
   try {
-    const updated = await action(req.params.id);
+    const updated = await action(getValidated(req, "params").id);
     if (!updated) return res.status(404).json({ message: "Section not found" });
     const section = await hydrateSection(updated, { admin: true });
     return res.status(200).json({ success: true, section });

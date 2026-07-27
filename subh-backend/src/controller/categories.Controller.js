@@ -8,7 +8,9 @@ import {
   listCategories,
   updateCategory,
 } from "../models/categories.Models.js";
+import { getBookCountsByCategory } from "../models/books.Models.js";
 import { serializeCategory } from "../utils/categorySerializer.js";
+import { getValidated } from "../middleware/validate.Middleware.js";
 
 const normalizeCategoryPayload = (body = {}) => {
   const payload = {};
@@ -29,7 +31,7 @@ const isDuplicateCategoryNameError = (error) => error?.code === "23505";
 
 export const createCategoryController = async (req, res) => {
   try {
-    const payload = normalizeCategoryPayload(req.body);
+    const payload = normalizeCategoryPayload(getValidated(req, "body"));
 
     if (!payload.name_en || !payload.name_ar) {
       return res
@@ -67,9 +69,18 @@ export const createCategoryController = async (req, res) => {
 
 export const getAllCategoriesController = async (req, res) => {
   try {
-    const categories = await listCategories();
+    const [categories, bookCounts] = await Promise.all([
+      listCategories(),
+      getBookCountsByCategory(),
+    ]);
+    const countsByCategoryId = new Map(
+      bookCounts.map((item) => [Number(item.category_id), item.book_count]),
+    );
     const serializedCategories = categories.map((category) =>
-      serializeCategory(category),
+      serializeCategory({
+        ...category,
+        book_count: countsByCategoryId.get(Number(category.id)) || 0,
+      }),
     );
 
     return res.status(200).json({
@@ -82,7 +93,7 @@ export const getAllCategoriesController = async (req, res) => {
 
 export const getCategoryByIdController = async (req, res) => {
   try {
-    const categoryId = Number(req.params.id);
+    const categoryId = Number(getValidated(req, "params").id);
     const category = await getCategoryById(categoryId);
 
     if (!category) {
@@ -99,7 +110,7 @@ export const getCategoryByIdController = async (req, res) => {
 
 export const deleteCategoryController = async (req, res) => {
   try {
-    const categoryId = Number(req.params.id);
+    const categoryId = Number(getValidated(req, "params").id);
     const existingCategory = await getCategoryById(categoryId);
 
     if (!existingCategory) {
@@ -126,14 +137,14 @@ export const deleteCategoryController = async (req, res) => {
 
 export const updateCategoryController = async (req, res) => {
   try {
-    const categoryId = Number(req.params.id);
+    const categoryId = Number(getValidated(req, "params").id);
     const existingCategory = await getCategoryById(categoryId);
 
     if (!existingCategory) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    const payload = normalizeCategoryPayload(req.body);
+    const payload = normalizeCategoryPayload(getValidated(req, "body"));
     if (Object.keys(payload).length === 0) {
       return res.status(400).json({ message: "No fields provided to update" });
     }

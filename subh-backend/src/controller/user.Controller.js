@@ -14,6 +14,7 @@ import {
   updateUserPassword,
 } from "../models/user.Model.js";
 import { serializeUser } from "../utils/userSerializer.js";
+import { getValidated } from "../middleware/validate.Middleware.js";
 
 const isDuplicateEmailError = (error) => error?.code === "23505";
 const isLastActiveAdminError = (error) => error?.code === "LAST_ACTIVE_ADMIN";
@@ -42,7 +43,7 @@ export const getAllUsersController = async (req, res) => {
 
 export const getUserByIdController = async (req, res) => {
   try {
-    const user = await getUserById(req.params.id);
+    const user = await getUserById(getValidated(req, "params").id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     return res.status(200).json({
@@ -56,7 +57,7 @@ export const getUserByIdController = async (req, res) => {
 
 export const getUserByEmailController = async (req, res) => {
   try {
-    const user = await getUserByEmailSafe(req.query.email);
+    const user = await getUserByEmailSafe(getValidated(req, "query").email);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     return res.status(200).json({
@@ -82,7 +83,7 @@ export const addNewUserController = async (req, res) => {
       userRole,
       isActive,
       emailVerified,
-    } = req.body;
+    } = getValidated(req, "body");
     const normalizedEmail = normalizeEmail(email);
 
     if (await getUserByEmailForAuth(normalizedEmail)) {
@@ -122,7 +123,7 @@ export const updateUserController = async (req, res) => {
       userRole,
       isActive,
       emailVerified,
-    } = req.body;
+    } = getValidated(req, "body");
 
     if (name !== undefined || fullName !== undefined) {
       payload.fullName = normalizeFullName(fullName ?? name);
@@ -136,7 +137,7 @@ export const updateUserController = async (req, res) => {
     if (isActive !== undefined) payload.isActive = isActive;
     if (emailVerified !== undefined) payload.emailVerified = emailVerified;
 
-    const user = await updateUser(req.params.id, payload);
+    const user = await updateUser(getValidated(req, "params").id, payload);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     return res.status(200).json({
@@ -150,7 +151,7 @@ export const updateUserController = async (req, res) => {
 
 export const deleteUserController = async (req, res) => {
   try {
-    const user = await deactivateUser(req.params.id);
+    const user = await deactivateUser(getValidated(req, "params").id);
     if (!user) return res.status(404).json({ message: "User not found" });
     return res.status(204).send();
   } catch (error) {
@@ -160,8 +161,8 @@ export const deleteUserController = async (req, res) => {
 
 export const updateUserStatusController = async (req, res) => {
   try {
-    const user = await updateUser(req.params.id, {
-      isActive: req.body.isActive,
+    const user = await updateUser(getValidated(req, "params").id, {
+      isActive: getValidated(req, "body").isActive,
     });
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -177,8 +178,8 @@ export const updateUserStatusController = async (req, res) => {
 export const updateUserPasswordController = async (req, res) => {
   try {
     const user = await updateUserPassword(
-      req.params.id,
-      await bcrypt.hash(req.body.password, 10),
+      getValidated(req, "params").id,
+      await bcrypt.hash(getValidated(req, "body").password, 10),
     );
     if (!user) return res.status(404).json({ message: "User not found" });
 

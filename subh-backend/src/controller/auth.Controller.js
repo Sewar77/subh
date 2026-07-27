@@ -7,6 +7,7 @@ import {
   normalizeFullName,
 } from "../models/auth.Models.js";
 import { serializeUser } from "../utils/userSerializer.js";
+import { getValidated } from "../middleware/validate.Middleware.js";
 
 const AUTH_COOKIE_NAME = "token";
 const AUTH_COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -31,7 +32,7 @@ export const registerUserController = async (req, res) => {
       confirmPassword,
       phoneNumber,
       userType,
-    } = req.body;
+    } = getValidated(req, "body");
     const normalizedEmail = normalizeEmail(email);
 
     if (password !== confirmPassword) {
@@ -65,14 +66,15 @@ export const registerUserController = async (req, res) => {
 
 export const loginUserController = async (req, res) => {
   try {
-    const user = await getUserByEmailForAuth(normalizeEmail(req.body.email));
+    const body = getValidated(req, "body");
+    const user = await getUserByEmailForAuth(normalizeEmail(body.email));
 
     if (!user || user.is_active !== true) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const passwordMatches = await bcrypt.compare(
-      req.body.password,
+      body.password,
       user.hashed_password,
     );
     if (!passwordMatches) {

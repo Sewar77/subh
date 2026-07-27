@@ -1,12 +1,10 @@
 import { useEffect, useMemo } from "react";
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 
 import SectionRenderer from "../../cms/SectionRenderer";
 import { useLanguage } from "../../Context/LanguageContext";
 import { prepareSection } from "../../Utils/sectionAdapter";
 
-import Navbar from "../../components/Home/Navbar/Navbar";
-import Footer from "../../components/Home/Footer/Footer";
 import { usePages } from "../../Context/pageContext";
 
 export default function Home() {
@@ -25,23 +23,11 @@ export default function Home() {
       .map((section) => prepareSection(section, language))
       .filter(Boolean);
   }, [sectionKey, language]);
-  console.log(sections);
-
   return (
-    <>
-      <Container
-        sx={{
-          direction: language === "ar" ? "rtl" : "ltr",
-          minHeight: "100vh",
-        }}
-      >
-        <Navbar />
-
-        {sections.map((section) => (
-          <SectionRenderer key={section.id} section={section} />
-        ))}
-      </Container>
-      <Footer />
-    </>
+    <Box sx={{ direction: language === "ar" ? "rtl" : "ltr" }}>
+      {sections.map((section) => (
+        <SectionRenderer key={section.id} section={section} />
+      ))}
+    </Box>
   );
 }

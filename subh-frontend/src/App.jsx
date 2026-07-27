@@ -28,28 +28,35 @@ import AdminRouteGuard from "./components/Admin/Auth/AdminRouteGuard.jsx";
 import CmsAdminPage from "./Pages/Admin/CmsAdminPage.jsx";
 import CategoriesPage from "./Pages/Categories/CategoriesPage.jsx";
 import CategoryDetailPage from "./Pages/Categories/CategoryDetailPage.jsx";
+import BookDetailPage from "./Pages/Books/BookDetailPage.jsx";
+import AdminProfilePage from "./Pages/Admin/AdminProfilePage.jsx";
 function App() {
   return (
     <>
       <Toaster position="top-center" />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/educational/courses" element={<EducationalPrograms />} />
-        <Route path="/categories" element={<CategoriesPage />} />
-        <Route path="/categories/:id" element={<CategoryDetailPage />} />
-        {/* User routes */}
-        <Route path="/subh" element={<UserLayout />}>
-          <Route index element={<LandingPage />} />
+        <Route path="/" element={<UserLayout />}>
+          <Route index element={<Home />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="register" element={<Register />} />
+          <Route path="login" element={<Login />} />
+          <Route path="educational/courses" element={<EducationalPrograms />} />
+          <Route path="categories" element={<CategoriesPage />} />
+          <Route path="categories/:id" element={<CategoryDetailPage />} />
+          <Route path="categories/:id/books" element={<DisplayBooks />} />
           <Route path="books" element={<DisplayBooks />} />
+          <Route path="books/:id" element={<BookDetailPage />} />
+          <Route path="subh">
+            <Route index element={<LandingPage />} />
+            <Route path="books" element={<DisplayBooks />} />
+          </Route>
         </Route>
         {/* admin routes */}
         <Route element={<AdminRouteGuard />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
+            <Route path="profile" element={<AdminProfilePage />} />
             <Route path="users" element={<ManageUsers />} />
             <Route path="add/user" element={<AddUser />} />
             <Route path="categories" element={<DisplayCategories />} />
@@ -64,7 +71,6 @@ function App() {
             <Route path="book/update/:id" element={<UpdateBook />} />
             <Route path="user/update/:id" element={<UpdateBook />} />
             <Route path="view/category/:id" element={<Navigate to="/admin/categories" replace />} />
-            <Route path="view/book/:id" element={<Navigate to="/admin/books" replace />} />
             <Route path="view/user/:id" element={<Navigate to="/admin/users" replace />} />
             <Route path="cms" element={<CmsAdminPage />} />
             <Route path="cms/:pageId" element={<CmsAdminPage />} />

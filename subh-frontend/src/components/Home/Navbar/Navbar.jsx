@@ -1,280 +1,229 @@
 import { useContext, useState } from "react";
-import AppBar from "@mui/material/AppBar";
-import IconButton from "@mui/material/IconButton";
-import Toolbar from "@mui/material/Toolbar";
 import {
+  AppBar,
   Box,
   Button,
-  Typography,
+  Container,
   Drawer,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
+  Toolbar,
   Tooltip,
+  Typography,
 } from "@mui/material";
-
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import TranslateIcon from "@mui/icons-material/Translate";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../Hooks/useAuth";
 import { authContext } from "../../../Context/authContextValue.js";
 import { useLanguage } from "../../../Context/LanguageContext";
 
+const pages = [
+  { name: { en: "Home", ar: "الرئيسية" }, path: "/" },
+  { name: { en: "Books", ar: "الكتب" }, path: "/books" },
+  { name: { en: "Categories", ar: "التصنيفات" }, path: "/categories" },
+  {
+    name: { en: "Training courses", ar: "الدورات التدريبية" },
+    path: "/educational/courses",
+  },
+  { name: { en: "Who we are", ar: "من نحن" }, path: "/about" },
+  { name: { en: "Contact", ar: "اتصل بنا" }, path: "/contact" },
+];
+
 export default function Navbar() {
   const { language, setLanguage } = useLanguage();
-
-  const navigate = useNavigate();
-
-  const [open, setOpen] = useState(false);
-
   const { logout } = useAuth();
   const { user } = useContext(authContext);
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const isAdmin = user?.role === "admin";
+  const isArabic = language === "ar";
 
-  const toggleLanguage = () => {
-    setLanguage(language === "en" ? "ar" : "en");
+  const navigateTo = (path) => {
+    navigate(path);
+    setOpen(false);
   };
-
-  const pages = [
-    {
-      name: {
-        en: "Home",
-        ar: "الرئيسية",
-      },
-      path: "/",
-    },
-    {
-      name: {
-        en: "Training Courses",
-        ar: "الدورات التدريبية",
-      },
-      path: "/courses",
-    },
-    {
-      name: {
-        en: "Books",
-        ar: "الكتب",
-      },
-      path: "/subh/books",
-    },
-    {
-      name: {
-        en: "Workshops",
-        ar: "ورش العمل",
-      },
-      path: "/workshops",
-    },
-    {
-      name: {
-        en: "Who We Are",
-        ar: "من نحن",
-      },
-      path: "/about",
-    },
-    {
-      name: {
-        en: "Contact Us",
-        ar: "اتصل بنا",
-      },
-      path: "/contact",
-    },
-  ];
 
   return (
     <AppBar
       position="sticky"
+      elevation={0}
       sx={{
-        direction: language === "ar" ? "rtl" : "ltr",
-        mb: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
-        width: "100%",
-        mx: "auto",
-        p: { xs: 0.5, sm: 1.5, md: 2, lg: 3 },
-        borderRadius: 5,
-        background: "linear-gradient(90deg, #bb40bf, #613389, #102943)",
+        bgcolor: "rgba(7, 26, 53, .96)",
+        borderBottom: "1px solid rgba(98, 216, 223, .2)",
       }}
     >
-      <Toolbar
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        {/* LOGO */}
-        <Tooltip title={language === "en" ? "Home Page" : "الصفحة الرئيسية"}>
-          <IconButton onClick={() => navigate("/")}>
-            <Box
-              component="img"
-              src="/subhlogo.png"
-              sx={{
-                width: "50px",
-              }}
-            />
-          </IconButton>
-        </Tooltip>
-
-        {/* DESKTOP MENU */}
-        <Box
+      <Container maxWidth="xl">
+        <Toolbar
+          disableGutters
           sx={{
-            display: { xs: "none", md: "flex" },
-            gap: 3,
+            minHeight: { xs: 68, md: 78 },
+            gap: 2,
+            direction: isArabic ? "rtl" : "ltr",
           }}
         >
-          {pages.map((page) => (
-            <Typography
-              key={page.path}
-              onClick={() => navigate(page.path)}
-              sx={{
-                color: "text.secondary",
-                fontWeight: 500,
-                cursor: "pointer",
-                "&:hover": {
-                  color: "success.main",
-                },
-              }}
-            >
-              {page.name[language]}
-            </Typography>
-          ))}
-        </Box>
-
-        {/* ACTIONS */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-          }}
-        >
-          {/* LANGUAGE */}
-          <Tooltip
-            title={language === "en" ? "Switch to Arabic" : "Switch to English"}
-          >
+          <Tooltip title={isArabic ? "الصفحة الرئيسية" : "Home"}>
             <IconButton
-              onClick={toggleLanguage}
-              sx={{
-                bgcolor: "secondary.main",
-                color: "text.secondary",
-                gap: 1,
-              }}
+              aria-label={isArabic ? "الصفحة الرئيسية" : "Home"}
+              onClick={() => navigateTo("/")}
+              sx={{ p: 0 }}
             >
-              <Typography
+              <Box
+                component="img"
+                src="/subhlogo.png"
+                alt="Subh"
                 sx={{
-                  fontWeight: 700,
-                  textTransform: "uppercase",
+                  width: { xs: 42, md: 50 },
+                  height: { xs: 42, md: 50 },
+                  objectFit: "contain",
                 }}
-              >
-                {language === "en" ? "عربي" : "English"}
-              </Typography>
-
-              <TranslateIcon />
+              />
             </IconButton>
           </Tooltip>
-
-          {/* USER */}
-          {user ? (
-            <>
-              <Tooltip title={language === "en" ? "Profile" : "الملف الشخصي"}>
-                <IconButton>
-                  <PersonOutlinedIcon
-                    sx={{
-                      color: "text.secondary",
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-
+          <Box
+            sx={{
+              display: { xs: "none", lg: "flex" },
+              alignItems: "center",
+              gap: 0.5,
+              flex: 1,
+            }}
+          >
+            {pages.map((page) => (
               <Button
-                variant="contained"
+                key={page.path}
+                color="inherit"
+                onClick={() => navigateTo(page.path)}
                 sx={{
-                  background:
-                    "linear-gradient(45deg, rgb(0,255,255), rgb(255,0,255))",
-                  color: "#fff",
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  textTransform: "none",
-                  display: { xs: "none", sm: "flex" },
+                  color: "rgba(255,255,255,.86)",
                   "&:hover": {
-                    background:
-                      "linear-gradient(90deg, rgb(255,0,255), #613389)",
+                    color: "secondary.main",
+                    bgcolor: "rgba(255,255,255,.07)",
                   },
                 }}
-                onClick={logout}
               >
-                {language === "en" ? "Logout" : "تسجيل الخروج"}
+                {page.name[language]}
               </Button>
-            </>
-          ) : (
-            <Button
-              variant="contained"
-              sx={{
-                background:
-                  "linear-gradient(45deg, rgb(0,255,255), rgb(255,0,255))",
-                color: "#fff",
-                fontWeight: 600,
-                borderRadius: 3,
-                textTransform: "none",
-                display: { xs: "none", sm: "flex" },
-                "&:hover": {
-                  background: "linear-gradient(90deg, rgb(255,0,255), #613389)",
-                },
-              }}
-              onClick={() => navigate("/login")}
-            >
-              {language === "en" ? "Login" : "تسجيل الدخول"}
-            </Button>
-          )}
-
-          {/* MOBILE MENU */}
-          <IconButton
-            onClick={() => setOpen(true)}
+            ))}
+          </Box>
+          <Box
             sx={{
-              display: { xs: "flex", md: "none" },
-              color: "white",
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 0.5, sm: 1 },
             }}
           >
-            <MenuIcon />
-          </IconButton>
-        </Box>
-      </Toolbar>
-
-      {/* MOBILE DRAWER */}
+            {isAdmin && (
+              <Button
+                variant="contained"
+                color="secondary"
+                startIcon={<DashboardOutlinedIcon />}
+                onClick={() => navigateTo("/admin")}
+                sx={{ display: { xs: "none", sm: "inline-flex" } }}
+              >
+                Dashboard
+              </Button>
+            )}
+            <Tooltip
+              title={isArabic ? "Switch to English" : "التبديل إلى العربية"}
+            >
+              <IconButton
+                aria-label={isArabic ? "Switch to English" : "Switch to Arabic"}
+                onClick={() => setLanguage(isArabic ? "en" : "ar")}
+                sx={{ color: "secondary.main" }}
+              >
+                <TranslateIcon />
+              </IconButton>
+            </Tooltip>
+            {user ? (
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={logout}
+                sx={{
+                  display: { xs: "none", sm: "inline-flex" },
+                  borderColor: "rgba(255,255,255,.55)",
+                  color: "common.white",
+                }}
+              >
+                {isArabic ? "تسجيل الخروج" : "Logout"}
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => navigateTo("/login")}
+                sx={{ display: { xs: "none", sm: "inline-flex" } }}
+              >
+                {isArabic ? "تسجيل الدخول" : "Login"}
+              </Button>
+            )}
+            <IconButton
+              aria-label={isArabic ? "فتح القائمة" : "Open navigation menu"}
+              onClick={() => setOpen(true)}
+              sx={{
+                display: { xs: "inline-flex", lg: "none" },
+                color: "common.white",
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
+        </Toolbar>
+      </Container>
       <Drawer
-        anchor={language === "ar" ? "left" : "right"}
+        anchor={isArabic ? "left" : "right"}
         open={open}
         onClose={() => setOpen(false)}
+        PaperProps={{ sx: { width: 300, bgcolor: "background.default" } }}
       >
-        <Box
-          sx={{
-            width: 250,
-            p: 2,
-            minHeight: "100vh",
-            direction: language === "ar" ? "rtl" : "ltr",
-          }}
-        >
-          <Typography
-            sx={{
-              mb: 2,
-              fontWeight: 700,
-            }}
-          >
-            {language === "en" ? "Menu" : "القائمة"}
+        <Box sx={{ p: 2, direction: isArabic ? "rtl" : "ltr" }}>
+          <Typography variant="h6" sx={{ mb: 1.5 }}>
+            {isArabic ? "التنقل" : "Navigation"}
           </Typography>
-
           <List>
             {pages.map((page) => (
               <ListItem key={page.path} disablePadding>
-                <ListItemButton
-                  onClick={() => {
-                    navigate(page.path);
-                    setOpen(false);
-                  }}
-                >
+                <ListItemButton onClick={() => navigateTo(page.path)}>
                   {page.name[language]}
                 </ListItemButton>
               </ListItem>
             ))}
           </List>
+          {isAdmin && (
+            <Button
+              fullWidth
+              variant="contained"
+              color="secondary"
+              startIcon={<DashboardOutlinedIcon />}
+              onClick={() => navigateTo("/admin")}
+              sx={{ mt: 2 }}
+            >
+              Dashboard
+            </Button>
+          )}
+          {user ? (
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={logout}
+              sx={{ mt: 1 }}
+            >
+              Logout
+            </Button>
+          ) : (
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              onClick={() => navigateTo("/login")}
+              sx={{ mt: 1 }}
+            >
+              Login
+            </Button>
+          )}
         </Box>
       </Drawer>
     </AppBar>

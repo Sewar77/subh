@@ -1,65 +1,80 @@
 import { createTheme } from "@mui/material";
 
+const colors = {
+  navy: "#071a35",
+  navyLight: "#102943",
+  cyan: "#24bec8",
+  cyanLight: "#62d8df",
+  magenta: "#a34ca8",
+  purple: "#613389",
+  surface: "#ffffff",
+  background: "#f4f7fb",
+};
+
 export const getTheme = (language) =>
   createTheme({
+    palette: {
+      mode: "light",
+      primary: { main: colors.purple, contrastText: "#ffffff" },
+      secondary: { main: colors.cyan, contrastText: colors.navy },
+      success: { main: colors.cyan },
+      background: { default: colors.background, paper: colors.surface },
+      text: { primary: colors.navy, secondary: "#52647b" },
+    },
     typography: {
       fontFamily:
         language === "ar" ? "DG Faseh, sans-serif" : "Montserrat, sans-serif",
-
-      button: {
-        textTransform: "none",
-        fontWeight: 600,
-      },
+      h1: { fontWeight: 800, letterSpacing: "-0.035em" },
+      h2: { fontWeight: 800, letterSpacing: "-0.025em" },
+      h3: { fontWeight: 750, letterSpacing: "-0.02em" },
+      h4: { fontWeight: 700 },
+      button: { textTransform: "none", fontWeight: 700 },
     },
-
-    palette: {
-      mode: "light",
-
-      primary: {
-        main: "#613389",
-        secondary: "#d9d6e6",
-      },
-
-      secondary: {
-        main: "#bb40bf",
-      },
-
-      success: {
-        main: "#41f2c3",
-      },
-      background: {
-        default: "#d9d6e6",
-        paper: "#bb40bf",
-      },
-
-      text: {
-        primary: "#102943",
-        secondary: "rgba(255,255,255,0.7)",
-      },
-    },
-
-    shape: {
-      borderRadius: 14,
-    },
-
+    shape: { borderRadius: 16 },
     components: {
-      MuiButton: {
+      MuiCssBaseline: {
         styleOverrides: {
-          root: {
-            borderRadius: 12,
+          body: {
+            background: "linear-gradient(180deg, #f8fbff 0%, #edf3fa 100%)",
+          },
+          "*:focus-visible": {
+            outline: `3px solid ${colors.cyanLight}`,
+            outlineOffset: 3,
+          },
+          "@media (prefers-reduced-motion: reduce)": {
+            "*, *::before, *::after": {
+              animationDuration: "0.01ms !important",
+              animationIterationCount: "1 !important",
+              scrollBehavior: "auto !important",
+              transitionDuration: "0.01ms !important",
+            },
           },
         },
       },
-
-      MuiPaper: {
+      MuiButton: {
+        defaultProps: { disableElevation: true },
+        styleOverrides: {
+          root: { minHeight: 44, borderRadius: 12, paddingInline: 20 },
+          containedPrimary: {
+            background: `linear-gradient(135deg, ${colors.purple}, ${colors.magenta})`,
+            "&:hover": {
+              background: `linear-gradient(135deg, ${colors.navyLight}, ${colors.purple})`,
+            },
+          },
+        },
+      },
+      MuiCard: {
         styleOverrides: {
           root: {
-            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(16, 41, 67, 0.09)",
+            boxShadow: "0 10px 28px rgba(7, 26, 53, 0.08)",
             backgroundImage: "none",
-            border: "1px solid rgba(255,255,255,0.05)",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
-            color: "white",
           },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: { backgroundImage: "none" },
         },
       },
     },

@@ -5,6 +5,7 @@ import { hydrateSection } from "../services/cms/sectionReadService.js";
 import { writeLegacyCompatibilityPatch } from "../services/cms/sectionWriteService.js";
 import { validateContentPatchForTemplate } from "../validation/sectionContent.Validation.js";
 import { sectionMediaCreateSchema } from "../validation/sectionMedia.Validation.js";
+import { getValidated } from "../middleware/validate.Middleware.js";
 
 const LEGACY_MEDIA_KEYS = new Set([
   "image",
@@ -29,7 +30,7 @@ const inferMediaType = (legacyKey) => {
 
 export const getSectionTranslationsBySectionController = async (req, res) => {
   try {
-    const rawSection = await getSectionForAdmin(req.params.id);
+    const rawSection = await getSectionForAdmin(getValidated(req, "params").id);
     if (!rawSection) return res.status(404).json({ message: "Section not found" });
     const section = await hydrateSection(rawSection, { admin: true });
     return res.status(200).json({
@@ -44,7 +45,7 @@ export const getSectionTranslationsBySectionController = async (req, res) => {
 export const updateSectionTranslationController = async (req, res) => {
   try {
     const legacyTranslation = await SectionTranslationModel.getById(
-      req.params.id,
+      getValidated(req, "params").id,
     );
     if (!legacyTranslation) {
       return res.status(404).json({ message: "Translation not found" });
@@ -60,7 +61,8 @@ export const updateSectionTranslationController = async (req, res) => {
       return res.status(409).json({ message: "Section template is not registered" });
     }
 
-    const submittedContent = { ...(req.body.content || {}) };
+    const body = getValidated(req, "body");
+    const submittedContent = { ...(body.content || {}) };
     const mediaEntries = Object.entries(submittedContent).filter(([key]) =>
       LEGACY_MEDIA_KEYS.has(key),
     );
@@ -70,8 +72,8 @@ export const updateSectionTranslationController = async (req, res) => {
     }
 
     const contentPatch = {};
-    if (Object.hasOwn(req.body, "title")) {
-      contentPatch.title = { [legacyTranslation.locale]: req.body.title };
+    if (Object.hasOwn(body, "title")) {
+      contentPatch.title = { [legacyTranslation.locale]: body.title };
     }
     for (const [fieldKey, value] of Object.entries(submittedContent)) {
       const definition = template.fields.find(({ key }) => key === fieldKey);

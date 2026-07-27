@@ -47,3 +47,27 @@
 - Decision: Admin typography is slightly enlarged and pages provide concise contextual instructions. Entity details use dedicated protected pages rather than modals; details include suitable management actions.
 - Reason: Administrative work must remain readable and understandable during long sessions and on smaller screens.
 - Impact: Table actions use accessible icons and tooltips; prominent primary-theme headers and theme-aware row hovers follow the Subh navy, cyan/turquoise, purple/magenta, and restrained-gradient visual direction. Responsive, accessible behavior is required.
+
+## Books navigation and access
+
+- Status: Active
+- Scope: Books and administration
+- Decision: Active admin pages use the shared Back control. Public books use responsive cards and dedicated public/admin details pages; book mutations remain administrator-only.
+- Reason: Books need consistent public reading and safe administration flows.
+- Impact: Category pages link to books and counts use grouped database reads; public users may list and view books; request actions reuse an existing workflow when one is available; errors remain specific and actionable.
+
+## Public layout and presentation
+
+- Status: Active
+- Scope: Public frontend
+- Decision: Public routes retain the shared Header and Footer. Public Books and Categories use responsive card layouts, and Book details render every safe canonical field supplied by the API.
+- Reason: Public browsing must remain cohesive through direct navigation, nested routes, and responsive breakpoints.
+- Impact: Public theme changes preserve the navy, cyan/turquoise, purple/magenta palette while improving hierarchy, spacing, surfaces, and contained primary actions. Administrators see a Dashboard action in the public Header.
+
+## Admin shell navigation
+
+- Status: Active
+- Scope: Frontend administration
+- Decision: The admin Header includes a Preview site action, and administrators use a dedicated protected profile page that never exposes authentication secrets.
+- Reason: Administrators need a safe account overview and a clear path to the public site without leaving the protected shell ambiguous.
+- Impact: The desktop sidebar may collapse to icon-only navigation with tooltips; its preference persists locally and mobile navigation remains available in a drawer.

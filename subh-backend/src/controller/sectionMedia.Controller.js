@@ -17,6 +17,7 @@ import {
   serializeSectionMediaList,
 } from "../utils/sectionMediaSerializer.js";
 import { isMediaReferenceCompatible } from "../validation/sectionMedia.Validation.js";
+import { getValidated } from "../middleware/validate.Middleware.js";
 
 const loadSection = async (id) => {
   const section = await getSectionForAdmin(id);
@@ -37,7 +38,7 @@ const respondLoadError = (res, error) => {
 
 export const listSectionMediaController = async (req, res) => {
   try {
-    const loaded = await loadSection(req.params.id);
+    const loaded = await loadSection(getValidated(req, "params").id);
     if (loaded.error) return respondLoadError(res, loaded.error);
     const media = serializeSectionMediaList(await listSectionMedia(loaded.section.id));
     return res.status(200).json({ media });
@@ -48,22 +49,24 @@ export const listSectionMediaController = async (req, res) => {
 
 export const createSectionMediaController = async (req, res) => {
   try {
-    const loaded = await loadSection(req.params.id);
+    const params = getValidated(req, "params");
+    const body = getValidated(req, "body");
+    const loaded = await loadSection(params.id);
     if (loaded.error) return respondLoadError(res, loaded.error);
-    const slot = getTemplateMediaSlot(loaded.section.template_key, req.body.slot);
+    const slot = getTemplateMediaSlot(loaded.section.template_key, body.slot);
     if (!slot) return res.status(400).json({ message: "Unknown media slot" });
-    if (!slot.mediaTypes.includes(req.body.mediaType)) {
+    if (!slot.mediaTypes.includes(body.mediaType)) {
       return res.status(400).json({ message: "Media type is not allowed for this slot" });
     }
 
     const mediaPayload = {
-      slot: req.body.slot,
-      mediaType: req.body.mediaType,
-      fileRef: req.body.fileRef,
-      altEn: req.body.altEn,
-      altAr: req.body.altAr,
-      captionEn: req.body.captionEn,
-      captionAr: req.body.captionAr,
+      slot: body.slot,
+      mediaType: body.mediaType,
+      fileRef: body.fileRef,
+      altEn: body.altEn,
+      altAr: body.altAr,
+      captionEn: body.captionEn,
+      captionAr: body.captionAr,
     };
     const created = await createSectionMedia(
       loaded.section.id,
@@ -81,9 +84,11 @@ export const createSectionMediaController = async (req, res) => {
 
 export const updateSectionMediaController = async (req, res) => {
   try {
-    const loaded = await loadSection(req.params.id);
+    const params = getValidated(req, "params");
+    const body = getValidated(req, "body");
+    const loaded = await loadSection(params.id);
     if (loaded.error) return respondLoadError(res, loaded.error);
-    const current = await getSectionMediaById(req.params.mediaId);
+    const current = await getSectionMediaById(params.mediaId);
     if (!current || Number(current.section_id) !== Number(loaded.section.id)) {
       return res.status(404).json({ message: "Media item not found" });
     }
@@ -92,14 +97,14 @@ export const updateSectionMediaController = async (req, res) => {
       return res.status(409).json({ message: "Media item does not match the section template" });
     }
     if (
-      req.body.fileRef &&
-      !isMediaReferenceCompatible(current.media_type, req.body.fileRef)
+      body.fileRef &&
+      !isMediaReferenceCompatible(current.media_type, body.fileRef)
     ) {
       return res.status(400).json({ message: "fileRef extension does not match media type" });
     }
     const mediaPayload = {};
     for (const key of ["fileRef", "altEn", "altAr", "captionEn", "captionAr"]) {
-      if (Object.hasOwn(req.body, key)) mediaPayload[key] = req.body[key];
+      if (Object.hasOwn(body, key)) mediaPayload[key] = body[key];
     }
     const updated = await patchSectionMedia(
       current.id,
@@ -114,14 +119,16 @@ export const updateSectionMediaController = async (req, res) => {
 
 export const reorderSectionMediaController = async (req, res) => {
   try {
-    const loaded = await loadSection(req.params.id);
+    const params = getValidated(req, "params");
+    const body = getValidated(req, "body");
+    const loaded = await loadSection(params.id);
     if (loaded.error) return respondLoadError(res, loaded.error);
-    const slot = getTemplateMediaSlot(loaded.section.template_key, req.body.slot);
+    const slot = getTemplateMediaSlot(loaded.section.template_key, body.slot);
     if (!slot) return res.status(400).json({ message: "Unknown media slot" });
     const reordered = await reorderSectionMedia(
       loaded.section.id,
       slot.key,
-      req.body.media.map(({ id, position }) => ({ id, position })),
+      body.media.map(({ id, position }) => ({ id, position })),
     );
     return res.status(200).json({ media: serializeSectionMediaList(reordered) });
   } catch (error) {
@@ -134,9 +141,10 @@ export const reorderSectionMediaController = async (req, res) => {
 
 export const deleteSectionMediaController = async (req, res) => {
   try {
-    const loaded = await loadSection(req.params.id);
+    const params = getValidated(req, "params");
+    const loaded = await loadSection(params.id);
     if (loaded.error) return respondLoadError(res, loaded.error);
-    const current = await getSectionMediaById(req.params.mediaId);
+    const current = await getSectionMediaById(params.mediaId);
     if (!current || Number(current.section_id) !== Number(loaded.section.id)) {
       return res.status(404).json({ message: "Media item not found" });
     }

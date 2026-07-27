@@ -5,11 +5,7 @@ import Contact from "../../components/Contact/Contact.jsx";
 export default function ContactPage() {
   return (
     <>
-      <Container>
-        <Navbar />
-        <Contact />
-        <Footer />
-      </Container>
+      <Contact />
     </>
   );
 }
