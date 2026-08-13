@@ -1,5 +1,9 @@
 import { getSectionTemplate } from "../../cms/sectionTemplateRegistry.js";
 import {
+  isObsoleteLegacyContentField,
+  normalizeLegacyContentFieldKey,
+} from "../../cms/legacyContentCompatibility.js";
+import {
   listSectionContentRecords,
   upsertSectionContentRecords,
 } from "../../models/sectionContent.Model.js";
@@ -32,18 +36,7 @@ const inferMediaType = (legacyKey) => {
   return "image";
 };
 
-const normalizeLegacyFieldKey = (template, fieldKey) => {
-  if (template.fields.some(({ key }) => key === fieldKey)) return fieldKey;
-  if (
-    ["content", "subtitle"].includes(fieldKey) &&
-    template.fields.some(({ key }) => key === "text")
-  ) {
-    return "text";
-  }
-  return null;
-};
-
-const buildLegacyContentPatch = (legacyRows, template) => {
+export const buildLegacyContentPatch = (legacyRows, template) => {
   const content = {};
   const mediaCandidates = [];
   const unknownFields = new Set();
@@ -73,7 +66,9 @@ const buildLegacyContentPatch = (legacyRows, template) => {
         continue;
       }
 
-      const fieldKey = normalizeLegacyFieldKey(template, legacyKey);
+      if (isObsoleteLegacyContentField(legacyKey)) continue;
+
+      const fieldKey = normalizeLegacyContentFieldKey(template, legacyKey);
       if (!fieldKey) {
         unknownFields.add(legacyKey);
         continue;

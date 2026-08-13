@@ -6,6 +6,8 @@ import {
   deleteCategoryController,
   getAllCategoriesController,
   getCategoryByIdController,
+  getPublicCategoriesController,
+  getPublicCategoryByIdController,
   updateCategoryController,
 } from "../controller/categories.Controller.js";
 import { validate } from "../middleware/validate.Middleware.js";
@@ -14,12 +16,18 @@ import {
   createCategorySchema,
   updateCategorySchema,
 } from "../validation/category.Validation.js";
+import { publicLocaleQuerySchema } from "../validation/publicLocale.Validation.js";
 
 const route = express.Router();
 
-route.get("/categories", getAllCategoriesController);
+route.get("/public/categories", validate(publicLocaleQuerySchema, "query"), getPublicCategoriesController);
+route.get("/public/categories/:id", validate(categoryIdParamSchema, "params"), validate(publicLocaleQuerySchema, "query"), getPublicCategoryByIdController);
+
+route.get("/categories", protect, adminOnly, getAllCategoriesController);
 route.get(
   "/categories/:id",
+  protect,
+  adminOnly,
   validate(categoryIdParamSchema, "params"),
   getCategoryByIdController,
 );

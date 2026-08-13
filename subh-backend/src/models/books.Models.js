@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { getPublicLocaleColumns } from "../utils/locale.js";
 
 const BOOK_COLUMNS = [
   "id",
@@ -289,6 +290,59 @@ export const listBooksByCategory = async (categoryId) => {
     [categoryId],
   );
 
+  return result.rows;
+};
+
+export const listPublicBooks = async ({ page = 1, limit = 20, search = "", categoryId, minPrice, maxPrice, sortBy = "createdAt", sortOrder = "desc", lang } = {}) => {
+  const localeColumns = getPublicLocaleColumns(lang, { book: "b", category: "c" });
+  const safePage = Number.isInteger(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+  const finalLimit = Math.min(Number(limit) || 20, 100);
+  const offset = (safePage - 1) * finalLimit;
+  const sortFields = { createdAt: "b.created_at", price: "b.price", name: `b.name_${localeColumns.language}` };
+  const values = [];
+  const filters = [];
+  if (categoryId) { values.push(Number(categoryId)); filters.push(`b.category_id = $${values.length}`); }
+  if (search) { values.push(`%${String(search).trim()}%`); filters.push(`LOWER(TRIM(b.name_${localeColumns.language})) LIKE LOWER($${values.length})`); }
+  if (minPrice !== undefined && minPrice !== null && minPrice !== "") { values.push(Number(minPrice)); filters.push(`b.price >= $${values.length}`); }
+  if (maxPrice !== undefined && maxPrice !== null && maxPrice !== "") { values.push(Number(maxPrice)); filters.push(`b.price <= $${values.length}`); }
+  const where = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
+  const total = (await pool.query(`SELECT COUNT(*)::int AS total FROM books b ${where}`, values)).rows[0]?.total ?? 0;
+  const result = await pool.query(
+    `SELECT b.id, ${localeColumns.bookName}, ${localeColumns.bookDescription}, b.weight_kg,
+      b.barcode_image, b.category_id, b.price, b.shipping_cost, b.length_cm, b.width_cm,
+      b.height_cm, b.created_at, b.cover_image, b.isbn, c.id AS category_id_join,
+      ${localeColumns.categoryName}, ${localeColumns.categoryDescription}, c.image AS category_image,
+      c.created_at AS category_created_at
+     FROM books b LEFT JOIN categories c ON c.id = b.category_id ${where}
+     ORDER BY ${sortFields[sortBy] || sortFields.createdAt} ${sortOrder === "asc" ? "asc" : "desc"}, b.id DESC
+     LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
+    [...values, finalLimit, offset],
+  );
+  return { books: result.rows, pagination: { page: safePage, limit: finalLimit, total, totalPages: total ? Math.ceil(total / finalLimit) : 0 } };
+};
+
+export const getPublicBookById = async (bookId, lang) => {
+  const localeColumns = getPublicLocaleColumns(lang, { book: "b", category: "c" });
+  const result = await pool.query(
+    `SELECT b.id, ${localeColumns.bookName}, ${localeColumns.bookDescription}, b.weight_kg,
+      b.barcode_image, b.category_id, b.price, b.shipping_cost, b.length_cm, b.width_cm,
+      b.height_cm, b.created_at, b.cover_image, b.isbn, c.id AS category_id_join,
+      ${localeColumns.categoryName}, ${localeColumns.categoryDescription}, c.image AS category_image,
+      c.created_at AS category_created_at
+     FROM books b LEFT JOIN categories c ON c.id = b.category_id WHERE b.id = $1`, [bookId]);
+  return result.rows[0] || null;
+};
+
+export const listPublicBooksByCategory = async (categoryId, query = {}) => {
+  return listPublicBooks({ ...query, categoryId });
+};
+
+export const listPublicAuthorsForBook = async (bookId, lang) => {
+  const columns = getPublicLocaleColumns(lang, { author: "a" });
+  const result = await pool.query(
+    `SELECT a.id, ${columns.authorName} FROM book_authors ba JOIN authors a ON a.id = ba.author_id WHERE ba.book_id = $1 ORDER BY a.id ASC`,
+    [bookId],
+  );
   return result.rows;
 };
 

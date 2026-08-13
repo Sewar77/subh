@@ -11,7 +11,10 @@ export const serializePage = (page = {}) => ({
 
 export const serializePublicPage = (page = {}, sections = []) => ({
   page: {
-    ...serializePage(page),
+    id: page.id,
+    key: page.key,
+    slug: page.slug || page.key,
+    name: page.name || null,
     sections,
   },
 });

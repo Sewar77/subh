@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import * as categoryService from "../Services/categoryService.js";
 import { categoriesContext } from "../Context/categoriesContextValue.js";
 export const useCategories = () => {
@@ -16,7 +16,7 @@ export const useCategories = () => {
     return updated;
   };
   const getCategory = async (catId) => {
-    const found = await categoryService.getCategory(catId);
+    const found = await categoryService.getAdminCategory(catId);
     setCategory(found);
     return found;
   };
@@ -24,9 +24,6 @@ export const useCategories = () => {
     await categoryService.deleteCategory(catId);
     setCategories((previous) => previous.filter((item) => item.id !== catId));
   };
-  useEffect(() => {
-    loadCategories().catch(() => {});
-  }, [loadCategories]);
   return {
     createCategories,
     categories,

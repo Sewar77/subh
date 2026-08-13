@@ -17,3 +17,12 @@ export const serializeCategory = (category) => {
       : {}),
   };
 };
+
+export const serializePublicCategory = (category) => category ? {
+  id: category.id,
+  name: category.name,
+  description: category.description,
+  image: category.image,
+  createdAt: category.created_at,
+  bookCount: Number(category.book_count || 0),
+} : null;

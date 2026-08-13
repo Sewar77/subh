@@ -45,6 +45,25 @@ export const listContentRecordsBySectionIds = async (
   return result.rows;
 };
 
+export const listPublicContentRecordsBySectionIds = async (
+  sectionIds,
+  locale,
+  client = pool,
+) => {
+  if (!Array.isArray(sectionIds) || sectionIds.length === 0) return [];
+  const result = await client.query(
+    `
+      SELECT ${CONTENT_PROJECTION}
+      FROM section_content
+      WHERE section_id = ANY($1::bigint[])
+        AND locale IN ($2, 'neutral')
+      ORDER BY section_id ASC, field_key ASC, locale ASC
+    `,
+    [sectionIds, locale],
+  );
+  return result.rows;
+};
+
 export const upsertSectionContentRecords = async (
   sectionId,
   records,

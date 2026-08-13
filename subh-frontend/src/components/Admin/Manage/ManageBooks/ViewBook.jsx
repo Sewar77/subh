@@ -4,7 +4,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { deleteBook, getPublicBook } from "../../../../Services/bookService.js";
+import { deleteBook, getAdminBook } from "../../../../Services/bookService.js";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal.jsx";
 
 const Detail = ({ label, value, dir }) => <Box><Typography variant="subtitle2" color="text.secondary">{label}</Typography><Typography dir={dir} sx={{ whiteSpace: "pre-wrap" }}>{value ?? "—"}</Typography></Box>;
@@ -19,7 +19,7 @@ export default function ViewBook() {
 
   useEffect(() => {
     let active = true;
-    getPublicBook(id).then((item) => active && setBook(item)).catch((requestError) => active && setError(requestError.status === 404 ? "The selected book could not be found." : requestError.message));
+    getAdminBook(id).then((item) => active && setBook(item)).catch((requestError) => active && setError(requestError.status === 404 ? "The selected book could not be found." : requestError.message));
     return () => { active = false; };
   }, [id]);
 

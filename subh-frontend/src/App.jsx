@@ -70,8 +70,14 @@ function App() {
             <Route path="category/update/:id" element={<UpdateCategory />} />
             <Route path="book/update/:id" element={<UpdateBook />} />
             <Route path="user/update/:id" element={<UpdateBook />} />
-            <Route path="view/category/:id" element={<Navigate to="/admin/categories" replace />} />
-            <Route path="view/user/:id" element={<Navigate to="/admin/users" replace />} />
+            <Route
+              path="view/category/:id"
+              element={<Navigate to="/admin/categories" replace />}
+            />
+            <Route
+              path="view/user/:id"
+              element={<Navigate to="/admin/users" replace />}
+            />
             <Route path="cms" element={<CmsAdminPage />} />
             <Route path="cms/:pageId" element={<CmsAdminPage />} />
             <Route

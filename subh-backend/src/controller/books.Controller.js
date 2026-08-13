@@ -10,13 +10,17 @@ import {
   listAuthorsForBook,
   listBooks,
   listBooksByCategory,
+  listPublicBooks,
+  getPublicBookById,
+  listPublicBooksByCategory,
+  listPublicAuthorsForBook,
   linkBookAuthor,
   replaceBookAuthors,
   updateBook,
 } from "../models/books.Models.js";
-import { getCategoryById } from "../models/categories.Models.js";
-import { serializeBook, serializeBookAuthor } from "../utils/bookSerializer.js";
-import { serializeCategory } from "../utils/categorySerializer.js";
+import { getCategoryById, getPublicCategoryById } from "../models/categories.Models.js";
+import { serializeBook, serializeBookAuthor, serializePublicBook } from "../utils/bookSerializer.js";
+import { serializeCategory, serializePublicCategory } from "../utils/categorySerializer.js";
 import { getValidated } from "../middleware/validate.Middleware.js";
 
 const isDuplicateISBNError = (error) => error?.code === "23505";
@@ -168,6 +172,40 @@ export const getAllBooksController = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getPublicBooksController = async (req, res) => {
+  try {
+    const query = getValidated(req, "query");
+    const { books, pagination } = await listPublicBooks(query);
+    return res.status(200).json({ books: books.map((book) => serializePublicBook(book)), pagination });
+  } catch {
+    return res.status(500).json({ message: "Unable to load books" });
+  }
+};
+
+export const getPublicBookByIdController = async (req, res) => {
+  try {
+    const book = await getPublicBookById(Number(getValidated(req, "params").id), getValidated(req, "query").lang);
+    if (!book) return res.status(404).json({ message: "Book not found" });
+    const authors = await listPublicAuthorsForBook(book.id, getValidated(req, "query").lang);
+    return res.status(200).json({ book: serializePublicBook(book, authors) });
+  } catch {
+    return res.status(500).json({ message: "Unable to load book" });
+  }
+};
+
+export const getPublicBooksByCategoryController = async (req, res) => {
+  try {
+    const query = getValidated(req, "query");
+    const categoryId = Number(getValidated(req, "params").categoryId);
+    const category = await getPublicCategoryById(categoryId, query.lang);
+    if (!category) return res.status(404).json({ message: "Category not found" });
+    const { books, pagination } = await listPublicBooksByCategory(categoryId, query);
+    return res.status(200).json({ category: serializePublicCategory(category), books: books.map((book) => serializePublicBook(book)), bookCount: pagination.total, pagination });
+  } catch {
+    return res.status(500).json({ message: "Unable to load books for this category" });
   }
 };
 

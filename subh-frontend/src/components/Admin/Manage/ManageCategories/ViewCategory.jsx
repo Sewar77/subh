@@ -6,13 +6,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { deleteCategory } from "../../../../Services/categoryService.js";
-import { getBooksForCategory } from "../../../../Services/bookService.js";
+import { getAdminBooksForCategory } from "../../../../Services/bookService.js";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal.jsx";
 
 const Detail = ({ label, value, dir }) => <Box><Typography variant="subtitle2" color="text.secondary">{label}</Typography><Typography dir={dir} sx={{ whiteSpace: "pre-wrap" }}>{value || "—"}</Typography></Box>;
 export default function ViewCategory() {
   const { id } = useParams(); const navigate = useNavigate(); const [category, setCategory] = useState(null); const [bookCount, setBookCount] = useState(null); const [error, setError] = useState(""); const [confirmOpen, setConfirmOpen] = useState(false); const [deleting, setDeleting] = useState(false);
-  useEffect(() => { let active = true; getBooksForCategory(id).then((response) => { if (active) { setCategory(response.category); setBookCount(response.bookCount); } }).catch((requestError) => active && setError(requestError.status === 404 ? "Category not found." : requestError.message)); return () => { active = false; }; }, [id]);
+  useEffect(() => { let active = true; getAdminBooksForCategory(id).then((response) => { if (active) { setCategory(response.category); setBookCount(response.bookCount); } }).catch((requestError) => active && setError(requestError.status === 404 ? "Category not found." : requestError.message)); return () => { active = false; }; }, [id]);
   const remove = async () => { try { setDeleting(true); await deleteCategory(id); toast.success("Category deleted."); navigate("/admin/categories"); } catch (requestError) { setError(requestError.message); } finally { setDeleting(false); } };
   if (error && !category) return <Container sx={{ py: 4 }}><Alert severity="error">{error}</Alert></Container>;
   if (!category) return <Container sx={{ py: 6, textAlign: "center" }}><CircularProgress /><Typography sx={{ mt: 2 }}>Loading category details...</Typography></Container>;

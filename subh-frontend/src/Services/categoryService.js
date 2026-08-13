@@ -16,8 +16,10 @@ const request = async (operation) => {
   }
 };
 
-export const getCategories = () => request(async () => (await api.get("/categories")).data.categories);
-export const getCategory = (id) => request(async () => (await api.get(`/categories/${id}`)).data.category);
+export const getCategories = (lang = "en") => request(async () => (await api.get("/public/categories", { params: { lang } })).data.categories);
+export const getCategory = (id, lang = "en") => request(async () => (await api.get(`/public/categories/${id}`, { params: { lang } })).data.category);
+export const getAdminCategories = () => request(async () => (await api.get("/categories")).data.categories);
+export const getAdminCategory = (id) => request(async () => (await api.get(`/categories/${id}`)).data.category);
 export const createCategory = (payload) => request(async () => (await api.post("/categories", payload)).data.category);
 export const updateCategory = (id, payload) => request(async () => (await api.patch(`/categories/${id}`, payload)).data.category);
 export const deleteCategory = (id) => request(() => api.delete(`/categories/${id}`));

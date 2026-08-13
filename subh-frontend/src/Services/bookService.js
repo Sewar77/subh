@@ -18,15 +18,33 @@ const request = async (operation, fallback) => {
 };
 export const getPublicBooks = (params = {}) =>
   request(
+    async () => (await api.get("/public/books", { params })).data,
+    "Books could not be loaded. Please try again.",
+  );
+export const getPublicBook = (id, lang = "en") =>
+  request(
+    async () => (await api.get(`/public/books/${id}`, { params: { lang } })).data.book,
+    "The selected book could not be loaded.",
+  );
+export const getBooksForCategory = (categoryId, params = {}) =>
+  request(
+    async () => (await api.get(`/public/categories/${categoryId}/books`, { params })).data,
+    "Books for this category could not be loaded.",
+  );
+
+export const getAdminBooks = (params = {}) =>
+  request(
     async () => (await api.get("/books", { params })).data,
     "Books could not be loaded. Please try again.",
   );
-export const getPublicBook = (id) =>
+
+export const getAdminBook = (id) =>
   request(
     async () => (await api.get(`/books/${id}`)).data.book,
     "The selected book could not be loaded.",
   );
-export const getBooksForCategory = (categoryId) =>
+
+export const getAdminBooksForCategory = (categoryId) =>
   request(
     async () => (await api.get(`/categories/${categoryId}/books`)).data,
     "Books for this category could not be loaded.",

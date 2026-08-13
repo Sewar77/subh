@@ -49,6 +49,21 @@ export const SectionTranslationModel = {
     return result.rows;
   },
 
+  async getPublicBySectionIds(sectionIds, locale, client = db) {
+    if (!Array.isArray(sectionIds) || sectionIds.length === 0) return [];
+    const result = await client.query(
+      `
+        SELECT ${LEGACY_TRANSLATION_PROJECTION}
+        FROM section_translations
+        WHERE section_id = ANY($1::bigint[])
+          AND locale = $2
+        ORDER BY section_id ASC, locale ASC
+      `,
+      [sectionIds, locale],
+    );
+    return result.rows;
+  },
+
   async getBySectionAndLocale(sectionId, locale, client = db) {
     const result = await client.query(
       `

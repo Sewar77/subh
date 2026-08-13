@@ -6,10 +6,12 @@ import {
   findCategoryByEnglishName,
   getCategoryById,
   listCategories,
+  listPublicCategories,
+  getPublicCategoryById,
   updateCategory,
 } from "../models/categories.Models.js";
 import { getBookCountsByCategory } from "../models/books.Models.js";
-import { serializeCategory } from "../utils/categorySerializer.js";
+import { serializeCategory, serializePublicCategory } from "../utils/categorySerializer.js";
 import { getValidated } from "../middleware/validate.Middleware.js";
 
 const normalizeCategoryPayload = (body = {}) => {
@@ -88,6 +90,25 @@ export const getAllCategoriesController = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getPublicCategoriesController = async (req, res) => {
+  try {
+    const categories = await listPublicCategories(getValidated(req, "query").lang);
+    return res.status(200).json({ categories: categories.map(serializePublicCategory) });
+  } catch {
+    return res.status(500).json({ message: "Unable to load categories" });
+  }
+};
+
+export const getPublicCategoryByIdController = async (req, res) => {
+  try {
+    const category = await getPublicCategoryById(Number(getValidated(req, "params").id), getValidated(req, "query").lang);
+    if (!category) return res.status(404).json({ message: "Category not found" });
+    return res.status(200).json({ category: serializePublicCategory(category) });
+  } catch {
+    return res.status(500).json({ message: "Unable to load category" });
   }
 };
 

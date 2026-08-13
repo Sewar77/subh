@@ -13,12 +13,11 @@ export default function Home() {
   const { language } = useLanguage();
 
   useEffect(() => {
-    getSectionsByPageKey("home-page");
-  }, []);
+    getSectionsByPageKey("home-page", language);
+  }, [getSectionsByPageKey, language]);
 
   const sections = useMemo(() => {
     return (sectionKey || [])
-      .filter((section) => section.is_visible)
       .sort((a, b) => a.position - b.position)
       .map((section) => prepareSection(section, language))
       .filter(Boolean);

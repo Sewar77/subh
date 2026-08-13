@@ -2,13 +2,17 @@
 
 ## Repository evidence
 
-The backend code in the repository still uses:
+The legacy user table used:
 
 - `name` in the legacy user registration and lookup queries
 - `email` as the normalized identity field
 - `hashed_password` as the password hash store
 - `role` and `user_type` as separate fields
-- `phoneNumber` in the SQL model layer, while the serializer exposes `phone_number`
+- unquoted `phoneNumber` (stored by PostgreSQL as `phonenumber`) in the SQL model layer
+
+The current account backend expects the target names `full_name` and
+`phone_number`. Migration 001 bridges the legacy names additively and leaves
+legacy columns in place.
 
 The frontend admin UI shows that the live business user types are:
 
@@ -40,7 +44,12 @@ It instead performs additive column changes and safe data backfills.
 
 ## Constraint notes
 
-The migration adds a lowercase email uniqueness check and role/type membership checks as non-invalidating checks, which means they are documented and can be reviewed manually before being fully enforced by the team.
+The migration aborts before adding role/type constraints if existing data has
+unsupported values. It does not silently coerce roles or business user types.
+The normalized-email check is added as `NOT VALID` so existing values are not
+rewritten; it is enforced for new and updated rows. The lowercase unique index
+will stop the migration if legacy values normalize to a duplicate, requiring
+manual resolution first.
 
 ## Seed behavior
 

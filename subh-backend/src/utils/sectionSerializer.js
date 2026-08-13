@@ -29,12 +29,12 @@ export const serializePublicSection = (
   section,
   content,
   media,
-  translations,
 ) => ({
-  ...serializeSectionInstance(section),
+  id: section.id,
+  templateKey: section.template_key || section.type,
+  position: section.position,
   content,
   media,
-  translations,
 });
 
 export const serializeAdminSection = (

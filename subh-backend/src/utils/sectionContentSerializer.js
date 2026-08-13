@@ -1,3 +1,8 @@
+import {
+  isObsoleteLegacyContentField,
+  normalizeLegacyContentFieldKey,
+} from "../cms/legacyContentCompatibility.js";
+
 const deserializeValue = (value, fieldType) => {
   if (value === null) return null;
   if (fieldType === "boolean") return value === true || value === "true";
@@ -125,13 +130,12 @@ export const serializeLegacyContentObject = (rows = [], template = null) => {
 
     for (const [fieldKey, value] of Object.entries(row.content || {})) {
       if (["image", "img"].includes(fieldKey)) continue;
-      const normalizedKey =
-        ["content", "subtitle"].includes(fieldKey) &&
-        template?.fields.some(({ key }) => key === "text")
-          ? "text"
-          : fieldKey;
+      if (isObsoleteLegacyContentField(fieldKey)) continue;
+
+      const normalizedKey = normalizeLegacyContentFieldKey(template, fieldKey);
       const definition = template?.fields.find(({ key }) => key === normalizedKey);
-      if (definition?.localized !== false) {
+      if (!definition) continue;
+      if (definition.localized !== false) {
         content[normalizedKey] ||= {};
         content[normalizedKey][row.locale] = value;
       } else if (!Object.hasOwn(content, normalizedKey)) {

@@ -2,8 +2,14 @@ import {
   getAdminEditingMetadata,
   getSectionTemplate,
 } from "../../cms/sectionTemplateRegistry.js";
-import { listContentRecordsBySectionIds } from "../../models/sectionContent.Model.js";
-import { listMediaBySectionIds } from "../../models/sectionMedia.Model.js";
+import {
+  listContentRecordsBySectionIds,
+  listPublicContentRecordsBySectionIds,
+} from "../../models/sectionContent.Model.js";
+import {
+  listMediaBySectionIds,
+  listPublicMediaBySectionIds,
+} from "../../models/sectionMedia.Model.js";
 import { SectionTranslationModel } from "../../models/sectionTranlsation.Model.js";
 import {
   attachMediaToTranslations,
@@ -17,6 +23,30 @@ import {
   serializeAdminSection,
   serializePublicSection,
 } from "../../utils/sectionSerializer.js";
+import { normalizePublicLocale } from "../../utils/locale.js";
+
+const serializePublicMedia = (mediaRows) =>
+  mediaRows.map((media) => ({
+    id: media.id,
+    slot: media.slot_key,
+    mediaType: media.media_type,
+    fileRef: media.file_ref,
+    url: media.file_ref,
+    position: media.position,
+    alt: media.alt,
+    caption: media.caption,
+  }));
+
+const getPublicContent = (translations, locale) => {
+  const translation = translations.find((item) => item.locale === locale);
+  if (!translation) return {};
+  return {
+    ...(translation.title === null || translation.title === undefined
+      ? {}
+      : { title: translation.title }),
+    ...(translation.content || {}),
+  };
+};
 
 const groupBySection = (rows) => {
   const grouped = new Map();
@@ -28,13 +58,20 @@ const groupBySection = (rows) => {
   return grouped;
 };
 
-export const hydrateSections = async (sections, { admin = false } = {}) => {
+export const hydrateSections = async (sections, { admin = false, locale } = {}) => {
   if (!Array.isArray(sections) || sections.length === 0) return [];
   const sectionIds = sections.map(({ id }) => id);
+  const publicLocale = normalizePublicLocale(locale);
   const [contentRows, mediaRows, legacyRows] = await Promise.all([
-    listContentRecordsBySectionIds(sectionIds),
-    listMediaBySectionIds(sectionIds),
-    SectionTranslationModel.getBySectionIds(sectionIds),
+    admin
+      ? listContentRecordsBySectionIds(sectionIds)
+      : listPublicContentRecordsBySectionIds(sectionIds, publicLocale),
+    admin
+      ? listMediaBySectionIds(sectionIds)
+      : listPublicMediaBySectionIds(sectionIds, publicLocale),
+    admin
+      ? SectionTranslationModel.getBySectionIds(sectionIds)
+      : SectionTranslationModel.getPublicBySectionIds(sectionIds, publicLocale),
   ]);
   const contentBySection = groupBySection(contentRows);
   const mediaBySection = groupBySection(mediaRows);
@@ -47,7 +84,9 @@ export const hydrateSections = async (sections, { admin = false } = {}) => {
     const legacy = legacyBySection.get(sectionId) || [];
     const templateKey = section.template_key || section.type;
     const template = getSectionTemplate(templateKey);
-    const media = serializeSectionMediaList(rawMedia);
+    const media = admin
+      ? serializeSectionMediaList(rawMedia)
+      : serializePublicMedia(rawMedia);
     const legacyTranslations = serializeLegacyTranslations(legacy);
     const translations =
       records.length > 0
@@ -68,7 +107,11 @@ export const hydrateSections = async (sections, { admin = false } = {}) => {
           translations,
           getAdminEditingMetadata(templateKey),
         )
-      : serializePublicSection(section, content, media, translations);
+      : serializePublicSection(
+          section,
+          getPublicContent(translations, publicLocale),
+          media,
+        );
   });
 };
 

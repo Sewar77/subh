@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { normalizePublicLocale } from "../utils/locale.js";
 
 const MEDIA_PROJECTION = `
   id,
@@ -34,6 +35,33 @@ export const listMediaBySectionIds = async (sectionIds, client = pool) => {
   const result = await client.query(
     `
       SELECT ${MEDIA_PROJECTION}
+      FROM section_media_items
+      WHERE section_id = ANY($1::bigint[])
+      ORDER BY section_id ASC, slot_key ASC, position ASC, id ASC
+    `,
+    [sectionIds],
+  );
+  return result.rows;
+};
+
+export const listPublicMediaBySectionIds = async (
+  sectionIds,
+  locale,
+  client = pool,
+) => {
+  if (!Array.isArray(sectionIds) || sectionIds.length === 0) return [];
+  const suffix = normalizePublicLocale(locale) === "ar" ? "ar" : "en";
+  const result = await client.query(
+    `
+      SELECT
+        id,
+        section_id,
+        slot_key,
+        media_type,
+        file_ref,
+        position,
+        alt_${suffix} AS alt,
+        caption_${suffix} AS caption
       FROM section_media_items
       WHERE section_id = ANY($1::bigint[])
       ORDER BY section_id ASC, slot_key ASC, position ASC, id ASC

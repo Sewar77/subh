@@ -78,7 +78,7 @@ export const getPageBySlug = async (slug) => {
 export const getPublicPageByKey = async (key) => {
   const page = await getPageByKey(key);
 
-  if (!page) {
+  if (!page || page.status !== "published") {
     return null;
   }
 

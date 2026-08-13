@@ -62,7 +62,15 @@
 - Scope: Public frontend
 - Decision: Public routes retain the shared Header and Footer. Public Books and Categories use responsive card layouts, and Book details render every safe canonical field supplied by the API.
 - Reason: Public browsing must remain cohesive through direct navigation, nested routes, and responsive breakpoints.
-- Impact: Public theme changes preserve the navy, cyan/turquoise, purple/magenta palette while improving hierarchy, spacing, surfaces, and contained primary actions. Administrators see a Dashboard action in the public Header.
+- Impact: Public theme changes preserve the established Subh purple, magenta, navy, and turquoise palette. Administrators see a Dashboard action in the public Header.
+
+## Public localization boundary
+
+- Status: Active
+- Scope: Public reads and administrator editing
+- Decision: Public localized reads use `?lang=en` or `?lang=ar`, defaulting to English, and return only the requested locale. Public SQL selects only the matching localized columns where practical.
+- Reason: Public views need one locale at a time without bilingual payload or query overhead.
+- Impact: Public and admin serializers remain separate; administrator CMS and entity editing APIs continue returning bilingual values.
 
 ## Admin shell navigation
 

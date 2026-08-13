@@ -76,3 +76,25 @@ export const serializeBook = (book, options = {}) => {
 
   return serialized;
 };
+
+export const serializePublicBook = (book, authors = []) => {
+  if (!book) return null;
+  return {
+    id: book.id,
+    name: book.name,
+    description: book.description,
+    weightKg: normalizeNumeric(book.weight_kg),
+    barcodeImage: book.barcode_image,
+    categoryId: book.category_id,
+    price: normalizeNumeric(book.price),
+    shippingCost: normalizeNumeric(book.shipping_cost),
+    lengthCm: normalizeNumeric(book.length_cm),
+    widthCm: normalizeNumeric(book.width_cm),
+    heightCm: normalizeNumeric(book.height_cm),
+    createdAt: book.created_at,
+    coverImage: book.cover_image,
+    isbn: book.isbn,
+    category: book.category_id_join ? { id: book.category_id_join, name: book.category_name, description: book.category_description, image: book.category_image, createdAt: book.category_created_at } : null,
+    authors: authors.map((author) => ({ id: author.id, name: author.name })),
+  };
+};

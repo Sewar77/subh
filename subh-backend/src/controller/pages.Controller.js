@@ -6,9 +6,12 @@ import {
   getAllPages,
   getPageById,
   getPageByKeyModel,
+  getPublicPageByKey,
   updatePage,
 } from "../models/pages.Models.js";
 import { getValidated } from "../middleware/validate.Middleware.js";
+import { hydrateSections } from "../services/cms/sectionReadService.js";
+import { serializePublicPage } from "../utils/pageSerializer.js";
 
 // =========================
 // CREATE PAGE
@@ -100,6 +103,19 @@ export const getPageByKeyController = async (req, res) => {
     return res.status(500).json({
       message: formatError(error),
     });
+  }
+};
+
+export const getPublicPageByKeyController = async (req, res) => {
+  try {
+    const { key } = getValidated(req, "params");
+    const { lang } = getValidated(req, "query");
+    const result = await getPublicPageByKey(key);
+    if (!result) return res.status(404).json({ message: "Page not found" });
+    const sections = await hydrateSections(result.sections, { locale: lang });
+    return res.status(200).json(serializePublicPage(result.page, sections));
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch page" });
   }
 };
 

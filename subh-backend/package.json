@@ -3,6 +3,7 @@
   "scripts": {
     "start": "nodemon index.js",
     "cms:verify": "node scripts/verify-cms.js",
+    "localization:verify": "node scripts/verify-public-localization.js",
     "auth:verify": "node scripts/verify-auth.js",
     "validation:verify": "node scripts/verify-validation-middleware.js",
     "admin:bootstrap": "node scripts/bootstrap-admin.js",

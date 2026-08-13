@@ -14,8 +14,10 @@ import translationRouter from "../src/routes/sectionTranslation.Routes.js";
 import uploadRouter from "../src/routes/uploadImage.Routes.js";
 import {
   buildStructuredTranslations,
+  serializeLegacyContentObject,
   serializeSectionContentObject,
 } from "../src/utils/sectionContentSerializer.js";
+import { buildLegacyContentPatch } from "../src/services/cms/legacySectionBootstrapService.js";
 import {
   sectionContentPatchSchema,
   validateContentPatchForTemplate,
@@ -87,6 +89,39 @@ assert.equal(
   validateContentPatchForTemplate("hero", {
     buttonLink: "javascript:alert(1)",
   }).ok,
+  false,
+);
+
+const summaryTemplate = getAdminEditingMetadata("summary");
+const legacySummaryRows = [
+  {
+    locale: "en",
+    title: "Summary",
+    content: { text: "Current copy", items: [{ unknown: "legacy data" }] },
+  },
+];
+const legacySummaryPatch = buildLegacyContentPatch(
+  legacySummaryRows,
+  summaryTemplate,
+);
+assert.deepEqual(legacySummaryPatch.unknownFields, []);
+assert.deepEqual(legacySummaryPatch.content, {
+  title: { en: "Summary" },
+  text: { en: "Current copy" },
+});
+assert.deepEqual(
+  serializeLegacyContentObject(legacySummaryRows, summaryTemplate),
+  legacySummaryPatch.content,
+);
+assert.deepEqual(
+  buildLegacyContentPatch(
+    [{ locale: "en", title: "Summary", content: { unknown: "reject" } }],
+    summaryTemplate,
+  ).unknownFields,
+  ["unknown"],
+);
+assert.equal(
+  validateContentPatchForTemplate("hero", { items: { en: "reject" } }).ok,
   false,
 );
 

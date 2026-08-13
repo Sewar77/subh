@@ -40,6 +40,7 @@ import {
   sectionMediaReorderSchema,
   sectionMediaUpdateSchema,
 } from "../validation/sectionMedia.Validation.js";
+import { publicLocaleQuerySchema } from "../validation/publicLocale.Validation.js";
 
 const router = express.Router();
 const admin = [protect, adminOnly];
@@ -47,11 +48,13 @@ const admin = [protect, adminOnly];
 router.get(
   "/pages/:page_id/sections",
   validate(pageSectionsParamSchema, "params"),
+  validate(publicLocaleQuerySchema, "query"),
   getSectionsByPageController,
 );
 router.get(
   "/pages/sections/:key",
   validate(pageKeyParamSchema, "params"),
+  validate(publicLocaleQuerySchema, "query"),
   getSectionsByPageKeyController,
 );
 

@@ -17,18 +17,25 @@ Review and apply migrations in the following order:
 2. `002_user_updated_at_trigger.sql`
 3. `003_structured_section_content.sql`
 
+`db:migrate` executes only files named with a three-digit migration prefix (for
+example, `001_name.sql`). It records each successfully completed filename in
+`public.schema_migrations`; it does not execute `manual_reset_catalog.sql`.
+
 ## Important warnings
 
 - Do not execute the legacy `schema.sql` file.
 - Do not apply migrations against the configured database from this task.
 - Do not use destructive SQL.
 - Preserve existing user rows and password hashes.
+- The migration runner requires `SUBH_MIGRATIONS_APPROVED=true` in addition to
+  `DATABASE_URL`. Set it only after the target database has been backed up and
+  explicitly approved.
 - Preserve legacy section translations and media; see `references/cms.md` for
   the optional backfill strategy.
 
 ## Safe seed usage
 
-Development seeds must only be run with explicit environment variables and must not run automatically during normal application startup.
+Development seeds must only be run with explicit environment variables and must not run automatically during normal application startup. They refuse `NODE_ENV=production`.
 
 ## Manual verification before apply
 

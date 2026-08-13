@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { getPublicLocaleColumns } from "../utils/locale.js";
 
 const CATEGORY_COLUMNS = [
   "id",
@@ -32,6 +33,33 @@ export const getCategoryById = async (categoryId) => {
     [categoryId],
   );
 
+  return result.rows[0] || null;
+};
+
+export const listPublicCategories = async (locale) => {
+  const columns = getPublicLocaleColumns(locale, { category: "c" });
+  const result = await pool.query(
+    `SELECT c.id, ${columns.categoryName}, ${columns.categoryDescription}, c.image,
+      c.created_at, COUNT(b.id)::int AS book_count
+     FROM categories c
+     LEFT JOIN books b ON b.category_id = c.id
+     GROUP BY c.id
+     ORDER BY c.created_at DESC, c.id DESC`,
+  );
+  return result.rows;
+};
+
+export const getPublicCategoryById = async (categoryId, locale) => {
+  const columns = getPublicLocaleColumns(locale, { category: "c" });
+  const result = await pool.query(
+    `SELECT c.id, ${columns.categoryName}, ${columns.categoryDescription}, c.image,
+      c.created_at, COUNT(b.id)::int AS book_count
+     FROM categories c
+     LEFT JOIN books b ON b.category_id = c.id
+     WHERE c.id = $1
+     GROUP BY c.id`,
+    [categoryId],
+  );
   return result.rows[0] || null;
 };
 

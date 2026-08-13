@@ -2,14 +2,21 @@
 
 ## Current repository evidence
 
-The application currently uses a legacy `public.users` table with these semantics from the backend code:
+The legacy `public.users` table is expected to have used these semantics before
+the account alignment migration:
 
 - `name` is used as the display/user name.
 - `email` is used for login and uniqueness checks.
 - `hashed_password` stores the bcrypt hash.
 - `role` is used for authorization.
 - `user_type` is used as a business classification field.
-- `phoneNumber` is a legacy phone field name that is serialized to `phone_number` in the user serializer.
+- `phoneNumber` was an unquoted legacy SQL identifier, so PostgreSQL stores it as
+  `phonenumber`. The migration copies it into `phone_number` without removing
+  the legacy column.
+
+The current backend user model uses the target field names (`full_name` and
+`phone_number`); migration 001 must be applied successfully before deploying
+that code to an existing database.
 
 ## Target user-account shape
 
@@ -40,7 +47,7 @@ The database should support the following normalized shape:
 ## Email normalization
 
 - Email should be stored in lowercase form.
-- The migration uses a unique lowercase index to support normalized email comparison safely.
+- The migration uses a unique lowercased-and-trimmed index to support normalized email comparison safely. Its normalization check applies to new and updated rows without silently rewriting pre-existing email values.
 
 ## Password hashing
 
@@ -65,10 +72,11 @@ Open the SQL files in the `database/migrations` directory and review them in ord
 
 ## How to apply migrations later
 
-Use the project-local migration runner, but only after manual verification against a target database:
+Use the project-local migration runner only after a backup, manual verification,
+and explicit target approval:
 
 ```bash
-DATABASE_URL=... node database/migrations/run-migrations.js
+SUBH_MIGRATIONS_APPROVED=true DATABASE_URL=... node database/migrations/run-migrations.js
 ```
 
 ## How to run seeds safely
@@ -87,7 +95,7 @@ Do not run the seed in production.
 
 ## Backup requirements
 
-Before any migration is applied to a real database, take a fresh backup of the database and confirm that the target database already contains the legacy `users` table shape expected by the code.
+Before any migration is applied to a real database, take a fresh backup of the database and confirm that the target database already contains the legacy `users` table shape expected by the code. In particular, inspect `role`, `user_type`, null/empty required values, normalized-email duplicates, and whether the legacy phone column is `phonenumber`.
 
 ## Legacy schema warning
 

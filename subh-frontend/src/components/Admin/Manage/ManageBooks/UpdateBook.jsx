@@ -2,7 +2,7 @@ import { Alert, CircularProgress, Container, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { getPublicBook, updateBook } from "../../../../Services/bookService.js";
+import { getAdminBook, updateBook } from "../../../../Services/bookService.js";
 import BookEditorForm from "./BookEditorForm.jsx";
 
 export default function UpdateBook() {
@@ -14,7 +14,7 @@ export default function UpdateBook() {
 
   useEffect(() => {
     let active = true;
-    getPublicBook(id)
+    getAdminBook(id)
       .then((item) => active && setBook(item))
       .catch((requestError) => active && setError(requestError.status === 404 ? "The selected book could not be found." : requestError.message));
     return () => { active = false; };

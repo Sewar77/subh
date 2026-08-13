@@ -2,14 +2,15 @@ export function prepareSection(section, language) {
   const translation = section.translations?.find(
     (item) => item.locale === language && item.is_visible,
   );
+  const content = section.content || translation?.content;
 
-  if (!translation) return null;
+  if (!content) return null;
 
   return {
     ...section,
 
-    title: translation.title,
+    title: content.title ?? translation?.title,
 
-    content: translation.content || {},
+    content,
   };
 }

@@ -135,12 +135,15 @@ export function PagesProvider({ children }) {
   );
 
   const getSectionsByPageKey = useCallback(
-    (key) =>
+    (key, language = "en") =>
       handleRequest(async () => {
         setSectionKey([]);
-        const res = await api.get(`/pages/sections/${key}`);
-        setSectionKey(res.data.sections || []);
-        return res.data.sections;
+        const res = await api.get(`/public/pages/key/${key}`, {
+          params: { lang: language },
+        });
+        const publicSections = res.data.page?.sections || [];
+        setSectionKey(publicSections);
+        return publicSections;
       }, setSectionsLoading),
     [],
   );
@@ -257,6 +260,8 @@ export function PagesProvider({ children }) {
   );
 }
 
+// The context hook intentionally shares this module with its provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePages() {
   const context = useContext(PagesContext);
 
