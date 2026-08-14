@@ -1,27 +1,15 @@
 import { useLanguage } from "../Context/LanguageContext";
 import { SECTION_COMPONENTS } from "./sectionRegistry";
+import { prepareSection } from "../Utils/sectionAdapter";
 
-export default function SectionRenderer({ section }) {
+export default function SectionRenderer({ section, priority = false }) {
   const { language } = useLanguage();
 
-  const Component = SECTION_COMPONENTS[section.type];
-  console.log(section.type);
+  const preparedSection = prepareSection(section, language);
+  const Component = preparedSection
+    ? SECTION_COMPONENTS[preparedSection.templateKey]
+    : null;
 
   if (!Component) return null;
-
-  const translation =
-    section.translations?.find((t) => t.locale === language) ||
-    section.translations?.[0];
-
-  if (!translation) return null;
-
-  return (
-    <Component
-      section={{
-        ...section,
-        title: translation.title,
-        content: translation.content,
-      }}
-    />
-  );
+  return <Component section={{ ...preparedSection, priority }} />;
 }

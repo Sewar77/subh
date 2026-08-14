@@ -1,4 +1,5 @@
 import { uploadToCloudinary } from "../services/cloudinary/cloudinaryServices.js";
+import fs from "node:fs";
 export const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
@@ -17,5 +18,9 @@ export const uploadImage = async (req, res) => {
     return res.status(500).json({
       message: "Upload failed",
     });
+  } finally {
+    if (req.file?.path) {
+      await fs.promises.unlink(req.file.path).catch(() => {});
+    }
   }
 };

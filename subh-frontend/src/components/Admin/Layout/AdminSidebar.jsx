@@ -7,12 +7,14 @@ import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import { Link, useLocation } from "react-router-dom";
 
 const sections = [
   { title: "Overview", items: [{ label: "Dashboard", path: "/admin", icon: DashboardOutlinedIcon, exact: true }, { label: "Profile", path: "/admin/profile", icon: AccountCircleOutlinedIcon }] },
   { title: "Categories", items: [{ label: "View categories", path: "/admin/categories", icon: CategoryOutlinedIcon, activePrefixes: ["/admin/category/"] }, { label: "Add category", path: "/admin/new-category", icon: AddCircleOutlineIcon }] },
   { title: "Users", items: [{ label: "Users", path: "/admin/users", icon: PeopleAltOutlinedIcon, activePrefixes: ["/admin/user/"] }, { label: "Add user", path: "/admin/add/user", icon: AddCircleOutlineIcon }] },
+  { title: "Requests", items: [{ label: "Book requests", path: "/admin/requests", icon: AssignmentOutlinedIcon }] },
   { title: "Pages", items: [{ label: "Structured CMS", path: "/admin/cms", icon: ArticleOutlinedIcon }] },
   { title: "Books", items: [{ label: "View books", path: "/admin/books", icon: MenuBookOutlinedIcon, activePrefixes: ["/admin/book/"] }, { label: "Add book", path: "/admin/book/new", icon: AddCircleOutlineIcon }] },
   { title: "Workshops", items: [{ label: "View workshops", path: "/admin/workshops", icon: EventNoteOutlinedIcon }] },

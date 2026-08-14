@@ -12,39 +12,17 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../Context/LanguageContext.jsx";
+import {
+  formatCatalogPrice,
+  getCatalogCopy,
+} from "../../Utils/catalogI18n.js";
 
 export default function BookCardGrid({ books }) {
   const { language } = useLanguage();
 
   const isArabic = language === "ar";
 
-  const text = {
-    en: {
-      notProvided: "Not provided",
-      noDescription: "No description available.",
-      noCover: "No cover image",
-      price: "Price",
-      priceOnRequest: "Price on request",
-      viewBook: "View book",
-    },
-
-    ar: {
-      notProvided: "غير متوفر",
-      noDescription: "لا يوجد وصف متاح.",
-      noCover: "لا توجد صورة للكتاب",
-      price: "السعر",
-      priceOnRequest: "السعر عند الطلب",
-      viewBook: "عرض الكتاب",
-    },
-  }[language];
-
-  const formatNumber = (value) => {
-    if (value == null) return "";
-
-    return new Intl.NumberFormat(isArabic ? "ar-JO-u-nu-arab" : "en-US").format(
-      Number(value),
-    );
-  };
+  const text = getCatalogCopy(language);
 
   return (
     <Box
@@ -67,7 +45,7 @@ export default function BookCardGrid({ books }) {
         const authors = book.authors
           ?.map((author) => author.name)
           .filter(Boolean)
-          .join("، ");
+          .join(isArabic ? "، " : ", ");
 
         return (
           <Card
@@ -89,6 +67,10 @@ export default function BookCardGrid({ books }) {
                 transform: "translateY(-6px)",
                 borderColor: "primary.light",
                 boxShadow: "0 18px 45px rgba(67, 45, 94, 0.14)",
+              },
+
+              "&:focus-within": {
+                borderColor: "primary.main",
               },
 
               "@media (prefers-reduced-motion: reduce)": {
@@ -115,6 +97,7 @@ export default function BookCardGrid({ books }) {
                   src={book.coverImage}
                   alt={title || text.noCover}
                   loading="lazy"
+                  decoding="async"
                   sx={{
                     width: "100%",
                     height: "100%",
@@ -240,7 +223,7 @@ export default function BookCardGrid({ books }) {
                       color="primary.main"
                       fontWeight={800}
                     >
-                      {formatNumber(book.price)}
+                      {formatCatalogPrice(book.price, language)}
                     </Typography>
                   </>
                 ) : (

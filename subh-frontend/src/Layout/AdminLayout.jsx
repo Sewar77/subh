@@ -5,6 +5,9 @@ import { adminTheme } from "../Theme/adminTheme.jsx";
 import AdminBackButton from "../components/Admin/AdminBackButton.jsx";
 import AdminNavbar from "../components/Admin/Layout/AdminNavbar.jsx";
 import AdminSidebar from "../components/Admin/Layout/AdminSidebar.jsx";
+import UsersProvider from "../Context/usersContext.jsx";
+import CategoriesProvider from "../Context/categoriesContext.jsx";
+import { PagesProvider } from "../Context/pageContext.jsx";
 
 const SIDEBAR_PREFERENCE_KEY = "subh.admin.sidebarCollapsed";
 
@@ -85,7 +88,13 @@ export default function AdminLayout() {
             }}
           >
             <AdminBackButton />
-            <Outlet />
+            <UsersProvider>
+              <CategoriesProvider>
+                <PagesProvider>
+                  <Outlet />
+                </PagesProvider>
+              </CategoriesProvider>
+            </UsersProvider>
           </Box>
         </Box>
       </Box>

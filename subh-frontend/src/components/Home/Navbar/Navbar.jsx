@@ -23,6 +23,7 @@ import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -327,6 +328,22 @@ export default function Navbar() {
                 </Button>
               )}
 
+              {user?.role === "user" && (
+                <Button
+                  variant="outlined"
+                  startIcon={<ReceiptLongOutlinedIcon />}
+                  onClick={() => navigateTo("/my-requests")}
+                  sx={{
+                    display: { xs: "none", md: "inline-flex" },
+                    minHeight: 44,
+                    color: "common.white",
+                    borderColor: "rgba(255,255,255,.32)",
+                  }}
+                >
+                  {isArabic ? "طلباتي" : "My Requests"}
+                </Button>
+              )}
+
               {/* Language */}
               <Tooltip
                 title={isArabic ? "Switch to English" : "التبديل إلى العربية"}
@@ -580,6 +597,18 @@ export default function Navbar() {
               }}
             >
               {isArabic ? "لوحة التحكم" : "Dashboard"}
+            </Button>
+          )}
+
+          {user?.role === "user" && (
+            <Button
+              fullWidth
+              variant="contained"
+              startIcon={<ReceiptLongOutlinedIcon />}
+              onClick={() => navigateTo("/my-requests")}
+              sx={{ mb: 1.2 }}
+            >
+              {isArabic ? "طلباتي" : "My Requests"}
             </Button>
           )}
 

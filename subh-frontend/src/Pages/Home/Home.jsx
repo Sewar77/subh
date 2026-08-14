@@ -3,7 +3,6 @@ import { Box } from "@mui/material";
 
 import SectionRenderer from "../../cms/SectionRenderer";
 import { useLanguage } from "../../Context/LanguageContext";
-import { prepareSection } from "../../Utils/sectionAdapter";
 
 import { usePages } from "../../Context/pageContext";
 
@@ -17,15 +16,18 @@ export default function Home() {
   }, [getSectionsByPageKey, language]);
 
   const sections = useMemo(() => {
-    return (sectionKey || [])
+    return [...(sectionKey || [])]
       .sort((a, b) => a.position - b.position)
-      .map((section) => prepareSection(section, language))
-      .filter(Boolean);
-  }, [sectionKey, language]);
+      .filter((section) => section && section.templateKey);
+  }, [sectionKey]);
   return (
     <Box sx={{ direction: language === "ar" ? "rtl" : "ltr" }}>
-      {sections.map((section) => (
-        <SectionRenderer key={section.id} section={section} />
+      {sections.map((section, index) => (
+        <SectionRenderer
+          key={section.id}
+          section={section}
+          priority={index === 0}
+        />
       ))}
     </Box>
   );

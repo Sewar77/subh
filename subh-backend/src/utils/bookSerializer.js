@@ -79,6 +79,7 @@ export const serializeBook = (book, options = {}) => {
 
 export const serializePublicBook = (book, authors = []) => {
   if (!book) return null;
+  const publicAuthors = authors.length ? authors : book.authors || [];
   return {
     id: book.id,
     name: book.name,
@@ -95,6 +96,6 @@ export const serializePublicBook = (book, authors = []) => {
     coverImage: book.cover_image,
     isbn: book.isbn,
     category: book.category_id_join ? { id: book.category_id_join, name: book.category_name, description: book.category_description, image: book.category_image, createdAt: book.category_created_at } : null,
-    authors: authors.map((author) => ({ id: author.id, name: author.name })),
+    authors: publicAuthors.map((author) => ({ id: author.id, name: author.name })),
   };
 };

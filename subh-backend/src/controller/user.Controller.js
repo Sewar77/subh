@@ -15,6 +15,7 @@ import {
 } from "../models/user.Model.js";
 import { serializeUser } from "../utils/userSerializer.js";
 import { getValidated } from "../middleware/validate.Middleware.js";
+import { getCompanyProfileByUserId } from "../models/companyProfile.Model.js";
 
 const isDuplicateEmailError = (error) => error?.code === "23505";
 const isLastActiveAdminError = (error) => error?.code === "LAST_ACTIVE_ADMIN";
@@ -45,10 +46,17 @@ export const getUserByIdController = async (req, res) => {
   try {
     const user = await getUserById(getValidated(req, "params").id);
     if (!user) return res.status(404).json({ message: "User not found" });
+    const companyProfile =
+      user.user_type === "company"
+        ? await getCompanyProfileByUserId(user.id)
+        : null;
 
     return res.status(200).json({
       message: "User found",
-      user: serializeUser(user),
+      user: serializeUser(user, {
+        companyProfile,
+        companyView: "admin",
+      }),
     });
   } catch (error) {
     return errorResponse(res, error);

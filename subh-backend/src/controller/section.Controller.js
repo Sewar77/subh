@@ -2,9 +2,9 @@ import { getAdminEditingMetadata } from "../cms/sectionTemplateRegistry.js";
 import {
   archiveSection,
   getAllSections,
-  getPublicSectionsByPageId,
   getSectionForAdmin,
   getSectionsByPageKey,
+  listSectionsByPageId,
   reorderPageSections,
   restoreSection,
   toggleSectionVisibility,
@@ -33,8 +33,8 @@ export const getAllSectionsController = async (req, res) => {
 export const getSectionsByPageController = async (req, res) => {
   try {
     const sections = await hydrateSections(
-      await getPublicSectionsByPageId(getValidated(req, "params").page_id),
-      { locale: getValidated(req, "query").lang },
+      await listSectionsByPageId(getValidated(req, "params").page_id),
+      { admin: true },
     );
     return res.status(200).json({ success: true, sections });
   } catch (error) {
@@ -46,7 +46,7 @@ export const getSectionsByPageKeyController = async (req, res) => {
   try {
     const sections = await hydrateSections(
       await getSectionsByPageKey(getValidated(req, "params").key),
-      { locale: getValidated(req, "query").lang },
+      { admin: true },
     );
     return res.status(200).json({ success: true, sections });
   } catch (error) {

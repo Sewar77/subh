@@ -367,8 +367,6 @@ export const getSectionsByPageKey = async (pageKey) => {
       FROM sections s
       JOIN pages p ON p.id = s.page_id
       WHERE p.key = $1
-        AND s.is_visible = true
-        AND COALESCE(s.is_archived, false) = false
       ORDER BY s.position ASC, s.id ASC
     `,
     [pageKey],

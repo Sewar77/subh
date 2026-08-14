@@ -23,9 +23,16 @@ export default function MediaSection({ section }) {
       <Box
         component="img"
         src={media}
-        alt={section.title || "media"}
+        alt={section.title || ""}
+        loading={section.priority ? "eager" : "lazy"}
+        fetchPriority={section.priority ? "high" : "auto"}
+        decoding="async"
         sx={{
+          width: "100%",
           maxWidth: "100%",
+          aspectRatio: "16 / 9",
+          objectFit: "contain",
+          bgcolor: "action.hover",
           borderRadius: 3,
         }}
       />

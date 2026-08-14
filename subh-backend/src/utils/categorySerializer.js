@@ -20,8 +20,9 @@ export const serializeCategory = (category) => {
 
 export const serializePublicCategory = (category) => category ? {
   id: category.id,
-  name: category.name,
-  description: category.description,
+  name: category.name ?? category.category_name ?? null,
+  description:
+    category.description ?? category.category_description ?? null,
   image: category.image,
   createdAt: category.created_at,
   bookCount: Number(category.book_count || 0),

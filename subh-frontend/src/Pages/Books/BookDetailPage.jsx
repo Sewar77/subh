@@ -17,6 +17,7 @@ import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import StraightenRoundedIcon from "@mui/icons-material/StraightenRounded";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
+import LibraryAddOutlinedIcon from "@mui/icons-material/LibraryAddOutlined";
 
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -61,6 +62,7 @@ const translations = {
 
     back: "Back to books",
     categoryButton: "View category",
+    requestBooks: "Request books",
   },
 
   ar: {
@@ -99,6 +101,7 @@ const translations = {
 
     back: "العودة إلى الكتب",
     categoryButton: "عرض التصنيف",
+    requestBooks: "طلب الكتب",
   },
 };
 
@@ -110,8 +113,12 @@ export default function BookDetailPage() {
   const isArabic = language === "ar";
   const t = translations[language];
 
-  const [book, setBook] = useState(null);
-  const [error, setError] = useState("");
+  const requestKey = `${id}:${language}`;
+  const [requestState, setRequestState] = useState({
+    requestKey: "",
+    book: null,
+    error: "",
+  });
 
   const formatNumber = (value, options = {}) => {
     if (value == null) return t.notProvided;
@@ -140,25 +147,31 @@ export default function BookDetailPage() {
   useEffect(() => {
     let active = true;
 
-    setBook(null);
-    setError("");
-
     getPublicBook(id, language)
       .then((item) => {
-        if (active) setBook(item);
+        if (active) {
+          setRequestState({ requestKey, book: item, error: "" });
+        }
       })
       .catch((requestError) => {
         if (!active) return;
 
-        setError(
-          requestError.status === 404 ? t.unavailable : requestError.message,
-        );
+        setRequestState({
+          requestKey,
+          book: null,
+          error:
+            requestError.status === 404 ? t.unavailable : requestError.message,
+        });
       });
 
     return () => {
       active = false;
     };
-  }, [id, language]);
+  }, [id, language, requestKey, t.unavailable]);
+
+  const loading = requestState.requestKey !== requestKey;
+  const book = loading ? null : requestState.book;
+  const error = loading ? "" : requestState.error;
 
   if (error) {
     return (
@@ -187,7 +200,7 @@ export default function BookDetailPage() {
     );
   }
 
-  if (!book) {
+  if (loading || !book) {
     return (
       <Box
         dir={isArabic ? "rtl" : "ltr"}
@@ -276,6 +289,14 @@ export default function BookDetailPage() {
         <Stack direction="row" flexWrap="wrap" gap={1}>
           <Button
             component={Link}
+            to={`/request-books?bookId=${book.id}`}
+            variant="contained"
+            startIcon={<LibraryAddOutlinedIcon />}
+          >
+            {t.requestBooks}
+          </Button>
+          <Button
+            component={Link}
             to="/books"
             variant="outlined"
             startIcon={
@@ -289,7 +310,7 @@ export default function BookDetailPage() {
             <Button
               component={Link}
               to={`/categories/${book.category.id}`}
-              variant="contained"
+              variant="outlined"
             >
               {t.categoryButton}
             </Button>
@@ -338,7 +359,9 @@ export default function BookDetailPage() {
                 component="img"
                 src={book.coverImage}
                 alt={book.name || t.noCover}
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 sx={{
                   maxWidth: "100%",
                   width: "auto",
@@ -526,6 +549,7 @@ export default function BookDetailPage() {
               src={book.barcodeImage}
               alt={t.barcode}
               loading="lazy"
+              decoding="async"
               sx={{
                 width: "100%",
                 maxWidth: 340,

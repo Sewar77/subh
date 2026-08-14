@@ -22,6 +22,9 @@ export default function ConfirmDeleteModal({
   loading = false,
   severity = "error",
   error = "",
+  confirmDisabled = false,
+  confirmAutoFocus = true,
+  children,
 }) {
   const description =
     message ||
@@ -37,6 +40,7 @@ export default function ConfirmDeleteModal({
       <DialogTitle id="confirm-action-title">{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>{description}</DialogContentText>
+        {children}
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
@@ -51,8 +55,8 @@ export default function ConfirmDeleteModal({
           variant="contained"
           color={severity === "error" ? "error" : "primary"}
           onClick={onConfirm}
-          disabled={loading}
-          autoFocus
+          disabled={loading || confirmDisabled}
+          autoFocus={confirmAutoFocus}
         >
           {loading ? (
             <CircularProgress size={20} color="inherit" />

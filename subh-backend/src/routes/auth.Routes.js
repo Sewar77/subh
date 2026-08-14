@@ -11,16 +11,19 @@ import {
 } from "../controller/auth.Controller.js";
 import { validate } from "../middleware/validate.Middleware.js";
 import { protect } from "../middleware/protect.Middleware.js";
+import { authRateLimit } from "../middleware/rateLimit.Middleware.js";
 
 const route = express.Router();
 
 route.post(
   "/auth/register",
+  authRateLimit,
   validate(registerUserSchema, "body"),
   registerUserController,
 );
 route.post(
   "/auth/login",
+  authRateLimit,
   validate(loginUserSchema, "body"),
   loginUserController,
 );

@@ -72,6 +72,14 @@
 - Reason: Public views need one locale at a time without bilingual payload or query overhead.
 - Impact: Public and admin serializers remain separate; administrator CMS and entity editing APIs continue returning bilingual values.
 
+## Public catalog query contract
+
+- Status: Active
+- Scope: Public Books and Categories
+- Decision: Public book lists and category-book lists share server-side pagination, localized title/category/author search, category and price filters, and validated sorting. Category-book routes force their path category while returning the same pagination metadata.
+- Reason: Public catalog controls must search the complete catalog without filtering only the currently loaded page or issuing author N+1 requests.
+- Impact: Public list responses include localized author summaries; category discovery may search/sort the complete localized category response client-side, while book filtering and pagination remain server-side.
+
 ## Admin shell navigation
 
 - Status: Active
@@ -79,3 +87,99 @@
 - Decision: The admin Header includes a Preview site action, and administrators use a dedicated protected profile page that never exposes authentication secrets.
 - Reason: Administrators need a safe account overview and a clear path to the public site without leaving the protected shell ambiguous.
 - Impact: The desktop sidebar may collapse to icon-only navigation with tooltips; its preference persists locally and mobile navigation remains available in a drawer.
+
+## Public CMS rendering contract
+
+- Status: Active
+- Scope: Public Home and About CMS rendering
+- Decision: Public page sections use the canonical localized shape `id`, `templateKey`, `position`, `content`, and `media`; the renderer maps media slots to registered section components and does not require bilingual translations.
+- Reason: `/public/pages/key/:key?lang=en|ar` already localizes content and media on the backend.
+- Impact: Unknown template keys fail closed by rendering nothing, public sections stay position-ordered, and narrow legacy translation compatibility must not weaken the CMS registry.
+
+## Cookie-authenticated request boundary
+
+- Status: Active
+- Scope: Backend HTTP security
+- Decision: Credentialed browser origins come from `CORS_ORIGINS` or `FRONTEND_ORIGIN`; production auth cookies default to Secure, HttpOnly, SameSite=Lax, and cookie-authenticated mutations require a trusted Origin.
+- Reason: Cookie authentication requires explicit credentialed-CORS and CSRF boundaries without breaking localhost development.
+- Impact: Cross-site production cookies require an explicit `COOKIE_SAME_SITE=none` deployment decision, configured trusted origins, and HTTPS; authentication and upload endpoints remain rate-limited.
+
+## Reusable public catalog presentation
+
+- Status: Active
+- Scope: Public Books, Categories, and future listing pages
+- Decision: Public listing pages use the shared `PublicPageHero` and compound `CatalogToolbar` controls, with page-specific configuration instead of duplicated page heroes or filter layouts.
+- Reason: Books and Categories should share Subh visual rhythm, responsive behavior, accessibility, and RTL handling without coupling reusable UI to one data domain.
+- Impact: Catalog strings and localized count formatting remain in `catalogI18n.js`; Books retain server-side filtering/debounce/pagination, Categories retain local discovery filtering, and listing images remain lazy-loaded with deliberate cover behavior.
+
+## Frontend route performance boundary
+
+- Status: Active
+- Scope: Public and administrator frontend routes
+- Decision: Substantial route elements load with `React.lazy` behind the shared localized `RouteLoading` fallback; the public shell stays eager, while the administrator guard, layout, pages, CMS, and admin-only providers remain outside the initial public route graph.
+- Reason: Route-level splitting reduces initial public JavaScript without fragile manual chunk rules or changing route authorization.
+- Impact: Keep direct and nested paths covered by route-splitting tests. Scope `PagesProvider` to public/admin layouts and user/category management providers to the admin outlet so unrelated context updates do not rerender the root application.
+
+## Public image loading priority
+
+- Status: Active
+- Scope: Public catalog and CMS imagery
+- Decision: Listing and below-fold images lazy-load with stable display geometry; primary Book Detail artwork and the first rendered CMS section image load eagerly with high fetch priority.
+- Reason: Critical imagery should not be delayed, while below-fold media should not compete with initial content or cause avoidable layout shift.
+- Impact: Book covers retain `contain` on detail pages, listing/category images retain appropriate `cover`, and missing CMS image references must not render broken image requests.
+
+## Company account identity boundary
+
+- Status: Active
+- Scope: Registration, authentication, and user profiles
+- Decision: A company account remains a normal `users` identity with `role = "user"` and `user_type = "company"`; company-only registration and profile data lives in the one-to-one `company_profiles` record.
+- Reason: Account type describes business information and must not create a separate authentication or authorization path.
+- Impact: Company registration creates the user and profile atomically. Login, role checks, dashboards, and authorization remain identical to individual users; only safe company profile fields may be added to current-user and administrator user-detail responses.
+
+## Customer Book Request boundary
+
+- Status: Active
+- Scope: Core customer Book Request backend
+- Decision: Authenticated individual and company users share `/api/book-requests`; creation accepts only book IDs, bulk quantities, shipping data, and a customer note. Duplicate book IDs are rejected and the centralized per-item quantity ceiling is one million.
+- Reason: Catalog prices, shipping estimates, identity snapshots, workflow states, totals, and administrative data must remain server-owned.
+- Impact: Creation loads and locks all requested books in one query, calculates line estimates in PostgreSQL, sums fixed-decimal values exactly, inserts request/items atomically, and retains database workflow defaults. Customer reads are owner-filtered in SQL, paginate newest-first, and localize the historical item name through `?lang=en|ar` without exposing bilingual snapshots or internal notes.
+
+## Administrator Book Request workflow boundary
+
+- Status: Active
+- Scope: Administrator Book Request backend
+- Decision: `/api/admin/book-requests` routes require both `protect` and `adminOnly`. Server-filtered list/detail reads may expose management-safe bilingual snapshots, internal notes, assignment, status history, and contact history only to administrators; payment records remain outside this phase.
+- Reason: Request management requires privileged operational context while customer ownership, note visibility, and quote confidentiality must remain unchanged.
+- Impact: Assignment accepts only active administrators. Request/contact/quote/fulfillment transitions use centralized allowlists and write status history transactionally. Quote preparation covers every item, uses server-calculated fixed-decimal totals, and stays hidden from customers while draft. Contact logging atomically synchronizes contact/follow-up fields and history.
+
+## Administrator Book Request UI boundary
+
+- Status: Active
+- Scope: Administrator Book Request frontend
+- Decision: `/admin/requests` uses server-driven URL filters and pagination through one `adminBookRequestService`; `/admin/requests/:id` exposes only backend-supported assignment, workflow, quote, notes, and contact operations.
+- Reason: Administrative workflow state and monetary totals remain server-owned while the interface stays navigable, reviewable, and responsive.
+- Impact: The UI offers only known status transitions, treats live quote totals as a non-authoritative preview, refreshes from mutation responses, keeps payment read-only, and visually separates customer, customer-visible administrator, and internal administrator notes.
+
+## Customer Book Request UI boundary
+
+- Status: Active
+- Scope: Customer Book Request frontend
+- Decision: Individual and company users share the protected `/request-books`, `/my-requests`, and `/my-requests/:id` flow through one `customerBookRequestService`; read requests always send the active `lang`.
+- Reason: A Book Request is a bulk inquiry rather than checkout, and customer-visible state must remain localized, owner-safe, and server-authoritative.
+- Impact: Creation sends only book IDs and quantities, supported shipping fields, and an optional customer note. Client estimates are preview-only, duplicate books are prevented, login preserves safe return navigation, and customer detail UI never expects draft quotes, internal notes, contact history, or administrator history.
+
+## Offline Book Request payment boundary
+
+- Status: Active
+- Scope: Book Request backend payments
+- Decision: Subh never processes cards or online payments. Administrators record offline payments and refunds as append-only `request_payments` ledger entries; incorrect entries are audited as voided and never deleted.
+- Reason: Payment credentials must remain outside Subh while balances and workflow state remain exact, reviewable, and concurrency-safe.
+- Impact: Currency comes from the request, totals come from `book_request_payment_summary`, and request-row locking serializes record/refund/void operations. Payment status is derived centrally and changes with transactional `payment` status history. Customer detail exposes only a customer-visible summary after the quote is visible; admin detail may expose the full safe ledger and void audit.
+
+## Administrator offline payment UI boundary
+
+- Status: Active
+- Scope: Administrator Book Request frontend
+- Decision: The existing `/admin/requests/:id` detail page is the only administrator offline-payment workspace. It uses `adminBookRequestService` to record payments, record refunds, and audit-void ledger entries; payment status and all monetary summaries remain read-only backend results.
+- Reason: Subh records offline money movement but never processes card credentials, and administrators need one auditable request context rather than a parallel payment module.
+- Impact: Entry forms send only allowed payment metadata, payment entry requires an accepted quote or confirmed request in the UI, refund availability reflects backend net paid, and voiding requires a reason through the reusable confirmation modal. Voided records remain visible and every successful mutation refreshes the full request detail.

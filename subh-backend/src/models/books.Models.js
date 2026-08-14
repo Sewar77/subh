@@ -302,17 +302,45 @@ export const listPublicBooks = async ({ page = 1, limit = 20, search = "", categ
   const values = [];
   const filters = [];
   if (categoryId) { values.push(Number(categoryId)); filters.push(`b.category_id = $${values.length}`); }
-  if (search) { values.push(`%${String(search).trim()}%`); filters.push(`LOWER(TRIM(b.name_${localeColumns.language})) LIKE LOWER($${values.length})`); }
+  if (search) {
+    values.push(`%${String(search).trim()}%`);
+    filters.push(`(
+      LOWER(TRIM(b.name_${localeColumns.language})) LIKE LOWER($${values.length})
+      OR LOWER(TRIM(c.name_${localeColumns.language})) LIKE LOWER($${values.length})
+      OR EXISTS (
+        SELECT 1
+        FROM book_authors search_ba
+        JOIN authors search_a ON search_a.id = search_ba.author_id
+        WHERE search_ba.book_id = b.id
+          AND LOWER(TRIM(search_a.name_${localeColumns.language})) LIKE LOWER($${values.length})
+      )
+    )`);
+  }
   if (minPrice !== undefined && minPrice !== null && minPrice !== "") { values.push(Number(minPrice)); filters.push(`b.price >= $${values.length}`); }
   if (maxPrice !== undefined && maxPrice !== null && maxPrice !== "") { values.push(Number(maxPrice)); filters.push(`b.price <= $${values.length}`); }
   const where = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
-  const total = (await pool.query(`SELECT COUNT(*)::int AS total FROM books b ${where}`, values)).rows[0]?.total ?? 0;
+  const total = (await pool.query(
+    `SELECT COUNT(*)::int AS total
+     FROM books b
+     LEFT JOIN categories c ON c.id = b.category_id
+     ${where}`,
+    values,
+  )).rows[0]?.total ?? 0;
   const result = await pool.query(
     `SELECT b.id, ${localeColumns.bookName}, ${localeColumns.bookDescription}, b.weight_kg,
       b.barcode_image, b.category_id, b.price, b.shipping_cost, b.length_cm, b.width_cm,
       b.height_cm, b.created_at, b.cover_image, b.isbn, c.id AS category_id_join,
       ${localeColumns.categoryName}, ${localeColumns.categoryDescription}, c.image AS category_image,
-      c.created_at AS category_created_at
+      c.created_at AS category_created_at,
+      COALESCE((
+        SELECT json_agg(
+          json_build_object('id', a.id, 'name', a.name_${localeColumns.language})
+          ORDER BY a.id
+        )
+        FROM book_authors ba
+        JOIN authors a ON a.id = ba.author_id
+        WHERE ba.book_id = b.id
+      ), '[]'::json) AS authors
      FROM books b LEFT JOIN categories c ON c.id = b.category_id ${where}
      ORDER BY ${sortFields[sortBy] || sortFields.createdAt} ${sortOrder === "asc" ? "asc" : "desc"}, b.id DESC
      LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,

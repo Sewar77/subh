@@ -5,9 +5,7 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
-  Slide,
   TextField,
   Typography,
 } from "@mui/material";
@@ -22,10 +20,17 @@ export default function Register() {
     confirmPassword: "",
     userType: "",
     phoneNumber: "",
+    companyName: "",
+    employeeCount: "",
+    ein: "",
+    registrationNumber: "",
+    registrationState: "",
+    website: "",
   });
   const { register } = useAuth();
   const navigate = useNavigate();
-  const handleSubmit = () => {
+  const handleSubmit = (event) => {
+    event.preventDefault();
     register(userInfo);
   };
   return (
@@ -68,6 +73,7 @@ export default function Register() {
           </Box>
           <Box
             component="form"
+            onSubmit={handleSubmit}
             sx={{
               display: "flex",
               flexDirection: "column",
@@ -107,6 +113,85 @@ export default function Register() {
                 label: { color: "primary.main" },
               }}
             />
+            {userInfo.userType === "company" && (
+              <>
+                <TextField
+                  label="Company Name"
+                  required
+                  fullWidth
+                  value={userInfo.companyName}
+                  onChange={(event) =>
+                    setUserInfo({
+                      ...userInfo,
+                      companyName: event.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  label="Employee Count"
+                  type="number"
+                  required
+                  fullWidth
+                  inputProps={{ min: 1, step: 1 }}
+                  value={userInfo.employeeCount}
+                  onChange={(event) =>
+                    setUserInfo({
+                      ...userInfo,
+                      employeeCount: event.target.value,
+                    })
+                  }
+                />
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                    gap: 2,
+                  }}
+                >
+                  <TextField
+                    label="EIN"
+                    fullWidth
+                    helperText="EIN or registration number is required"
+                    value={userInfo.ein}
+                    onChange={(event) =>
+                      setUserInfo({ ...userInfo, ein: event.target.value })
+                    }
+                  />
+                  <TextField
+                    label="Registration Number"
+                    fullWidth
+                    value={userInfo.registrationNumber}
+                    onChange={(event) =>
+                      setUserInfo({
+                        ...userInfo,
+                        registrationNumber: event.target.value,
+                      })
+                    }
+                  />
+                  <TextField
+                    label="Registration State"
+                    fullWidth
+                    value={userInfo.registrationState}
+                    onChange={(event) =>
+                      setUserInfo({
+                        ...userInfo,
+                        registrationState: event.target.value,
+                      })
+                    }
+                  />
+                  <TextField
+                    label="Website"
+                    type="url"
+                    fullWidth
+                    placeholder="https://example.com"
+                    value={userInfo.website}
+                    onChange={(event) =>
+                      setUserInfo({ ...userInfo, website: event.target.value })
+                    }
+                  />
+                </Box>
+              </>
+            )}
             <Box
               sx={{
                 display: "flex",
@@ -184,13 +269,13 @@ export default function Register() {
             </Typography>
             <Button
               variant="contained"
+              type="submit"
               size="large"
               sx={{
                 mt: 1,
                 py: 1.2,
                 fontWeight: 600,
               }}
-              onClick={handleSubmit}
             >
               Register
             </Button>

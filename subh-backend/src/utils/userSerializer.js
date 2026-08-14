@@ -1,4 +1,41 @@
-export const serializeUser = (user) => {
+const serializeCompanySummary = (companyProfile) => {
+  if (!companyProfile) return null;
+
+  return {
+    companyName:
+      companyProfile.company_name ?? companyProfile.companyName ?? null,
+    employeeCount:
+      companyProfile.employee_count ?? companyProfile.employeeCount ?? null,
+    verificationStatus:
+      companyProfile.verification_status ??
+      companyProfile.verificationStatus ??
+      null,
+  };
+};
+
+const serializeAdminCompanyProfile = (companyProfile) => {
+  const summary = serializeCompanySummary(companyProfile);
+  if (!summary) return null;
+
+  return {
+    ...summary,
+    ein: companyProfile.ein ?? null,
+    registrationNumber:
+      companyProfile.registration_number ??
+      companyProfile.registrationNumber ??
+      null,
+    registrationState:
+      companyProfile.registration_state ??
+      companyProfile.registrationState ??
+      null,
+    website: companyProfile.website ?? null,
+  };
+};
+
+export const serializeUser = (
+  user,
+  { companyProfile = null, companyView = "none" } = {},
+) => {
   if (!user) {
     return null;
   }
@@ -9,7 +46,7 @@ export const serializeUser = (user) => {
   const isActive = user.is_active ?? user.isActive ?? false;
   const emailVerified = user.email_verified ?? user.emailVerified ?? false;
 
-  return {
+  const serialized = {
     id: user.id,
     name: fullName,
     fullName,
@@ -24,4 +61,13 @@ export const serializeUser = (user) => {
     createdAt: user.created_at ?? user.createdAt ?? null,
     updatedAt: user.updated_at ?? user.updatedAt ?? null,
   };
+
+  if (companyView === "summary" && companyProfile) {
+    serialized.companyProfile = serializeCompanySummary(companyProfile);
+  }
+  if (companyView === "admin" && companyProfile) {
+    serialized.companyProfile = serializeAdminCompanyProfile(companyProfile);
+  }
+
+  return serialized;
 };

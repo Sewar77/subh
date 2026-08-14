@@ -192,5 +192,13 @@ assertCmsMutationsAreAdminOnly(sectionRouter);
 assertCmsMutationsAreAdminOnly(translationRouter);
 assertCmsMutationsAreAdminOnly(uploadRouter);
 
+for (const routePath of ["/pages/:page_id/sections", "/pages/sections/:key"]) {
+  const layer = sectionRouter.stack.find((item) => item.route?.path === routePath);
+  assert.ok(layer, `${routePath} route was not found`);
+  const handlerNames = layer.route.stack.map(({ handle }) => handle.name);
+  assert.ok(handlerNames.includes("protect"), `${routePath} lacks protect`);
+  assert.ok(handlerNames.includes("adminOnly"), `${routePath} lacks adminOnly`);
+}
+
 console.log("CMS verification passed");
 process.exit(0);

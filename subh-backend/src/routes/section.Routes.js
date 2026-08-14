@@ -47,12 +47,14 @@ const admin = [protect, adminOnly];
 
 router.get(
   "/pages/:page_id/sections",
+  ...admin,
   validate(pageSectionsParamSchema, "params"),
   validate(publicLocaleQuerySchema, "query"),
   getSectionsByPageController,
 );
 router.get(
   "/pages/sections/:key",
+  ...admin,
   validate(pageKeyParamSchema, "params"),
   validate(publicLocaleQuerySchema, "query"),
   getSectionsByPageKeyController,

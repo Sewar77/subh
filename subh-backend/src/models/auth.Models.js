@@ -33,8 +33,8 @@ export const createUser = async ({
   userType = null,
   isActive = true,
   emailVerified = false,
-}) => {
-  const result = await pool.query(
+}, client = pool) => {
+  const result = await client.query(
     `
       INSERT INTO users (
         full_name,

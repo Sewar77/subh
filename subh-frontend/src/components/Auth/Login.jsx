@@ -2,27 +2,22 @@ import {
   Box,
   Button,
   Container,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Slide,
   TextField,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { useAuth } from "../../Hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 export default function Login() {
   const [userData, setUserData] = useState({
     email: "",
     password: "",
   });
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const handleLogin = () => {
-    login(userData);
+    login(userData, location.state?.from);
   };
   return (
     <>

@@ -22,23 +22,29 @@ export default function ImageTextSection({ section }) {
       }}
     >
       {/* IMAGE SIDE */}
-      <Box
-        component="img"
-        src={img}
-        alt={title || "image"}
-        sx={{
-          width: { xs: "70%", md: "30%" },
-          maxWidth: 400,
-          borderRadius: 3,
-          transition: "all 0.4s ease",
-          filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.25))",
-          objectFit: "cover",
+      {img && (
+        <Box
+          component="img"
+          src={img}
+          alt={title || ""}
+          loading={section.priority ? "eager" : "lazy"}
+          fetchPriority={section.priority ? "high" : "auto"}
+          decoding="async"
+          sx={{
+            width: { xs: "70%", md: "30%" },
+            maxWidth: 400,
+            aspectRatio: "4 / 3",
+            borderRadius: 3,
+            transition: "all 0.4s ease",
+            filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.25))",
+            objectFit: "cover",
 
-          "&:hover": {
-            transform: "scale(1.05) rotate(1deg)",
-          },
-        }}
-      />
+            "&:hover": {
+              transform: "scale(1.05) rotate(1deg)",
+            },
+          }}
+        />
+      )}
 
       {/* TEXT CARD */}
       <Box

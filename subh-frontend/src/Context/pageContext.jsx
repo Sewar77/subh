@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import toast from "react-hot-toast";
 import { api } from "../../api";
 
@@ -19,16 +25,17 @@ export function PagesProvider({ children }) {
   const [pagesLoading, setPagesLoading] = useState(false);
   const [sectionsLoading, setSectionsLoading] = useState(false);
   const [translationsLoading, setTranslationsLoading] = useState(false);
+  const publicPageRequestId = useRef(0);
 
-  const handleError = (error) => {
+  const handleError = useCallback((error) => {
     toast.error(
       error?.response?.data?.message ||
         error?.message ||
         "Something went wrong",
     );
-  };
+  }, []);
 
-  const handleRequest = async (callback, setLoading) => {
+  const handleRequest = useCallback(async (callback, setLoading) => {
     try {
       setLoading(true);
       return await callback();
@@ -38,7 +45,7 @@ export function PagesProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [handleError]);
 
   // ======================
   // PAGES
@@ -51,7 +58,7 @@ export function PagesProvider({ children }) {
         setPages(res.data.pages || []);
         return res.data.pages;
       }, setPagesLoading),
-    [],
+    [handleRequest],
   );
 
   const fetchPageById = useCallback(
@@ -62,7 +69,7 @@ export function PagesProvider({ children }) {
         setPage(res.data.page);
         return res.data.page;
       }, setPagesLoading),
-    [],
+    [handleRequest],
   );
 
   const fetchPageByKey = useCallback(
@@ -73,7 +80,7 @@ export function PagesProvider({ children }) {
         setPage(res.data.page);
         return res.data.page;
       }, setPagesLoading),
-    [],
+    [handleRequest],
   );
 
   // ======================
@@ -87,7 +94,7 @@ export function PagesProvider({ children }) {
         setPageTranslations(res.data.translations || []);
         return res.data.translations;
       }, setTranslationsLoading),
-    [],
+    [handleRequest],
   );
 
   const createPageTranslation = useCallback(
@@ -97,7 +104,7 @@ export function PagesProvider({ children }) {
         toast.success("Page translation added");
         return res.data;
       }, setTranslationsLoading),
-    [],
+    [handleRequest],
   );
 
   const updatePageTranslation = useCallback(
@@ -107,7 +114,7 @@ export function PagesProvider({ children }) {
         toast.success("Page translation updated");
         return res.data;
       }, setTranslationsLoading),
-    [],
+    [handleRequest],
   );
 
   const deletePageTranslation = useCallback(
@@ -117,7 +124,7 @@ export function PagesProvider({ children }) {
         setPageTranslations((prev) => prev.filter((item) => item.id !== id));
         toast.success("Page translation deleted");
       }, setTranslationsLoading),
-    [],
+    [handleRequest],
   );
 
   // ======================
@@ -131,21 +138,25 @@ export function PagesProvider({ children }) {
         setSections(res.data.sections || []);
         return res.data.sections;
       }, setSectionsLoading),
-    [],
+    [handleRequest],
   );
 
   const getSectionsByPageKey = useCallback(
     (key, language = "en") =>
       handleRequest(async () => {
+        const requestId = publicPageRequestId.current + 1;
+        publicPageRequestId.current = requestId;
         setSectionKey([]);
         const res = await api.get(`/public/pages/key/${key}`, {
           params: { lang: language },
         });
         const publicSections = res.data.page?.sections || [];
-        setSectionKey(publicSections);
+        if (requestId === publicPageRequestId.current) {
+          setSectionKey(publicSections);
+        }
         return publicSections;
       }, setSectionsLoading),
-    [],
+    [handleRequest],
   );
 
   const getAllSections = useCallback(
@@ -155,7 +166,7 @@ export function PagesProvider({ children }) {
         setAllSections(res.data.sections || []);
         return res.data.sections;
       }, setSectionsLoading),
-    [],
+    [handleRequest],
   );
 
   const fetchSectionById = useCallback(
@@ -165,7 +176,7 @@ export function PagesProvider({ children }) {
         setSection(res.data.section);
         return res.data.section;
       }, setSectionsLoading),
-    [],
+    [handleRequest],
   );
 
   const toggleSectionVisibility = useCallback(
@@ -191,7 +202,7 @@ export function PagesProvider({ children }) {
 
         return res.data.section;
       }, setSectionsLoading),
-    [],
+    [handleRequest],
   );
 
   // ======================
@@ -205,19 +216,17 @@ export function PagesProvider({ children }) {
         setSectionTranslations(res.data.translations || []);
         return res.data.translations;
       }, setTranslationsLoading),
-    [],
+    [handleRequest],
   );
 
   const updateSectionTranslation = useCallback(
     (id, data) =>
       handleRequest(async () => {
         const res = await api.put(`/translations/${id}`, data);
-        console.log(data);
-
         toast.success("Section content updated");
         return res.data;
       }, setTranslationsLoading),
-    [],
+    [handleRequest],
   );
 
   return (

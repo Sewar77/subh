@@ -8,10 +8,16 @@ const fullNameSchema = Joi.string().trim().min(2).max(100);
 const emailSchema = Joi.string().trim().lowercase().email();
 const phoneSchema = Joi.string().trim().pattern(phonePattern);
 const passwordSchema = Joi.string().min(8).pattern(passwordPattern);
-const userTypeSchema = Joi.string()
-  .valid("individual", "company")
-  .allow(null);
+const userTypeSchema = Joi.string().valid("individual", "company");
 const roleSchema = Joi.string().valid("user", "admin");
+const companyNameSchema = Joi.string().trim().min(2).max(200);
+const companyIdentifierSchema = Joi.string().trim().min(2).max(100);
+const registrationStateSchema = Joi.string().trim().min(2).max(100);
+const employeeCountSchema = Joi.number().integer().positive().max(10000000);
+const websiteSchema = Joi.string()
+  .trim()
+  .max(2048)
+  .uri({ scheme: ["http", "https"] });
 
 const withNameAlias = (schema) => schema.xor("name", "fullName");
 const withOptionalNameAlias = (schema) => schema.oxor("name", "fullName");
@@ -23,8 +29,50 @@ export const registerUserSchema = withNameAlias(
     email: emailSchema.required(),
     phoneNumber: phoneSchema.required(),
     userType: userTypeSchema.required(),
+    companyName: Joi.when("userType", {
+      is: "company",
+      then: companyNameSchema.required(),
+      otherwise: Joi.forbidden(),
+    }),
+    employeeCount: Joi.when("userType", {
+      is: "company",
+      then: employeeCountSchema.required(),
+      otherwise: Joi.forbidden(),
+    }),
+    ein: Joi.when("userType", {
+      is: "company",
+      then: companyIdentifierSchema,
+      otherwise: Joi.forbidden(),
+    }),
+    registrationNumber: Joi.when("userType", {
+      is: "company",
+      then: companyIdentifierSchema,
+      otherwise: Joi.forbidden(),
+    }),
+    registrationState: Joi.when("userType", {
+      is: "company",
+      then: registrationStateSchema,
+      otherwise: Joi.forbidden(),
+    }),
+    website: Joi.when("userType", {
+      is: "company",
+      then: websiteSchema,
+      otherwise: Joi.forbidden(),
+    }),
     password: passwordSchema.required(),
     confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
+  }).custom((value, helpers) => {
+    if (
+      value.userType === "company" &&
+      !value.ein &&
+      !value.registrationNumber
+    ) {
+      return helpers.error("object.missing", {
+        peers: ["ein", "registrationNumber"],
+        peersWithLabels: ["ein", "registrationNumber"],
+      });
+    }
+    return value;
   }),
 ).unknown(false);
 

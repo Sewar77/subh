@@ -4,11 +4,10 @@ import { Box } from "@mui/material";
 import { useLanguage } from "../../Context/LanguageContext";
 
 import SectionRenderer from "../../cms/SectionRenderer";
-import { prepareSection } from "../../Utils/sectionAdapter";
 import { usePages } from "../../Context/pageContext";
 
 export default function About() {
-  const { getSectionsByPageKey, sectionKey, sectionsLoading } = usePages();
+  const { getSectionsByPageKey, sectionKey } = usePages();
   const { language } = useLanguage();
 
   useEffect(() => {
@@ -16,14 +15,10 @@ export default function About() {
   }, [getSectionsByPageKey, language]);
 
   const sections = useMemo(() => {
-    return (sectionKey || [])
-
+    return [...(sectionKey || [])]
       .sort((a, b) => a.position - b.position)
-
-      .map((section) => prepareSection(section, language))
-
-      .filter(Boolean);
-  }, [sectionKey, language]);
+      .filter((section) => section && section.templateKey);
+  }, [sectionKey]);
 
   return (
     <Box
@@ -32,8 +27,12 @@ export default function About() {
         minHeight: "100vh",
       }}
     >
-      {sections.map((section) => (
-        <SectionRenderer key={section.id} section={section} />
+      {sections.map((section, index) => (
+        <SectionRenderer
+          key={section.id}
+          section={section}
+          priority={index === 0}
+        />
       ))}
     </Box>
   );

@@ -1,20 +1,11 @@
 import {
   Alert,
   Box,
-  Button,
   CircularProgress,
-  Container,
-  FormControl,
-  InputLabel,
-  MenuItem,
   Pagination,
-  Select,
-  Stack,
-  TextField,
   Typography,
 } from "@mui/material";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useLanguage } from "../../Context/LanguageContext.jsx";
@@ -26,9 +17,18 @@ import {
 import { getCategories } from "../../Services/categoryService.js";
 import {
   formatCatalogNumber,
+  formatActiveFilterLabel,
+  getCatalogCountLabel,
   getCatalogCopy,
 } from "../../Utils/catalogI18n.js";
 import BookCardGrid from "./BookCardGrid.jsx";
+import PublicPageHero from "../Public/PublicPageHero.jsx";
+import {
+  CatalogNumberField,
+  CatalogSearchField,
+  CatalogSelectField,
+  CatalogToolbar,
+} from "../Catalog/CatalogToolbar.jsx";
 
 const sortOptions = [
   { value: "createdAt:desc", key: "newest" },
@@ -46,9 +46,13 @@ export default function DisplayBooks() {
   const [filters, setFilters] = useState({
     search: "",
     categoryId: "",
+    minPrice: "",
+    maxPrice: "",
     sort: "createdAt:desc",
   });
   const debouncedSearch = useDebouncedValue(filters.search);
+  const debouncedMinPrice = useDebouncedValue(filters.minPrice);
+  const debouncedMaxPrice = useDebouncedValue(filters.maxPrice);
   const [categories, setCategories] = useState([]);
   const [categoryError, setCategoryError] = useState("");
   const [state, setState] = useState({
@@ -78,15 +82,20 @@ export default function DisplayBooks() {
 
   useEffect(() => {
     let active = true;
+    const query = {
+      page,
+      limit: 20,
+      lang: language,
+      search: debouncedSearch,
+      minPrice: debouncedMinPrice || null,
+      maxPrice: debouncedMaxPrice || null,
+      ...selectedSort,
+    };
     const request = categoryId
-      ? getBooksForCategory(categoryId, language)
+      ? getBooksForCategory(categoryId, query)
       : getPublicBooks({
-          page,
-          limit: 20,
-          lang: language,
-          search: debouncedSearch,
+          ...query,
           categoryId: filters.categoryId || null,
-          ...selectedSort,
         });
 
     request
@@ -102,12 +111,12 @@ export default function DisplayBooks() {
           pagination: data.pagination || null,
         });
       })
-      .catch((error) => {
+      .catch(() => {
         if (!active) return;
         setState({
           loading: false,
           books: [],
-          error: error.message,
+          error: t.booksLoadError,
           category: null,
           bookCount: 0,
           pagination: null,
@@ -116,7 +125,17 @@ export default function DisplayBooks() {
     return () => {
       active = false;
     };
-  }, [categoryId, debouncedSearch, filters.categoryId, language, page, selectedSort]);
+  }, [
+    categoryId,
+    debouncedSearch,
+    filters.categoryId,
+    debouncedMaxPrice,
+    debouncedMinPrice,
+    language,
+    page,
+    selectedSort,
+    t.booksLoadError,
+  ]);
 
   const updateFilter = (key, value) => {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -124,90 +143,131 @@ export default function DisplayBooks() {
   };
 
   const clearFilters = () => {
-    setFilters({ search: "", categoryId: "", sort: "createdAt:desc" });
+    setFilters({
+      search: "",
+      categoryId: "",
+      minPrice: "",
+      maxPrice: "",
+      sort: "createdAt:desc",
+    });
     setPage(1);
   };
 
   const hasFilters =
-    Boolean(filters.search || filters.categoryId) ||
+    Boolean(
+      filters.search ||
+        filters.categoryId ||
+        filters.minPrice ||
+        filters.maxPrice,
+    ) ||
     filters.sort !== "createdAt:desc";
   const heading = state.category?.name || t.booksTitle;
+  const activeFilterCount = [
+    filters.search.trim(),
+    !categoryId && filters.categoryId,
+    filters.minPrice,
+    filters.maxPrice,
+  ].filter(Boolean).length;
+  const categoryOptions = [
+    { value: "", label: t.allCategories },
+    ...categories.map((category) => ({
+      value: String(category.id),
+      label: category.name,
+    })),
+  ];
+  const localizedSortOptions = sortOptions.map((option) => ({
+    value: option.value,
+    label: t[option.key],
+  }));
 
   if (state.loading) {
     return (
-      <Container sx={{ py: 8, textAlign: "center" }} dir={isArabic ? "rtl" : "ltr"}>
+      <Box sx={{ py: 8, textAlign: "center" }} dir={isArabic ? "rtl" : "ltr"}>
         <CircularProgress />
         <Typography sx={{ mt: 2 }}>{t.loadingBooks}</Typography>
-      </Container>
+      </Box>
     );
   }
 
   if (state.error) {
     return (
-      <Container sx={{ py: 5 }} dir={isArabic ? "rtl" : "ltr"}>
+      <Box sx={{ py: 5 }} dir={isArabic ? "rtl" : "ltr"}>
         <Alert severity="error">{state.error}</Alert>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="xl" dir={isArabic ? "rtl" : "ltr"} sx={{ py: { xs: 3, md: 6 } }}>
-      <Box
-        sx={{
-          p: { xs: 3, sm: 4, md: 5 },
-          mb: 4,
-          borderRadius: 4,
-          color: "common.white",
-          background: "linear-gradient(120deg, #102943, #613389 58%, #bb40bf)",
-        }}
-      >
-        <Typography variant="overline" sx={{ color: "#41f2c3", fontWeight: 700 }}>
-          {categoryId ? t.category : t.booksEyebrow}
-        </Typography>
-        <Typography variant="h1" component="h1" sx={{ mt: 0.5, fontSize: { xs: "2rem", md: "3.1rem" }, maxWidth: 800 }}>
-          {heading}
-        </Typography>
-        {!categoryId && <Typography sx={{ mt: 1.5, maxWidth: 680, color: "rgba(255,255,255,.84)" }}>{t.booksDescription}</Typography>}
-        <Typography sx={{ mt: 2.5, fontWeight: 700 }}>
-          {formatCatalogNumber(state.bookCount, language)} {t.bookCount}
-        </Typography>
-      </Box>
+    <Box dir={isArabic ? "rtl" : "ltr"}>
+      <PublicPageHero
+        eyebrow={categoryId ? t.category : t.booksEyebrow}
+        title={heading}
+        description={
+          categoryId
+            ? state.category?.description || t.categoryBooksDescription
+            : t.booksDescription
+        }
+        icon={<MenuBookRoundedIcon />}
+        count={formatCatalogNumber(state.bookCount, language)}
+        countLabel={getCatalogCountLabel("books", state.bookCount, language)}
+      />
 
-      {!categoryId && (
-        <Box component="form" onSubmit={(event) => event.preventDefault()} sx={{ mb: 4 }}>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} alignItems={{ md: "center" }}>
-            <TextField
-              label={t.searchBooks}
-              placeholder={t.searchBooksPlaceholder}
-              value={filters.search}
-              onChange={(event) => updateFilter("search", event.target.value)}
-              slotProps={{ input: { startAdornment: <SearchRoundedIcon sx={{ mr: 1, color: "text.secondary" }} /> } }}
-              sx={{ flex: 1, minWidth: 0 }}
+      <Box sx={{ mt: { xs: 3, md: 4 }, mb: 4 }}>
+        <CatalogToolbar
+          label={t.catalogFilters}
+          activeFilterLabel={
+            activeFilterCount
+              ? formatActiveFilterLabel(activeFilterCount, language)
+              : null
+          }
+          clearLabel={t.clearFilters}
+          clearDisabled={!hasFilters}
+          onClear={clearFilters}
+          status={`${formatCatalogNumber(state.bookCount, language)} ${getCatalogCountLabel("books", state.bookCount, language)}`}
+        >
+          <CatalogSearchField
+            label={t.searchBooks}
+            placeholder={t.searchBooksPlaceholder}
+            value={filters.search}
+            onChange={(event) => updateFilter("search", event.target.value)}
+          />
+          {!categoryId && (
+            <CatalogSelectField
+              label={t.categoryFilter}
+              value={filters.categoryId}
+              onChange={(event) =>
+                updateFilter("categoryId", event.target.value)
+              }
+              options={categoryOptions}
             />
-            <FormControl sx={{ minWidth: { xs: "100%", sm: 210 } }}>
-              <InputLabel id="book-category-filter-label">{t.categoryFilter}</InputLabel>
-              <Select labelId="book-category-filter-label" label={t.categoryFilter} value={filters.categoryId} onChange={(event) => updateFilter("categoryId", event.target.value)}>
-                <MenuItem value="">{t.allCategories}</MenuItem>
-                {categories.map((category) => <MenuItem key={category.id} value={String(category.id)}>{category.name}</MenuItem>)}
-              </Select>
-            </FormControl>
-            <FormControl sx={{ minWidth: { xs: "100%", sm: 210 } }}>
-              <InputLabel id="book-sort-label">{t.sort}</InputLabel>
-              <Select labelId="book-sort-label" label={t.sort} value={filters.sort} onChange={(event) => updateFilter("sort", event.target.value)}>
-                {sortOptions.map((option) => <MenuItem key={option.value} value={option.value}>{t[option.key]}</MenuItem>)}
-              </Select>
-            </FormControl>
-            <Button variant="outlined" startIcon={<RestartAltRoundedIcon />} onClick={clearFilters} disabled={!hasFilters} sx={{ minHeight: 48, whiteSpace: "nowrap" }}>
-              {t.clearFilters}
-            </Button>
-          </Stack>
-          {categoryError && <Alert severity="warning" sx={{ mt: 1.5 }}>{categoryError}</Alert>}
-        </Box>
-      )}
+          )}
+          <CatalogNumberField
+            label={t.minPrice}
+            value={filters.minPrice}
+            onChange={(event) => updateFilter("minPrice", event.target.value)}
+          />
+          <CatalogNumberField
+            label={t.maxPrice}
+            value={filters.maxPrice}
+            onChange={(event) => updateFilter("maxPrice", event.target.value)}
+          />
+          <CatalogSelectField
+            label={t.sort}
+            value={filters.sort}
+            onChange={(event) => updateFilter("sort", event.target.value)}
+            options={localizedSortOptions}
+          />
+        </CatalogToolbar>
+        {!categoryId && categoryError && (
+          <Alert severity="warning" sx={{ mt: 1.5 }}>
+            {t.categoriesLoadError}
+          </Alert>
+        )}
+      </Box>
 
       {state.books.length ? <BookCardGrid books={state.books} /> : <Alert severity="info">{categoryId ? t.noCategoryBooks : t.noBooks}</Alert>}
 
-      {!categoryId && state.pagination?.totalPages > 1 && (
+      {state.pagination?.totalPages > 1 && (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <Pagination
             count={state.pagination.totalPages}
@@ -218,6 +278,6 @@ export default function DisplayBooks() {
           />
         </Box>
       )}
-    </Container>
+    </Box>
   );
 }

@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../components/Home/Navbar/Navbar.jsx";
 import Footer from "../components/Home/Footer/Footer.jsx";
 import { Box, Container } from "@mui/material";
+import { PagesProvider } from "../Context/pageContext.jsx";
 
 export default function UserLayout() {
   return (
@@ -12,7 +13,9 @@ export default function UserLayout() {
         maxWidth="xl"
         sx={{ flex: 1, width: "100%", py: { xs: 3, md: 5 } }}
       >
-        <Outlet />
+        <PagesProvider>
+          <Outlet />
+        </PagesProvider>
       </Container>
       <Footer />
     </Box>

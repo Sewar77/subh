@@ -5,7 +5,11 @@
     "cms:verify": "node scripts/verify-cms.js",
     "localization:verify": "node scripts/verify-public-localization.js",
     "auth:verify": "node scripts/verify-auth.js",
+    "security:verify": "node scripts/verify-security.js",
     "validation:verify": "node scripts/verify-validation-middleware.js",
+    "book-requests:verify": "node scripts/verify-book-requests.js",
+    "admin-book-requests:verify": "node scripts/verify-admin-book-requests.js",
+    "request-payments:verify": "node scripts/verify-request-payments.js",
     "admin:bootstrap": "node scripts/bootstrap-admin.js",
     "db:migrate": "node database/migrations/run-migrations.js",
     "db:seed": "node database/seeds/dev-users-seed.js"

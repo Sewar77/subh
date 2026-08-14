@@ -14,14 +14,18 @@ export default function ImageSection({ section }) {
       <Box
         component="img"
         src={imageUrl}
-        alt={section.content.alt}
+        alt={section.content.alt || section.title || ""}
+        loading={section.priority ? "eager" : "lazy"}
+        fetchPriority={section.priority ? "high" : "auto"}
+        decoding="async"
         sx={{
           width: "100%",
           maxWidth: "1200px",
-          height: "auto",
+          aspectRatio: "16 / 9",
           borderRadius: 4,
           display: "block",
-          objectFit: "cover",
+          objectFit: "contain",
+          bgcolor: "action.hover",
           boxShadow: 3,
         }}
       />
