@@ -42,9 +42,14 @@ export default function SummarySection({ section }) {
 
   return (
     <Box
+      component="section"
       sx={{
         display: "flex",
         justifyContent: alignmentSx.justifyContent,
+        maxWidth: 1120,
+        mx: "auto",
+        my: { xs: 3, md: 5 },
+        borderRadius: 3,
         ...variantSx,
       }}
     >
@@ -58,8 +63,9 @@ export default function SummarySection({ section }) {
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
-            mb: 2,
+            fontWeight: 820,
+            mb: 1.25,
+            fontSize: { xs: "1.65rem", md: "2rem" },
             ...(isHighlight ? { color: "info.dark" } : {}),
           }}
         >
@@ -68,7 +74,9 @@ export default function SummarySection({ section }) {
 
         <Typography
           sx={{
-            lineHeight: 1.7,
+            lineHeight: 1.75,
+            maxWidth: 760,
+            mx: alignmentSx.textAlign === "center" ? "auto" : 0,
             ...(isHighlight ? { color: "info.dark" } : {}),
           }}
         >

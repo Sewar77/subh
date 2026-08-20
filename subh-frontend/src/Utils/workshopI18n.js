@@ -2,7 +2,7 @@ const copy = {
   en: {
     workshops: "Workshops", discover: "Discover Subh Workshops", search: "Search", mode: "Mode", category: "Category",
     loading: "Loading Workshops…", empty: "No Workshops match these filters.", view: "View details", book: "Book This Session",
-    full: "This session is full.", available: "Available", seatsRemaining: "seats remaining", online: "Online", offline: "Offline", any: "Any",
+    full: "This session is full.", fullShort: "Full", almostFull: "Almost Full", closed: "Closed", available: "Available", seatsRemaining: "seats remaining", online: "Online", offline: "Offline", any: "Any",
     male: "Male", female: "Female", duration: "Duration", minutes: "minutes", price: "Price", free: "Free",
     eligibility: "Eligibility", sessions: "Available sessions", presenter: "Presenter", booking: "Workshop booking",
     submit: "Reserve my seat", myBookings: "My Workshops", noBookings: "You have no Workshop bookings yet.",
@@ -13,7 +13,7 @@ const copy = {
   ar: {
     workshops: "ورش العمل", discover: "اكتشف ورش عمل صبح", search: "بحث", mode: "النوع", category: "التصنيف",
     loading: "جارٍ تحميل ورش العمل…", empty: "لا توجد ورش عمل مطابقة لهذه المرشحات.", view: "عرض التفاصيل", book: "احجز هذه الجلسة",
-    full: "هذه الجلسة مكتملة.", available: "متاح", seatsRemaining: "مقاعد متبقية", online: "عن بُعد", offline: "حضوري", any: "الجميع",
+    full: "هذه الجلسة مكتملة.", fullShort: "مكتملة", almostFull: "أوشكت على الاكتمال", closed: "مغلقة", available: "متاح", seatsRemaining: "مقاعد متبقية", online: "عن بُعد", offline: "حضوري", any: "الجميع",
     male: "ذكر", female: "أنثى", duration: "المدة", minutes: "دقيقة", price: "السعر", free: "مجانية",
     eligibility: "شروط المشاركة", sessions: "الجلسات المتاحة", presenter: "المقدم", booking: "حجز ورشة عمل",
     submit: "احجز مقعدي", myBookings: "ورش العمل الخاصة بي", noBookings: "لا توجد لديك حجوزات ورش عمل بعد.",
@@ -28,6 +28,17 @@ export const workshopLocale = (lang) => lang === "ar" ? "ar-EG-u-nu-arab" : "en-
 export const formatWorkshopDate = (value, lang, options = {}) => value
   ? new Intl.DateTimeFormat(workshopLocale(lang), { dateStyle: "medium", timeStyle: "short", ...options }).format(new Date(value))
   : "—";
+export const formatWorkshopDay = (value, lang, timeZone) => value
+  ? new Intl.DateTimeFormat(workshopLocale(lang), { dateStyle: "medium", ...(timeZone ? { timeZone } : {}) }).format(new Date(value))
+  : "—";
+export const formatWorkshopTimeRange = (startsAt, endsAt, lang, timeZone) => {
+  const formatter = new Intl.DateTimeFormat(workshopLocale(lang), {
+    hour: "numeric",
+    minute: "2-digit",
+    ...(timeZone ? { timeZone } : {}),
+  });
+  return startsAt && endsAt ? `${formatter.format(new Date(startsAt))} – ${formatter.format(new Date(endsAt))}` : "—";
+};
 export const formatWorkshopNumber = (value, lang) => new Intl.NumberFormat(workshopLocale(lang)).format(Number(value || 0));
 export const formatWorkshopMoney = (value, currency, lang) => new Intl.NumberFormat(workshopLocale(lang), { style: "currency", currency: currency || "USD" }).format(Number(value || 0));
 

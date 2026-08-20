@@ -1,146 +1,47 @@
-import { Box, Typography, Paper } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import {
+  alignmentStyles,
+  contentWidthStyles,
   getAppearanceValue,
   mapAppearanceToStyle,
-  textVariantStyles,
-  contentWidthStyles,
-  alignmentStyles,
 } from "../Utils/appearanceMapping";
 
 export default function TextSection({ section }) {
-  const { title, content, align = "center" } = section || {};
-
   if (!section) return null;
 
   const appearance = section.appearance || {};
-
-  // Get appearance values with defaults
   const variant = getAppearanceValue(appearance, "variant", "article");
-  const contentWidth = getAppearanceValue(
-    appearance,
-    "contentWidth",
-    "standard",
-  );
+  const contentWidth = getAppearanceValue(appearance, "contentWidth", "standard");
   const alignment = getAppearanceValue(appearance, "alignment", "center");
+  const contentWidthSx = mapAppearanceToStyle(contentWidthStyles, contentWidth, contentWidthStyles.standard);
+  const alignmentSx = mapAppearanceToStyle(alignmentStyles, alignment, alignmentStyles.center);
+  const highlighted = variant === "highlight";
+  const centered = variant === "centered";
+  const text = typeof section.content === "string" ? section.content : section.content?.text;
+  if (!section.title && !text) return null;
 
-  // Map appearance values to styles
-  const variantSx = mapAppearanceToStyle(textVariantStyles, variant, {});
-  const contentWidthSx = mapAppearanceToStyle(
-    contentWidthStyles,
-    contentWidth,
-    contentWidthStyles.standard,
+  const content = (
+    <Box sx={{ ...contentWidthSx, width: "100%", mx: alignmentSx.textAlign === "center" ? "auto" : 0, textAlign: alignmentSx.textAlign }}>
+      {section.title && (
+        <Typography component="h2" variant={centered || highlighted ? "h4" : "h5"} sx={{ fontWeight: 800, mb: text ? 1.5 : 0, lineHeight: 1.25 }}>
+          {section.title}
+        </Typography>
+      )}
+      {text && (
+        <Typography sx={{ whiteSpace: "pre-line", lineHeight: 1.85, fontSize: { xs: "1rem", md: "1.06rem" }, color: highlighted ? "inherit" : "text.secondary" }}>
+          {text}
+        </Typography>
+      )}
+    </Box>
   );
-  const alignmentSx = mapAppearanceToStyle(
-    alignmentStyles,
-    alignment,
-    alignmentStyles.center,
-  );
-
-  const textItems =
-    typeof content === "string"
-      ? [content]
-      : content && typeof content === "object"
-        ? Object.values(content)
-        : [];
-
-  const isHighlight = variant === "highlight";
-  const isCentered = variant === "centered";
 
   return (
-    <Box
-      sx={{
-        py: 8,
-        px: 2,
-        display: "flex",
-        justifyContent: alignmentSx.justifyContent,
-      }}
-    >
-      <Box
-        sx={{
-          ...contentWidthSx,
-          width: "100%",
-          textAlign: alignmentSx.textAlign,
-        }}
-      >
-        {title && (
-          <Typography
-            variant={isCentered || isHighlight ? "h4" : "h5"}
-            sx={{
-              position: "relative",
-              display: isCentered ? "inline-block" : "block",
-              fontWeight: 700,
-              mb: 5,
-              ...(variant !== "highlight"
-                ? {
-                    "&::after": {
-                      mx: alignmentSx.textAlign === "center" ? "auto" : 0,
-                      content: '""',
-                      position: "absolute",
-                      left: alignmentSx.textAlign === "right" ? "auto" : 0,
-                      right: alignmentSx.textAlign === "right" ? 0 : "auto",
-                      bottom: -8,
-                      width: isCentered ? "100%" : "60px",
-                      height: "4px",
-                      borderRadius: "4px",
-                      background: "linear-gradient(90deg, #41f2c3, #102943)",
-                    },
-                  }
-                : {}),
-            }}
-          >
-            {title}
-          </Typography>
-        )}
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns:
-              textItems.length > 1 && !isHighlight
-                ? {
-                    xs: "1fr",
-                    md: "repeat(2, 1fr)",
-                  }
-                : "1fr",
-            gap: 3,
-            mt: 2,
-          }}
-        >
-          {textItems.map((text, index) => (
-            <Paper
-              key={index}
-              elevation={isHighlight ? 0 : 0}
-              sx={{
-                ...(isHighlight
-                  ? {
-                      p: 4,
-                      bgcolor: "info.light",
-                      borderLeft: "4px solid",
-                      borderColor: "info.main",
-                      borderRadius: 0,
-                    }
-                  : {
-                      p: 4,
-                      borderRadius: 3,
-                      backgroundColor: "background.paper",
-                      border: "1px solid",
-                      borderColor: "divider",
-                    }),
-                textAlign: "start",
-              }}
-            >
-              <Typography
-                sx={{
-                  lineHeight: 1.8,
-                  color: isHighlight ? "info.dark" : "text.primary",
-                }}
-              >
-                {text}
-              </Typography>
-            </Paper>
-          ))}
-        </Box>
-      </Box>
+    <Box component="section" sx={{ py: { xs: 3.5, md: 5.5 }, px: { xs: 0.5, sm: 2 } }}>
+      {highlighted ? (
+        <Paper variant="outlined" sx={{ maxWidth: 960, mx: "auto", p: { xs: 2.5, md: 3.5 }, borderRadius: 3, borderInlineStart: "4px solid", borderInlineStartColor: "secondary.main", background: "linear-gradient(135deg, rgba(85,201,181,.09), rgba(101,70,163,.06))" }}>
+          {content}
+        </Paper>
+      ) : content}
     </Box>
   );
 }

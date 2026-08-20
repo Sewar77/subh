@@ -23,6 +23,7 @@ import {
 } from "../../Utils/catalogI18n.js";
 import BookCardGrid from "./BookCardGrid.jsx";
 import PublicPageHero from "../Public/PublicPageHero.jsx";
+import { trackEvent } from "../../Services/analyticsService.js";
 import {
   CatalogNumberField,
   CatalogSearchField,
@@ -101,6 +102,13 @@ export default function DisplayBooks() {
     request
       .then((data) => {
         if (!active) return;
+        if (debouncedSearch.trim()) {
+          void trackEvent("books_search", {
+            locale: language,
+            properties: { resultCount: Number(data.pagination?.total ?? data.books.length) },
+            dedupeKey: `books-search:${language}:${debouncedSearch.trim().toLocaleLowerCase()}:${page}`,
+          });
+        }
         setState({
           loading: false,
           books: data.books,

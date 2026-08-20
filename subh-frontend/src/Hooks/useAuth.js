@@ -3,6 +3,7 @@ import { authContext } from "../Context/authContextValue.js";
 import { api } from "../../api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { trackEvent } from "../Services/analyticsService.js";
 
 export const useAuth = () => {
   const { user, setUser } = useContext(authContext);
@@ -46,6 +47,9 @@ export const useAuth = () => {
               phoneNumber: userData.phoneNumber,
             };
       const res = await api.post("/auth/register", registrationPayload);
+      void trackEvent("registration_completed", {
+        locale: document.documentElement.lang,
+      });
       toast.success(res.data.message);
       navigate("/login");
     } catch (error) {
@@ -57,7 +61,6 @@ export const useAuth = () => {
         return;
       }
       toast.error(data?.message || "Something went wrong");
-
     }
   };
 
@@ -70,14 +73,17 @@ export const useAuth = () => {
       const res = await api.post("/auth/login", userData);
       const role = res.data.user.role;
       setUser(res.data.user);
+      void trackEvent("login_completed", {
+        locale: document.documentElement.lang,
+      });
       const safeReturnTo =
         typeof returnTo === "string" &&
         returnTo.startsWith("/") &&
         !returnTo.startsWith("//")
           ? returnTo
           : "";
-      if (role === "admin") navigate("/admin");
-      if (role === "user") navigate(safeReturnTo || "/subh");
+      if (role === "admin") navigate("/admin/analytics");
+      if (role === "user") navigate(safeReturnTo || "/");
       toast.success(res.data.message);
     } catch (error) {
       const data = error.response?.data;

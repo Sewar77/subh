@@ -22,6 +22,7 @@ import {
   getCatalogCopy,
 } from "../../Utils/catalogI18n.js";
 import PublicPageHero from "../../components/Public/PublicPageHero.jsx";
+import { trackEntityView } from "../../Services/analyticsService.js";
 
 export default function CategoryDetailPage() {
   const { id } = useParams();
@@ -85,6 +86,10 @@ export default function CategoryDetailPage() {
   const loading = state.requestKey !== requestKey;
   const hasCurrentCategory = state.categoryKey === pageKey && state.category;
 
+  useEffect(() => {
+    if (hasCurrentCategory) void trackEntityView("category", id, language, `/categories/${id}`);
+  }, [hasCurrentCategory, id, language]);
+
   const backButton = (
     <Button
       component={Link}
@@ -119,7 +124,7 @@ export default function CategoryDetailPage() {
   const name = state.category?.name || t.category;
 
   return (
-    <Stack dir={isArabic ? "rtl" : "ltr"} spacing={{ xs: 3, md: 5 }}>
+    <Stack dir={isArabic ? "rtl" : "ltr"} spacing={{ xs: 2.5, md: 3.5 }}>
       <PublicPageHero
         variant="detail"
         eyebrow={t.categoryDetails}
@@ -136,10 +141,10 @@ export default function CategoryDetailPage() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "minmax(280px, .75fr) 1.25fr" },
+            gridTemplateColumns: { xs: "1fr", md: "minmax(240px, .65fr) 1.35fr" },
           }}
         >
-          <Box sx={{ minHeight: { xs: 220, md: 340 }, bgcolor: "action.hover" }}>
+          <Box sx={{ minHeight: { xs: 200, md: 280 }, maxHeight: { md: 340 }, bgcolor: "action.hover" }}>
             {state.category.image ? (
               <Box
                 component="img"
@@ -163,9 +168,9 @@ export default function CategoryDetailPage() {
               </Box>
             )}
           </Box>
-          <Box sx={{ p: { xs: 3, md: 4 } }}>
+          <Box sx={{ p: { xs: 2.5, md: 3.5 }, alignSelf: "center" }}>
             <Typography variant="h5">{t.description}</Typography>
-            <Typography color="text.secondary" sx={{ mt: 1, whiteSpace: "pre-wrap", lineHeight: 1.9 }}>
+            <Typography color="text.secondary" sx={{ mt: 1, whiteSpace: "pre-wrap", lineHeight: 1.75, maxWidth: 760 }}>
               {state.category.description || t.noDescription}
             </Typography>
           </Box>
@@ -173,7 +178,7 @@ export default function CategoryDetailPage() {
       </Paper>
 
       <Box aria-busy={loading}>
-        <Typography variant="h4" component="h2" sx={{ mb: 2.5 }}>
+        <Typography variant="h4" component="h2" sx={{ mb: 2 }}>
           {t.booksInCategory}
         </Typography>
         {loading ? (

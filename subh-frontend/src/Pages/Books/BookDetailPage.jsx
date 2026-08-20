@@ -25,6 +25,7 @@ import { Link, useParams } from "react-router-dom";
 import { useLanguage } from "../../Context/LanguageContext.jsx";
 import BookCoverImage from "../../components/Books/BookCoverImage.jsx";
 import { getPublicBook } from "../../Services/bookService.js";
+import { trackEntityView } from "../../Services/analyticsService.js";
 
 const translations = {
   en: {
@@ -174,6 +175,10 @@ export default function BookDetailPage() {
   const book = loading ? null : requestState.book;
   const error = loading ? "" : requestState.error;
 
+  useEffect(() => {
+    if (book?.id) void trackEntityView("book", book.id, language, `/books/${book.id}`);
+  }, [book?.id, language]);
+
   if (error) {
     return (
       <Container maxWidth="xl" dir={isArabic ? "rtl" : "ltr"} sx={{ py: 6 }}>
@@ -225,8 +230,8 @@ export default function BookDetailPage() {
       dir={isArabic ? "rtl" : "ltr"}
       sx={{
         py: {
-          xs: 4,
-          md: 6,
+          xs: 1,
+          md: 2,
         },
       }}
     >
@@ -239,10 +244,10 @@ export default function BookDetailPage() {
         justifyContent="space-between"
         alignItems={{
           xs: "flex-start",
-          md: "flex-end",
+          md: "center",
         }}
-        spacing={3}
-        sx={{ mb: 4 }}
+        spacing={2}
+        sx={{ mb: 3 }}
       >
         <Box>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
@@ -267,7 +272,7 @@ export default function BookDetailPage() {
               fontSize: {
                 xs: "2rem",
                 sm: "2.7rem",
-                md: "3.4rem",
+                md: "2.8rem",
               },
 
               maxWidth: 850,
@@ -282,12 +287,12 @@ export default function BookDetailPage() {
               label={book.category.name}
               color="primary"
               variant="outlined"
-              sx={{ mt: 2 }}
+              sx={{ mt: 1.25 }}
             />
           )}
         </Box>
 
-        <Stack direction="row" flexWrap="wrap" gap={1}>
+        <Stack direction="row" flexWrap="wrap" gap={1} sx={{ "& .MuiButton-root": { minHeight: 40, px: 1.75 } }}>
           <Button
             component={Link}
             to={`/request-books?bookId=${book.id}`}
@@ -323,7 +328,7 @@ export default function BookDetailPage() {
       <Paper
         sx={{
           overflow: "hidden",
-          mb: 4,
+          mb: 3,
         }}
       >
         <Box
@@ -332,7 +337,7 @@ export default function BookDetailPage() {
 
             gridTemplateColumns: {
               xs: "1fr",
-              md: "minmax(300px, 0.8fr) 1.2fr",
+              md: "minmax(280px, 0.72fr) 1.28fr",
             },
           }}
         >
@@ -340,8 +345,8 @@ export default function BookDetailPage() {
           <Box
             sx={{
               minHeight: {
-                xs: 360,
-                md: 580,
+                xs: 320,
+                md: 460,
               },
 
               bgcolor: "#241D38",
@@ -351,7 +356,7 @@ export default function BookDetailPage() {
 
               p: {
                 xs: 2,
-                md: 4,
+                md: 3,
               },
             }}
           >
@@ -362,7 +367,7 @@ export default function BookDetailPage() {
               variant="detail"
               loading="eager"
               sx={{
-                maxHeight: 540,
+                maxHeight: 420,
                 bgcolor: "rgba(255,255,255,.08)",
                 boxShadow: book.coverImage
                   ? "0 24px 50px rgba(0,0,0,.30)"
@@ -374,11 +379,11 @@ export default function BookDetailPage() {
 
           {/* Description */}
           <Stack
-            spacing={3}
+            spacing={2.25}
             sx={{
               p: {
                 xs: 3,
-                md: 5,
+                md: 4,
               },
             }}
           >
@@ -388,8 +393,9 @@ export default function BookDetailPage() {
               color="text.secondary"
               sx={{
                 whiteSpace: "pre-line",
-                lineHeight: 2,
-                fontSize: "1.05rem",
+                lineHeight: 1.8,
+                fontSize: "1rem",
+                maxWidth: 760,
               }}
             >
               {book.description || t.notProvided}
@@ -434,9 +440,10 @@ export default function BookDetailPage() {
           gridTemplateColumns: {
             xs: "1fr",
             md: "repeat(2, minmax(0, 1fr))",
+            lg: "repeat(3, minmax(0, 1fr))",
           },
 
-          gap: 3,
+          gap: 2,
         }}
       >
         {/* Price */}
@@ -529,36 +536,21 @@ export default function BookDetailPage() {
               fallback={t.notProvided}
             />
           </InfoGrid>
-        </InfoPaper>
-
-        {/* Barcode */}
-        <InfoPaper>
-          <SectionTitle>{t.barcode}</SectionTitle>
-
-          {book.barcodeImage ? (
-            <Box
-              component="img"
-              src={book.barcodeImage}
-              alt={t.barcode}
-              loading="lazy"
-              decoding="async"
-              sx={{
-                width: "100%",
-                maxWidth: 340,
-                height: 130,
-                objectFit: "contain",
-
-                border: "1px solid",
-                borderColor: "divider",
-
-                borderRadius: 2,
-                p: 1.5,
-
-                bgcolor: "common.white",
-              }}
-            />
-          ) : (
-            <Typography color="text.secondary">{t.notProvided}</Typography>
+          {book.barcodeImage && (
+            <>
+              <Divider />
+              <Box>
+                <DetailLabel>{t.barcode}</DetailLabel>
+                <Box
+                  component="img"
+                  src={book.barcodeImage}
+                  alt={t.barcode}
+                  loading="lazy"
+                  decoding="async"
+                  sx={{ width: "100%", maxWidth: 260, height: 92, objectFit: "contain", border: "1px solid", borderColor: "divider", borderRadius: 1.5, p: 1, mt: 0.75, bgcolor: "common.white" }}
+                />
+              </Box>
+            </>
           )}
         </InfoPaper>
       </Box>
@@ -639,13 +631,13 @@ function InfoPaper({ children }) {
     <Paper
       sx={{
         p: {
-          xs: 2.5,
-          md: 3.5,
+          xs: 2.25,
+          md: 2.75,
         },
 
         display: "flex",
         flexDirection: "column",
-        gap: 2.5,
+        gap: 2,
       }}
     >
       {children}

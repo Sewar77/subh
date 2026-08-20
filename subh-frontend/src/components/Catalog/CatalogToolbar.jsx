@@ -23,7 +23,7 @@ const fieldSx = (smSpan, lgSpan) => ({
     lg: `span ${lgSpan}`,
   },
   minWidth: 0,
-  "& .MuiInputBase-root": { minHeight: 50 },
+  "& .MuiInputBase-root": { minHeight: 44 },
 });
 
 export function CatalogToolbar({
@@ -41,8 +41,8 @@ export function CatalogToolbar({
       onSubmit={(event) => event.preventDefault()}
       aria-label={label}
       sx={{
-        p: { xs: 2, sm: 2.5, md: 3 },
-        borderRadius: 3,
+        p: { xs: 1.5, sm: 2 },
+        borderRadius: 2.5,
         overflow: "hidden",
       }}
     >
@@ -50,8 +50,8 @@ export function CatalogToolbar({
         direction={{ xs: "column", sm: "row" }}
         alignItems={{ xs: "stretch", sm: "center" }}
         justifyContent="space-between"
-        spacing={1.5}
-        sx={{ mb: 2 }}
+        spacing={1}
+        sx={{ mb: 1.5 }}
       >
         <Stack direction="row" alignItems="center" spacing={1}>
           <Typography variant="h6" component="h2">
@@ -73,7 +73,7 @@ export function CatalogToolbar({
           disabled={clearDisabled}
           onClick={onClear}
           sx={{
-            minHeight: 46,
+            minHeight: 40,
             alignSelf: { xs: "stretch", sm: "center" },
             whiteSpace: "nowrap",
             gap: 0.5,
@@ -91,7 +91,7 @@ export function CatalogToolbar({
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-          gap: 1.5,
+          gap: { xs: 1.25, sm: 1.5 },
           alignItems: "start",
         }}
       >

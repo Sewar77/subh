@@ -98,6 +98,9 @@ const AdminBookRequestsPage = lazy(
 const AdminBookRequestDetailPage = lazy(
   () => import("./Pages/Admin/AdminBookRequestDetailPage.jsx"),
 );
+const AdminAnalyticsPage = lazy(
+  () => import("./Pages/Admin/AdminAnalyticsPage.jsx"),
+);
 
 function LazyRoute({ component: Component, fullPage = false }) {
   return (
@@ -264,6 +267,10 @@ function App() {
             <Route
               path="requests/:id"
               element={<LazyRoute component={AdminBookRequestDetailPage} />}
+            />
+            <Route
+              path="analytics"
+              element={<LazyRoute component={AdminAnalyticsPage} />}
             />
             <Route
               path="cms/:pageId"

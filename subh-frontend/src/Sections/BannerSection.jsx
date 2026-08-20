@@ -1,4 +1,4 @@
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Stack } from "@mui/material";
 import {
   getAppearanceValue,
   mapAppearanceToStyle,
@@ -39,22 +39,28 @@ export default function BannerSection({ section }) {
 
   return (
     <Box
+      component="section"
       sx={{
         ...heightSx,
-        px: 3,
+        px: { xs: 2.5, md: 4 },
         textAlign: alignmentSx.textAlign,
         display: "flex",
         alignItems: "center",
         justifyContent: alignmentSx.justifyContent,
+        maxWidth: 1120,
+        mx: "auto",
+        my: { xs: 3, md: 5 },
+        borderRadius: 3,
+        overflow: "hidden",
         ...variantSx,
       }}
     >
-      <Box>
+      <Stack spacing={1.25} alignItems={alignmentSx.textAlign === "center" ? "center" : "flex-start"} sx={{ maxWidth: 820 }}>
         <Typography
-          variant="h3"
+          variant="h4"
           sx={{
-            fontWeight: 700,
-            mb: isAnnouncement ? 1 : 2,
+            fontWeight: 820,
+            fontSize: { xs: "1.65rem", md: "2.2rem" },
           }}
         >
           {section.title}
@@ -63,9 +69,9 @@ export default function BannerSection({ section }) {
         {section.content?.text && (
           <Typography
             sx={{
-              mb: isCta ? 2 : 0,
               fontSize: isAnnouncement ? "1rem" : "1.1rem",
               opacity: isCta ? 1 : 0.9,
+              lineHeight: 1.65,
             }}
           >
             {section.content.text}
@@ -77,10 +83,11 @@ export default function BannerSection({ section }) {
           section.content?.buttonLink && (
             <Button
               variant="contained"
-              size="large"
               href={section.content.buttonLink}
               sx={{
-                mt: 1,
+                mt: 0.5,
+                minHeight: 42,
+                px: 2.5,
                 bgcolor: isAnnouncement ? "warning.main" : "secondary.main",
                 color: isAnnouncement ? "white" : "primary.main",
 
@@ -92,7 +99,7 @@ export default function BannerSection({ section }) {
               {section.content.buttonText}
             </Button>
           )}
-      </Box>
+      </Stack>
     </Box>
   );
 }

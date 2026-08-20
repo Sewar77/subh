@@ -24,11 +24,11 @@ export default function PublicPageHero({
         isolation: "isolate",
         overflow: "hidden",
         p: {
-          xs: compact ? 2.5 : 3,
-          sm: compact ? 3.5 : 4,
-          md: compact ? 4 : 5,
+          xs: 2.25,
+          sm: compact ? 2.75 : 3,
+          md: compact ? 3 : 3.5,
         },
-        borderRadius: { xs: 3, md: 4 },
+        borderRadius: { xs: 2.5, md: 3.5 },
         borderColor: "rgba(101, 70, 163, 0.14)",
         background:
           "linear-gradient(135deg, rgba(255,255,255,.97), rgba(249,247,253,.94))",
@@ -36,8 +36,8 @@ export default function PublicPageHero({
           content: '""',
           position: "absolute",
           zIndex: -1,
-          width: { xs: 210, md: 330 },
-          height: { xs: 210, md: 330 },
+          width: { xs: 190, md: 270 },
+          height: { xs: 190, md: 270 },
           borderRadius: "50%",
           insetBlockStart: { xs: -130, md: -210 },
           insetInlineEnd: { xs: -90, md: -120 },
@@ -62,7 +62,7 @@ export default function PublicPageHero({
     >
       <Stack
         direction={{ xs: "column", md: "row" }}
-        spacing={{ xs: 2.5, md: 4 }}
+        spacing={{ xs: 2, md: 3 }}
         justifyContent="space-between"
         alignItems={{ xs: "stretch", md: "center" }}
       >
@@ -70,22 +70,22 @@ export default function PublicPageHero({
           direction="row"
           spacing={{ xs: 1.75, sm: 2.25 }}
           alignItems="flex-start"
-          sx={{ minWidth: 0, maxWidth: 860 }}
+          sx={{ minWidth: 0, maxWidth: 780 }}
         >
           {icon && (
             <Box
               aria-hidden="true"
               sx={{
                 flex: "0 0 auto",
-                width: { xs: 46, sm: 54 },
-                height: { xs: 46, sm: 54 },
+                width: { xs: 42, sm: 48 },
+                height: { xs: 42, sm: 48 },
                 display: "grid",
                 placeItems: "center",
                 borderRadius: 3,
                 color: "primary.main",
                 bgcolor: "rgba(101,70,163,.09)",
                 border: "1px solid rgba(101,70,163,.12)",
-                "& svg": { fontSize: { xs: 25, sm: 29 } },
+                "& svg": { fontSize: { xs: 23, sm: 26 } },
               }}
             >
               {icon}
@@ -115,8 +115,8 @@ export default function PublicPageHero({
                 mt: eyebrow ? 0.5 : 0,
                 maxWidth: 760,
                 fontSize: compact
-                  ? { xs: "1.85rem", sm: "2.3rem", md: "2.7rem" }
-                  : { xs: "2rem", sm: "2.55rem", md: "3rem" },
+                  ? { xs: "1.75rem", sm: "2.05rem", md: "2.35rem" }
+                  : { xs: "1.9rem", sm: "2.25rem", md: "2.6rem" },
                 lineHeight: 1.16,
                 overflowWrap: "anywhere",
               }}
@@ -126,7 +126,7 @@ export default function PublicPageHero({
             {description && (
               <Typography
                 color="text.secondary"
-                sx={{ mt: 1.25, maxWidth: 720, lineHeight: 1.8 }}
+                sx={{ mt: 0.9, maxWidth: 680, lineHeight: 1.65 }}
               >
                 {description}
               </Typography>
@@ -137,7 +137,7 @@ export default function PublicPageHero({
 
         {(count !== undefined || actions) && (
           <Stack
-            spacing={1.5}
+            spacing={1.25}
             alignItems={{ xs: "flex-start", md: "flex-end" }}
             sx={{ flex: "0 0 auto" }}
           >
@@ -145,8 +145,8 @@ export default function PublicPageHero({
               <Chip
                 label={`${count}${countLabel ? ` ${countLabel}` : ""}`}
                 sx={{
-                  minHeight: 38,
-                  px: 0.75,
+                  minHeight: 36,
+                  px: 0.5,
                   bgcolor: "rgba(85,201,181,.13)",
                   color: "primary.dark",
                   border: "1px solid rgba(85,201,181,.24)",

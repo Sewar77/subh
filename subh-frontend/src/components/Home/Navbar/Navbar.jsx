@@ -36,13 +36,13 @@ const pages = [
   { name: { en: "Books", ar: "الكتب" }, path: "/books" },
   { name: { en: "Categories", ar: "التصنيفات" }, path: "/categories" },
   { name: { en: "Workshops", ar: "ورش العمل" }, path: "/workshops" },
-  {
-    name: {
-      en: "Training Courses",
-      ar: "الدورات التدريبية",
-    },
-    path: "/educational/courses",
-  },
+  // {
+  //   name: {
+  //     en: "Training Courses",
+  //     ar: "الدورات التدريبية",
+  //   },
+  //   path: "/educational/courses",
+  // },
   {
     name: {
       en: "Who We Are",
@@ -307,7 +307,7 @@ export default function Navbar() {
                 <Button
                   variant="contained"
                   startIcon={<DashboardOutlinedIcon />}
-                  onClick={() => navigateTo("/admin")}
+                  onClick={() => navigateTo("/admin/analytics")}
                   sx={{
                     display: {
                       xs: "none",

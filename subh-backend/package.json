@@ -13,6 +13,7 @@
     "admin-book-requests:verify": "node scripts/verify-admin-book-requests.js",
     "request-payments:verify": "node scripts/verify-request-payments.js",
     "workshops:verify": "node scripts/verify-workshops.js",
+    "analytics:verify": "node scripts/verify-analytics.js",
     "admin:bootstrap": "node scripts/bootstrap-admin.js",
     "db:migrate": "node database/migrations/run-migrations.js",
     "db:seed": "node database/seeds/dev-users-seed.js"

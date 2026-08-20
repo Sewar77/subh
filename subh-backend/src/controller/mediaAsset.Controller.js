@@ -11,16 +11,18 @@ import {
 
 const failure = (res, error, fallback) => {
   if (error?.code === "MEDIA_ASSET_DUPLICATE") {
-    return res.status(409).json({ message: "Media asset is already registered" });
+    return res
+      .status(409)
+      .json({ message: "Media asset is already registered" });
   }
   return res.status(500).json({ message: fallback });
 };
 
 export const listMediaAssetsController = async (req, res) => {
   try {
-    return res.status(200).json(
-      await listAdminMediaAssets(getValidated(req, "query")),
-    );
+    return res
+      .status(200)
+      .json(await listAdminMediaAssets(getValidated(req, "query")));
   } catch (error) {
     return failure(res, error, "Media assets could not be loaded");
   }
@@ -29,7 +31,8 @@ export const listMediaAssetsController = async (req, res) => {
 export const getMediaAssetController = async (req, res) => {
   try {
     const asset = await getAdminMediaAsset(getValidated(req, "params").id);
-    if (!asset) return res.status(404).json({ message: "Media asset not found" });
+    if (!asset)
+      return res.status(404).json({ message: "Media asset not found" });
     return res.status(200).json({ asset });
   } catch (error) {
     return failure(res, error, "Media asset could not be loaded");
@@ -60,7 +63,8 @@ export const updateMediaAssetController = async (req, res) => {
       getValidated(req, "params").id,
       getValidated(req, "body"),
     );
-    if (!asset) return res.status(404).json({ message: "Media asset not found" });
+    if (!asset)
+      return res.status(404).json({ message: "Media asset not found" });
     return res.status(200).json({ message: "Media metadata updated", asset });
   } catch (error) {
     return failure(res, error, "Media metadata could not be updated");
@@ -70,7 +74,8 @@ export const updateMediaAssetController = async (req, res) => {
 const setArchiveState = async (req, res, operation, message) => {
   try {
     const asset = await operation(getValidated(req, "params").id);
-    if (!asset) return res.status(404).json({ message: "Media asset not found" });
+    if (!asset)
+      return res.status(404).json({ message: "Media asset not found" });
     return res.status(200).json({ message, asset });
   } catch (error) {
     return failure(res, error, "Media archive state could not be updated");

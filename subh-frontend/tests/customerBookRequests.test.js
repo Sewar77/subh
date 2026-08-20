@@ -59,7 +59,7 @@ test("request creation constructs only customer-owned payload fields", () => {
   for (const forbidden of ["userId", "unitPrice", "shippingCost", "subtotal", "total", "requestStatus", "admin", "payment"]) {
     assert.doesNotMatch(payloadBlock, new RegExp(forbidden, "i"), `${forbidden} must not be submitted`);
   }
-  assert.match(builderSource, /current\.some\(\(item\) => item\.book\.id === book\.id\)/);
+  assert.match(builderSource, /items\.some\(\(item\) => item\.book\.id === book\.id\)/);
 });
 
 test("customer details never expect administrator-private fields", () => {

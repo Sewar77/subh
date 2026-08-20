@@ -21,7 +21,7 @@ export default function Home() {
       .filter((section) => section && section.templateKey);
   }, [sectionKey]);
   return (
-    <Box sx={{ direction: language === "ar" ? "rtl" : "ltr" }}>
+    <Box sx={{ direction: language === "ar" ? "rtl" : "ltr", display: "grid", minWidth: 0 }}>
       {sections.map((section, index) => (
         <SectionRenderer
           key={section.id}

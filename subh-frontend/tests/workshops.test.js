@@ -19,7 +19,8 @@ test("Workshop routes are lazy and protected at the correct boundary", () => {
   assert.match(app, /path="workshops" element={<LazyRoute component={WorkshopsPage}/);
   assert.match(app, /path="workshops\/:workshopId\/sessions\/:sessionId\/book"/);
   assert.ok(app.indexOf("workshops/:workshopId/sessions/:sessionId/book") > app.indexOf("CustomerRouteGuard"));
-  assert.ok(app.indexOf('path="workshops"\n              element={<LazyRoute component={AdminWorkshopsPage}') > app.indexOf("AdminRouteGuard"));
+  const adminWorkshopRoute = app.search(/path="workshops"\s+element={<LazyRoute component={AdminWorkshopsPage}/);
+  assert.ok(adminWorkshopRoute > app.indexOf("AdminRouteGuard"));
 });
 
 test("one canonical service owns public, customer, and admin Workshop APIs", () => {

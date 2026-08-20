@@ -5,6 +5,7 @@ import { authContext } from "../../Context/authContextValue.js";
 import { useLanguage } from "../../Context/LanguageContext.jsx";
 import { createWorkshopBooking, getPublicWorkshop } from "../../Services/workshopService.js";
 import { formatWorkshopDate, formatWorkshopMoney, getWorkshopCopy } from "../../Utils/workshopI18n.js";
+import { trackEvent } from "../../Services/analyticsService.js";
 
 const fields = ["fullName", "email", "phone", "age", "addressLine1", "addressLine2", "city", "state", "postalCode", "country"];
 
@@ -16,6 +17,15 @@ export default function WorkshopBookingPage() {
   const [workshop, setWorkshop] = useState(null);
   const [form, setForm] = useState({ fullName: user?.fullName || "", email: user?.email || "", phone: user?.phoneNumber || "", age: "", gender: "", addressLine1: "", addressLine2: "", city: "", state: "", postalCode: "", country: "" });
   const [state, setState] = useState({ loading: true, submitting: false, error: "", booking: null });
+
+  useEffect(() => {
+    void trackEvent("workshop_booking_started", {
+      locale: language,
+      entityType: "workshop_session",
+      entityId: sessionId,
+      dedupeKey: `workshop-booking-started:${sessionId}`,
+    });
+  }, [language, sessionId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -32,6 +42,7 @@ export default function WorkshopBookingPage() {
     try {
       const payload = { ...form, age: Number(form.age) };
       const booking = await createWorkshopBooking(sessionId, payload, language);
+      void trackEvent("workshop_booking_submitted", { locale: language, entityType: "workshop_booking", entityId: booking.id });
       setState((old) => ({ ...old, submitting: false, booking }));
     } catch (error) {
       setState((old) => ({ ...old, submitting: false, error: error.message }));

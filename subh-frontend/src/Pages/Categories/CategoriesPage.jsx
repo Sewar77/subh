@@ -18,6 +18,7 @@ import {
   getCatalogCopy,
 } from "../../Utils/catalogI18n.js";
 import PublicPageHero from "../../components/Public/PublicPageHero.jsx";
+import { trackEvent } from "../../Services/analyticsService.js";
 import {
   CatalogSearchField,
   CatalogSelectField,
@@ -68,6 +69,18 @@ export default function CategoriesPage() {
         : compareCatalogText(left.name, right.name, language),
     );
   }, [categories, isArabic, language, search, sort]);
+
+  useEffect(() => {
+    if (!search.trim() || loadedLanguage !== language) return undefined;
+    const timeout = setTimeout(() => {
+      void trackEvent("categories_search", {
+        locale: language,
+        properties: { resultCount: visibleCategories.length },
+        dedupeKey: `categories-search:${language}:${search.trim().toLocaleLowerCase()}`,
+      });
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [language, loadedLanguage, search, visibleCategories.length]);
 
   if (error.language === language) {
     return <Alert severity="error">{error.message}</Alert>;
@@ -139,7 +152,8 @@ export default function CategoriesPage() {
           aria-live="polite"
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 380px))",
+            justifyContent: "center",
             gap: { xs: 2, md: 3 },
           }}
         >

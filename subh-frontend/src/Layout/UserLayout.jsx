@@ -3,10 +3,12 @@ import Navbar from "../components/Home/Navbar/Navbar.jsx";
 import Footer from "../components/Home/Footer/Footer.jsx";
 import { Box, Container } from "@mui/material";
 import { PagesProvider } from "../Context/pageContext.jsx";
+import AnalyticsPageTracker from "../components/Analytics/AnalyticsPageTracker.jsx";
 
 export default function UserLayout() {
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <AnalyticsPageTracker />
       <Navbar />
       <Container
         component="main"

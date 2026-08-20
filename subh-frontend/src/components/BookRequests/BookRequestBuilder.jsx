@@ -25,6 +25,7 @@ import {
   getBookRequestCopy,
 } from "../../Utils/bookRequestI18n.js";
 import CustomerRequestSection from "./CustomerRequestSection.jsx";
+import { trackEvent } from "../../Services/analyticsService.js";
 
 const optional = (value) => value.trim() || undefined;
 
@@ -55,6 +56,14 @@ export default function BookRequestBuilder({ initialBookId, language, user, onSu
   const selectedBookIdsKey = items.map((item) => item.book.id).join(",");
   const bookIdsToLoad =
     selectedBookIdsKey || (initialLoading && initialBookId ? String(initialBookId) : "");
+
+  useEffect(() => {
+    void trackEvent("book_request_started", {
+      locale: language,
+      properties: { itemCount: initialBookId ? 1 : 0 },
+      dedupeKey: `book-request-started:${initialBookId || "empty"}`,
+    });
+  }, [initialBookId, language]);
 
   useEffect(() => {
     if (!bookIdsToLoad) return undefined;
@@ -105,9 +114,9 @@ export default function BookRequestBuilder({ initialBookId, language, user, onSu
   };
 
   const addBook = (book) => {
-    setItems((current) => current.some((item) => item.book.id === book.id)
-      ? current
-      : [...current, { book, quantity: 1 }]);
+    if (items.some((item) => item.book.id === book.id)) return;
+    void trackEvent("book_added_to_request", { locale: language, entityType: "book", entityId: book.id, properties: { quantity: 1 } });
+    setItems((current) => [...current, { book, quantity: 1 }]);
   };
   const visibleResults = resultsLanguage === language ? results : [];
 
@@ -159,7 +168,14 @@ export default function BookRequestBuilder({ initialBookId, language, user, onSu
     };
     setSubmitting(true);
     try {
-      onSuccess(await createCustomerBookRequest(payload, language));
+      const created = await createCustomerBookRequest(payload, language);
+      void trackEvent("book_request_submitted", {
+        locale: language,
+        entityType: "book_request",
+        entityId: created.id,
+        properties: { itemCount: items.length, totalQuantity: preview.quantity },
+      });
+      onSuccess(created);
     } catch (requestError) {
       setError(requestError.status === 409 ? t.profileIncomplete : t.requestSubmitError);
     } finally {
@@ -235,7 +251,10 @@ export default function BookRequestBuilder({ initialBookId, language, user, onSu
                     sx={{ width: { sm: 170 } }}
                   />
                   <Tooltip title={t.remove}>
-                    <IconButton color="error" aria-label={`${t.remove}: ${item.book.name}`} onClick={() => setItems((current) => current.filter((entry) => entry.book.id !== item.book.id))}>
+                    <IconButton color="error" aria-label={`${t.remove}: ${item.book.name}`} onClick={() => {
+                      void trackEvent("book_removed_from_request", { locale: language, entityType: "book", entityId: item.book.id, properties: { quantity: Number(item.quantity) || 0 } });
+                      setItems((current) => current.filter((entry) => entry.book.id !== item.book.id));
+                    }}>
                       <DeleteOutlineRoundedIcon />
                     </IconButton>
                   </Tooltip>

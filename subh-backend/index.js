@@ -20,6 +20,7 @@ import bookRequestRoutes from "./src/routes/bookRequest.Routes.js";
 import adminBookRequestRoutes from "./src/routes/adminBookRequest.Routes.js";
 import mediaAssetRoutes from "./src/routes/mediaAsset.Routes.js";
 import workshopRoutes from "./src/routes/workshop.Routes.js";
+import analyticsRoutes from "./src/routes/analytics.Routes.js";
 dotenv.config();
 assertProductionSecurityConfig();
 const app = express();
@@ -45,6 +46,7 @@ app.use("/api", bookRequestRoutes);
 app.use("/api", adminBookRequestRoutes);
 app.use("/api", mediaAssetRoutes);
 app.use("/api", workshopRoutes);
+app.use("/api", analyticsRoutes);
 app.use((req, res) => res.status(404).json({ message: "Not found" }));
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error);

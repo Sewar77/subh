@@ -76,13 +76,13 @@ export default function CategoryCard({ category }) {
         )}
       </Box>
 
-      <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
+      <CardContent sx={{ flexGrow: 1, p: 2.25 }}>
         <Typography
           variant="h6"
           component="h2"
           sx={{
             fontWeight: 750,
-            minHeight: "2.9em",
+            minHeight: "2.8em",
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
@@ -99,10 +99,10 @@ export default function CategoryCard({ category }) {
         <Typography
           color="text.secondary"
           sx={{
-            mt: 1.25,
-            minHeight: "5.25em",
+            mt: 1.1,
+            minHeight: "3.4em",
             display: "-webkit-box",
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
           }}
@@ -111,14 +111,14 @@ export default function CategoryCard({ category }) {
         </Typography>
       </CardContent>
 
-      <CardActions sx={{ px: 2.5, pb: 2.5, pt: 0 }}>
-        <Stack direction="column" spacing={1} width="100%">
+      <CardActions sx={{ px: 2.25, pb: 2.25, pt: 0 }}>
+        <Stack direction="row" spacing={1} width="100%">
           <Button
             component={Link}
             to={`/categories/${category.id}`}
             variant="outlined"
             fullWidth
-            sx={{ minHeight: 46, px: 1.5 }}
+            sx={{ minHeight: 42, px: 1.25 }}
           >
             {t.details}
           </Button>
@@ -128,7 +128,7 @@ export default function CategoryCard({ category }) {
             variant="contained"
             fullWidth
             endIcon={isArabic ? <ArrowBackRoundedIcon /> : <ArrowForwardRoundedIcon />}
-            sx={{ minHeight: 46, px: 1.5 }}
+            sx={{ minHeight: 42, px: 1.25 }}
           >
             {t.viewBooks}
           </Button>

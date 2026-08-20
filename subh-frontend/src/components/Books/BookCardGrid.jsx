@@ -30,11 +30,12 @@ export default function BookCardGrid({ books }) {
       dir={isArabic ? "rtl" : "ltr"}
       sx={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 270px), 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 290px), 330px))",
+        justifyContent: "center",
         gap: {
           xs: 2.5,
           sm: 3,
-          lg: 3.5,
+          lg: 3,
         },
       }}
     >
@@ -65,7 +66,7 @@ export default function BookCardGrid({ books }) {
                 "transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
 
               "&:hover": {
-                transform: "translateY(-6px)",
+                transform: "translateY(-4px)",
                 borderColor: "primary.light",
                 boxShadow: "0 18px 45px rgba(67, 45, 94, 0.14)",
               },
@@ -117,7 +118,7 @@ export default function BookCardGrid({ books }) {
             <CardContent
               sx={{
                 flexGrow: 1,
-                p: 2.5,
+                p: 2.25,
               }}
             >
               <Typography
@@ -132,7 +133,7 @@ export default function BookCardGrid({ books }) {
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
 
-                  minHeight: "2.9em",
+                  minHeight: "2.8em",
                 }}
               >
                 {title || text.notProvided}
@@ -156,15 +157,15 @@ export default function BookCardGrid({ books }) {
               <Typography
                 color="text.secondary"
                 sx={{
-                  mt: 1.5,
-                  lineHeight: 1.75,
+                  mt: 1.1,
+                  lineHeight: 1.65,
 
                   display: "-webkit-box",
-                  WebkitLineClamp: 3,
+                  WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
 
-                  minHeight: "5.2em",
+                  minHeight: "3.3em",
                 }}
               >
                 {description || text.noDescription}
@@ -175,7 +176,7 @@ export default function BookCardGrid({ books }) {
                 alignItems="baseline"
                 spacing={0.7}
                 sx={{
-                  mt: 2,
+                  mt: 1.5,
                 }}
               >
                 {book.price != null ? (
@@ -202,8 +203,8 @@ export default function BookCardGrid({ books }) {
 
             <CardActions
               sx={{
-                px: 2.5,
-                pb: 2.5,
+                px: 2.25,
+                pb: 2.25,
                 pt: 0,
               }}
             >
@@ -220,7 +221,7 @@ export default function BookCardGrid({ books }) {
                   )
                 }
                 sx={{
-                  minHeight: 46,
+                  minHeight: 42,
                 }}
               >
                 {text.viewBook}

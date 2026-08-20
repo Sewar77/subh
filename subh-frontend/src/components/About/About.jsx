@@ -24,7 +24,8 @@ export default function About() {
     <Box
       sx={{
         direction: language === "ar" ? "rtl" : "ltr",
-        minHeight: "100vh",
+        display: "grid",
+        minWidth: 0,
       }}
     >
       {sections.map((section, index) => (

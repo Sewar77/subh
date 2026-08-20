@@ -8,7 +8,7 @@ import {
   imageHeightStyles,
 } from "../Utils/appearanceMapping";
 
-export default function ImageSection({ section, priority = false }) {
+export default function ImageSection({ section }) {
   const imageUrl = section.content.image;
   if (!imageUrl) return null;
 
@@ -47,14 +47,14 @@ export default function ImageSection({ section, priority = false }) {
   );
 
   const containerSx = {
-    py: 6,
+    py: { xs: 3, md: 5 },
     display: "flex",
     ...positionSx,
   };
 
   const imageSx = {
     width: variant === "full_width" ? "100%" : "100%",
-    maxWidth: variant === "full_width" ? "100%" : "1200px",
+    maxWidth: variant === "full_width" ? "100%" : "1120px",
     ...heightSx,
     ...variantSx,
     display: "block",
@@ -63,13 +63,13 @@ export default function ImageSection({ section, priority = false }) {
   };
 
   return (
-    <Box sx={containerSx}>
+    <Box component="section" sx={containerSx}>
       <Box
         component="img"
         src={imageUrl}
         alt={section.content.alt || section.title || ""}
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
+        loading={section.priority ? "eager" : "lazy"}
+        fetchPriority={section.priority ? "high" : "auto"}
         decoding="async"
         sx={imageSx}
       />

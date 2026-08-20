@@ -1,0 +1,7 @@
+import { Box, Paper, Stack, Typography } from "@mui/material";
+import { formatAnalyticsNumber, formatAnalyticsPercent } from "../../../Utils/analyticsI18n.js";
+
+export default function AnalyticsBars({ title, rows = [], language, emptyLabel, valueKey = "value", labelKey = "label", percent = false }) {
+  const maximum = Math.max(0, ...rows.map((row) => Number(row[valueKey] || 0)));
+  return <Paper variant="outlined" sx={{ p: 2.5, minWidth: 0 }}><Typography variant="h6" fontWeight={800} sx={{ mb: 2 }}>{title}</Typography>{!rows.length || maximum === 0 ? <Typography color="text.secondary">{emptyLabel}</Typography> : <Stack spacing={1.5}>{rows.map((row, index) => <Box key={`${row[labelKey]}-${index}`}><Stack direction="row" justifyContent="space-between" gap={1}><Box><Typography variant="body2" sx={{ overflowWrap: "anywhere" }}>{row[labelKey]}</Typography>{row.secondary && <Typography variant="caption" color="text.secondary">{row.secondary}</Typography>}</Box><Typography variant="body2" fontWeight={750}>{percent ? formatAnalyticsPercent(row[valueKey], language) : formatAnalyticsNumber(row[valueKey], language)}</Typography></Stack><Box sx={{ height: 8, mt: 0.75, borderRadius: 99, bgcolor: "action.hover", overflow: "hidden" }}><Box sx={{ height: "100%", width: `${Math.max(2, Number(row[valueKey]) / maximum * 100)}%`, bgcolor: index % 2 ? "secondary.main" : "primary.main", borderRadius: 99 }} /></Box></Box>)}</Stack>}</Paper>;
+}
