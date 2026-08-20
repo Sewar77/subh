@@ -25,14 +25,16 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-  ];
+export const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
+export const ALLOWED_IMAGE_MIME_TYPES = Object.freeze([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
 
-  if (allowedTypes.includes(file.mimetype)) {
+const fileFilter = (req, file, cb) => {
+
+  if (ALLOWED_IMAGE_MIME_TYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {
     const error = new Error("Unsupported file type");
@@ -44,13 +46,13 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024,
+    fileSize: MAX_IMAGE_UPLOAD_BYTES,
   },
   fileFilter,
 });
 export default upload;
 
-const matchesSignature = (buffer, mimetype) => {
+export const matchesImageSignature = (buffer, mimetype) => {
   if (mimetype === "image/jpeg") {
     return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
   }
@@ -75,7 +77,7 @@ export const verifyUploadedImage = async (req, res, next) => {
     await handle.read(signature, 0, signature.length, 0);
     await handle.close();
 
-    if (!matchesSignature(signature, req.file.mimetype)) {
+    if (!matchesImageSignature(signature, req.file.mimetype)) {
       await fs.promises.unlink(req.file.path).catch(() => {});
       req.file = undefined;
       const error = new Error("Uploaded file signature is invalid");
@@ -88,4 +90,9 @@ export const verifyUploadedImage = async (req, res, next) => {
     await fs.promises.unlink(req.file.path).catch(() => {});
     return next(error);
   }
+};
+
+export const cleanupUploadedFile = async (file) => {
+  if (!file?.path) return;
+  await fs.promises.unlink(file.path).catch(() => {});
 };

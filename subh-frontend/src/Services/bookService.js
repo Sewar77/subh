@@ -67,17 +67,3 @@ export const deleteBook = (id) =>
     () => api.delete(`/books/${id}`),
     "The book could not be deleted. Check whether it is used elsewhere and try again.",
   );
-
-export const uploadBookImage = (file) => {
-  const data = new FormData();
-  data.append("image", file);
-  return request(
-    async () =>
-      (
-        await api.post("/upload", data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-      ).data.url,
-    "The image could not be uploaded. Choose an image file and try again.",
-  );
-};

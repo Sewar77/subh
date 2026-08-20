@@ -13,9 +13,10 @@ import {
 } from "@mui/material";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-// import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import ConfirmDeleteModal from "../Modal/ConfirmDeleteModal.jsx";
+import MediaPicker from "../Media/MediaPicker.jsx";
 
 const metadataFromItem = (item) => ({
   altEn: item.altEn || "",
@@ -32,6 +33,7 @@ export default function CmsMediaItem({
   busy,
   replaceAccept,
   onReplace,
+  onReplaceAsset,
   onSaveMetadata,
   onDelete,
   onMove,
@@ -136,7 +138,7 @@ export default function CmsMediaItem({
                     disabled={busy || (required && total === 1)}
                     onClick={() => setConfirmOpen(true)}
                   >
-                    {/* <DeleteOutlineIcon /> */}
+                    <DeleteOutlineIcon />
                   </IconButton>
                 </span>
               </Tooltip>
@@ -147,7 +149,15 @@ export default function CmsMediaItem({
 
           {error && <Alert severity="error">{error}</Alert>}
 
-          {onReplace && (
+          {onReplaceAsset && (
+            <MediaPicker
+              value={item}
+              disabled={busy}
+              onSelect={(asset) => onReplaceAsset(item, asset)}
+            />
+          )}
+
+          {onReplace && item.mediaType !== "image" && (
             <Button
               component="label"
               htmlFor={replaceInputId}

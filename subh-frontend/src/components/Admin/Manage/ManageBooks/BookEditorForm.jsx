@@ -2,7 +2,6 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   Divider,
   MenuItem,
   Paper,
@@ -10,9 +9,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCategories } from "../../../../Hooks/useCategories.js";
-import { uploadBookImage } from "../../../../Services/bookService.js";
+import MediaPicker from "../../Media/MediaPicker.jsx";
 
 const emptyBook = {
   nameEn: "",
@@ -58,71 +57,20 @@ const toPayload = (values) => ({
   barcodeImage: values.barcodeImage.trim() || null,
 });
 
-function ImageField({ label, value, onChange }) {
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(
-    () => () => {
-      if (preview) URL.revokeObjectURL(preview);
-    },
-    [preview],
-  );
-
-  const selectFile = (event) => {
-    const nextFile = event.target.files?.[0];
-    if (!nextFile) return;
-    if (!nextFile.type.startsWith("image/")) {
-      setError("Choose an image file for this field.");
-      return;
-    }
-    if (preview) URL.revokeObjectURL(preview);
-    setError("");
-    setFile(nextFile);
-    setPreview(URL.createObjectURL(nextFile));
-  };
-
-  const upload = async () => {
-    if (!file) {
-      setError("Choose an image before uploading.");
-      return;
-    }
-    try {
-      setUploading(true);
-      setError("");
-      onChange(await uploadBookImage(file));
-    } catch (requestError) {
-      setError(requestError.message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
+function ImageField({ label, value, onChange, barcode = false, disabled }) {
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography fontWeight={700}>{label}</Typography>
-      {(preview || value) && (
-        <Box
-          component="img"
-          src={preview || value}
-          alt={`${label} preview`}
-          loading="lazy"
-          sx={{ display: "block", width: 144, height: 112, objectFit: "cover", borderRadius: 1, my: 1.5 }}
-        />
-      )}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1} alignItems={{ sm: "center" }}>
-        <Button component="label" variant="outlined">
-          Choose image
-          <input hidden accept="image/*" type="file" onChange={selectFile} />
-        </Button>
-        <Button variant="contained" onClick={upload} disabled={!file || uploading}>
-          {uploading ? "Uploading..." : value ? "Replace image" : "Upload image"}
-        </Button>
-        {uploading && <CircularProgress size={22} aria-label={`Uploading ${label}`} />}
-      </Stack>
-      {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
+      <Typography fontWeight={700} sx={{ mb: 1.5 }}>{label}</Typography>
+      <MediaPicker
+        value={value ? { url: value } : null}
+        disabled={disabled}
+        uploadLabel="Upload image"
+        replaceLabel="Replace image"
+        libraryLabel="Choose from Media Library"
+        previewAspectRatio={barcode ? "17 / 6" : "2 / 3"}
+        previewObjectFit={barcode ? "contain" : "cover"}
+        onSelect={(asset) => onChange(asset.url)}
+      />
     </Paper>
   );
 }
@@ -181,8 +129,8 @@ export default function BookEditorForm({ initialBook, submitLabel, onSubmit, sav
           <TextField label="Width (cm)" name="widthCm" type="number" inputProps={{ min: 0, step: "0.01" }} value={values.widthCm} onChange={change} fullWidth />
           <TextField label="Height (cm)" name="heightCm" type="number" inputProps={{ min: 0, step: "0.01" }} value={values.heightCm} onChange={change} fullWidth />
         </Box>
-        <ImageField label="Cover image" value={values.coverImage} onChange={(coverImage) => setValues((current) => ({ ...current, coverImage }))} />
-        <ImageField label="Barcode image" value={values.barcodeImage} onChange={(barcodeImage) => setValues((current) => ({ ...current, barcodeImage }))} />
+        <ImageField label="Cover image" value={values.coverImage} disabled={saving} onChange={(coverImage) => setValues((current) => ({ ...current, coverImage }))} />
+        <ImageField label="Barcode image" value={values.barcodeImage} barcode disabled={saving} onChange={(barcodeImage) => setValues((current) => ({ ...current, barcodeImage }))} />
         <Button type="submit" variant="contained" size="large" disabled={saving}>{saving ? "Saving..." : submitLabel}</Button>
       </Stack>
     </Paper>

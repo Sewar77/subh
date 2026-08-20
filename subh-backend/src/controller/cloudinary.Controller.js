@@ -1,5 +1,5 @@
 import { uploadToCloudinary } from "../services/cloudinary/cloudinaryServices.js";
-import fs from "node:fs";
+import { cleanupUploadedFile } from "../middleware/uploadImage.Middleware.js";
 export const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
@@ -19,8 +19,6 @@ export const uploadImage = async (req, res) => {
       message: "Upload failed",
     });
   } finally {
-    if (req.file?.path) {
-      await fs.promises.unlink(req.file.path).catch(() => {});
-    }
+    await cleanupUploadedFile(req.file);
   }
 };

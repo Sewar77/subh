@@ -16,6 +16,12 @@ export const serializeSectionInstance = (section = {}) => {
     page_key: section.page_key,
     page_name: section.page_name,
     page_status: section.page_status,
+    page: {
+      id: pageId,
+      key: section.page_key ?? null,
+      name: section.page_name ?? null,
+      status: section.page_status ?? null,
+    },
     pageId,
     templateKey,
     isVisible,
@@ -29,12 +35,14 @@ export const serializePublicSection = (
   section,
   content,
   media,
+  appearance = {},
 ) => ({
   id: section.id,
   templateKey: section.template_key || section.type,
   position: section.position,
   content,
   media,
+  ...(Object.keys(appearance).length > 0 ? { appearance } : {}),
 });
 
 export const serializeAdminSection = (
@@ -43,10 +51,12 @@ export const serializeAdminSection = (
   media,
   translations,
   editingSchema,
+  appearance = {},
 ) => ({
   ...serializeSectionInstance(section),
   content,
   media,
   translations,
   editingSchema,
+  appearance,
 });

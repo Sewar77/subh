@@ -153,7 +153,9 @@ export default function CmsSectionEditor({
   onDirtyChange,
   onSaveContent,
   onAddMedia,
+  onAddMediaAsset,
   onReplaceMedia,
+  onReplaceMediaAsset,
   onUpdateMedia,
   onDeleteMedia,
   onReorderMedia,
@@ -327,8 +329,14 @@ export default function CmsSectionEditor({
                   onAdd={(slotDefinition, file, mediaType) =>
                     onAddMedia(section, slotDefinition, file, mediaType)
                   }
+                  onAddAsset={(slotDefinition, asset) =>
+                    onAddMediaAsset(section, slotDefinition, asset)
+                  }
                   onReplace={(item, file) =>
                     onReplaceMedia(section, item, file)
+                  }
+                  onReplaceAsset={(item, asset) =>
+                    onReplaceMediaAsset(section, item, asset)
                   }
                   onSaveMetadata={(item, metadata) =>
                     onUpdateMedia(section, item, metadata)

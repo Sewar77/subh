@@ -35,6 +35,7 @@ const pages = [
   { name: { en: "Home", ar: "الرئيسية" }, path: "/" },
   { name: { en: "Books", ar: "الكتب" }, path: "/books" },
   { name: { en: "Categories", ar: "التصنيفات" }, path: "/categories" },
+  { name: { en: "Workshops", ar: "ورش العمل" }, path: "/workshops" },
   {
     name: {
       en: "Training Courses",

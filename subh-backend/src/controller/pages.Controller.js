@@ -4,14 +4,18 @@ import {
   createPage,
   deletePage,
   getAllPages,
-  getPageById,
+  getAdminPageById,
   getPageByKeyModel,
   getPublicPageByKey,
   updatePage,
 } from "../models/pages.Models.js";
+import { listSectionsByPageId } from "../models/section.Model.js";
 import { getValidated } from "../middleware/validate.Middleware.js";
 import { hydrateSections } from "../services/cms/sectionReadService.js";
-import { serializePublicPage } from "../utils/pageSerializer.js";
+import {
+  serializeAdminPage,
+  serializePublicPage,
+} from "../utils/pageSerializer.js";
 
 // =========================
 // CREATE PAGE
@@ -62,16 +66,19 @@ export const getPageByIdController = async (req, res) => {
   try {
     const { id } = getValidated(req, "params");
 
-    const page = await getPageById(id);
+    const result = await getAdminPageById(id);
 
-    if (!page) {
+    if (!result) {
       return res.status(404).json({
         message: "Page not found",
       });
     }
 
     return res.status(200).json({
-      page,
+      ...serializeAdminPage(
+        result.page,
+        await hydrateSections(result.sections, { admin: true }),
+      ),
     });
   } catch (error) {
     return res.status(500).json({
@@ -96,9 +103,11 @@ export const getPageByKeyController = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
-      page,
-    });
+    const sections = await hydrateSections(
+      await listSectionsByPageId(page.id),
+      { admin: true },
+    );
+    return res.status(200).json(serializeAdminPage(page, sections));
   } catch (error) {
     return res.status(500).json({
       message: formatError(error),

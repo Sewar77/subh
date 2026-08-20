@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const fallbackFor = (pathname) => {
   if (pathname.includes("/requests")) return "/admin/requests";
+  if (pathname.includes("/workshop-bookings")) return "/admin/workshop-bookings";
+  if (pathname.includes("/workshops") || pathname.includes("/workshop-resources")) return "/admin/workshops";
   if (pathname.includes("/books" ) || pathname.includes("/book/")) return "/admin/books";
   if (pathname.includes("/categories") || pathname.includes("/category/")) return "/admin/categories";
   if (pathname.includes("/users") || pathname.includes("/user/")) return "/admin/users";

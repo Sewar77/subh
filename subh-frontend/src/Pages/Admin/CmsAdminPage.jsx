@@ -3,9 +3,9 @@ import {
   Alert,
   Box,
   Breadcrumbs,
+  Button,
   CircularProgress,
   Container,
-  Grid,
   Link,
   Paper,
   Stack,
@@ -13,15 +13,21 @@ import {
 } from "@mui/material";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import AddIcon from "@mui/icons-material/Add";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import CmsPageSelector from "../../components/Admin/Cms/CmsPageSelector.jsx";
 import CmsSectionEditor from "../../components/Admin/Cms/CmsSectionEditor.jsx";
-import CmsSectionList from "../../components/Admin/Cms/CmsSectionList.jsx";
+import SectionBuilderCard from "../../components/Admin/Cms/SectionBuilderCard.jsx";
+import AddSectionDialog from "../../components/Admin/Cms/AddSectionDialog.jsx";
+import ArchivedSections from "../../components/Admin/Cms/ArchivedSections.jsx";
+import AppearanceEditor from "../../components/Admin/Cms/AppearanceEditor.jsx";
 import ConfirmDeleteModal from "../../components/Admin/Modal/ConfirmDeleteModal.jsx";
 import AdminInstructions from "../../components/Admin/AdminInstructions.jsx";
 import {
   addSectionMedia,
   archiveSection,
   deleteSectionMedia,
+  duplicateSection,
   getAdminPage,
   getAdminSection,
   getFixedPages,
@@ -32,6 +38,7 @@ import {
   updateSectionContent,
   updateSectionMedia,
   updateSectionVisibility,
+  updateSectionAppearance,
   uploadCmsFile,
 } from "../../Services/cmsService.js";
 
@@ -48,12 +55,13 @@ export default function CmsAdminPage() {
   const [error, setError] = useState("");
   const [dirty, setDirty] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [addSectionDialogOpen, setAddSectionDialogOpen] = useState(false);
 
-  const orderedSections = useMemo(
+  const activeSections = useMemo(
     () =>
-      [...(page?.sections || [])].sort(
-        (left, right) => left.position - right.position,
-      ),
+      [...(page?.sections || [])]
+        .filter((s) => !s.isArchived)
+        .sort((left, right) => left.position - right.position),
     [page?.sections],
   );
 
@@ -231,10 +239,13 @@ export default function CmsAdminPage() {
 
   const handleVisibility = async (target, isVisible) => {
     try {
-      await runMutation(async () => {
-        const updated = await updateSectionVisibility(target.id, isVisible);
-        replaceCanonicalSection(updated);
-      }, isVisible ? "Section is now visible." : "Section is now hidden.");
+      await runMutation(
+        async () => {
+          const updated = await updateSectionVisibility(target.id, isVisible);
+          replaceCanonicalSection(updated);
+        },
+        isVisible ? "Section is now visible." : "Section is now hidden.",
+      );
     } catch {
       // The page alert displays the normalized API error.
     }
@@ -262,18 +273,35 @@ export default function CmsAdminPage() {
     }
   };
 
-  const handleSectionMove = async (fromIndex, toIndex) => {
-    const reordered = [...orderedSections];
-    const [moved] = reordered.splice(fromIndex, 1);
+  const handleDuplicate = async (target) => {
+    try {
+      await runMutation(async () => {
+        const duplicated = await duplicateSection(target.id, {});
+        replaceCanonicalSection(duplicated);
+        toast.success("Section duplicated. New section is hidden.");
+      }, null);
+    } catch {
+      // The page alert displays the normalized API error.
+    }
+  };
+
+  const handleSectionMove = async (section, direction) => {
+    const currentIndex = activeSections.findIndex(
+      (s) => String(s.id) === String(section.id),
+    );
+    if (currentIndex === -1) return;
+
+    const toIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (toIndex < 0 || toIndex >= activeSections.length) return;
+
+    const reordered = [...activeSections];
+    const [moved] = reordered.splice(currentIndex, 1);
     reordered.splice(toIndex, 0, moved);
-    const payload = reordered.map((item, index) => ({
-      id: item.id,
-      position: index + 1,
-    }));
+    const sectionIds = reordered.map((item) => item.id);
 
     try {
       await runMutation(async () => {
-        const updatedSections = await reorderPageSections(pageId, payload);
+        const updatedSections = await reorderPageSections(pageId, sectionIds);
         setPage((current) => ({
           ...current,
           sections: updatedSections,
@@ -282,7 +310,7 @@ export default function CmsAdminPage() {
           (item) => String(item.id) === String(sectionId),
         );
         if (selected) setSection(selected);
-      }, "Section order saved.");
+      }, "Section moved.");
     } catch {
       // Local order is not changed until the server confirms the mutation.
     }
@@ -305,6 +333,24 @@ export default function CmsAdminPage() {
       await replaceSectionMedia(target.id, item.id, fileRef);
       return refreshSection(target.id);
     }, "Media replaced.");
+
+  const handleAddMediaAsset = (target, slot, asset) =>
+    runMutation(async () => {
+      await addSectionMedia(target.id, {
+        slot: slot.key,
+        mediaType: "image",
+        fileRef: asset.url,
+        altEn: asset.altTextEn || "",
+        altAr: asset.altTextAr || "",
+      });
+      return refreshSection(target.id);
+    }, "Media added from the Media Library.");
+
+  const handleReplaceMediaAsset = (target, item, asset) =>
+    runMutation(async () => {
+      await replaceSectionMedia(target.id, item.id, asset.url);
+      return refreshSection(target.id);
+    }, "Media replaced from the Media Library.");
 
   const handleUpdateMedia = (target, item, metadata) =>
     runMutation(async () => {
@@ -331,19 +377,47 @@ export default function CmsAdminPage() {
       return refreshSection(target.id);
     }, "Media order saved.");
 
+  const handleSaveAppearance = (target, patch) =>
+    runMutation(async () => {
+      const updated = await updateSectionAppearance(target.id, patch);
+      replaceCanonicalSection(updated);
+      return updated;
+    }, "Design saved.");
+
+  const handleSectionCreated = (newSection) => {
+    if (page) {
+      setPage((current) => ({
+        ...current,
+        sections: [...current.sections, newSection].sort(
+          (left, right) => left.position - right.position,
+        ),
+      }));
+      editSection(newSection);
+    }
+  };
+
+  const handlePreviewPage = () => {
+    if (page?.key) {
+      window.open(`/?preview=true#/${page.key}`, "_blank");
+    }
+  };
+
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 } }}>
       <Stack spacing={3}>
         <Box>
           <Typography variant="h3" component="h1" fontWeight={700}>
-            Structured CMS
+            Page Builder
           </Typography>
           <Typography color="text.secondary">
-            Edit fixed section content and media using the developer-owned
-            editing schema.
+            Manage section instances on fixed pages using visual layout.
           </Typography>
         </Box>
-        <AdminInstructions>Use the page selector to manage fixed sections. Content and media fields are developer-defined. Hidden sections stay editable; archived sections are not public and can be restored. Destructive media changes require confirmation.</AdminInstructions>
+        <AdminInstructions>
+          Add, edit, and arrange section instances on this page. Hidden sections
+          remain editable but won't appear publicly. Archived sections are
+          removed from the builder and can be restored later.
+        </AdminInstructions>
 
         <Breadcrumbs aria-label="CMS location">
           <Link component={RouterLink} to="/admin">
@@ -365,17 +439,35 @@ export default function CmsAdminPage() {
           {loadingPages ? (
             <Stack direction="row" spacing={2} alignItems="center">
               <CircularProgress size={24} />
-              <Typography>Loading fixed pages...</Typography>
+              <Typography>Loading pages...</Typography>
             </Stack>
           ) : pages.length === 0 ? (
-            <Alert severity="info">No fixed pages are available.</Alert>
+            <Alert severity="info">No pages are available.</Alert>
           ) : (
-            <CmsPageSelector
-              pages={pages}
-              value={pageId}
-              disabled={loadingPage || mutating}
-              onChange={changePage}
-            />
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              alignItems="center"
+            >
+              <Box flex={1}>
+                <CmsPageSelector
+                  pages={pages}
+                  value={pageId}
+                  disabled={loadingPage || mutating}
+                  onChange={changePage}
+                />
+              </Box>
+              {page && (
+                <Button
+                  variant="outlined"
+                  startIcon={<VisibilityIcon />}
+                  onClick={handlePreviewPage}
+                  disabled={loadingPage || mutating}
+                >
+                  Preview Page
+                </Button>
+              )}
+            </Stack>
           )}
         </Paper>
 
@@ -385,64 +477,147 @@ export default function CmsAdminPage() {
             <Typography sx={{ mt: 2 }}>Loading page sections...</Typography>
           </Box>
         ) : page ? (
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, lg: 5 }}>
-              <Stack spacing={2}>
-                <Box>
-                  <Typography variant="h5">{page.name || page.key}</Typography>
-                  <Typography color="text.secondary">
-                    {orderedSections.length} fixed section
-                    {orderedSections.length === 1 ? "" : "s"}
-                  </Typography>
-                </Box>
-                <CmsSectionList
-                  sections={orderedSections}
-                  selectedSectionId={sectionId}
-                  busy={mutating}
-                  onEdit={editSection}
-                  onMove={handleSectionMove}
-                  onVisibility={handleVisibility}
-                  onArchive={handleArchive}
-                  onRestore={handleRestore}
-                />
-              </Stack>
-            </Grid>
+          <Stack spacing={2}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Box>
+                <Typography variant="h5">{page.name || page.key}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {activeSections.length} active section
+                  {activeSections.length === 1 ? "" : "s"}
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setAddSectionDialogOpen(true)}
+                disabled={mutating}
+              >
+                Add Section
+              </Button>
+            </Box>
 
-            <Grid size={{ xs: 12, lg: 7 }}>
-              {loadingSection ? (
-                <Box role="status" sx={{ py: 8, textAlign: "center" }}>
-                  <CircularProgress />
-                  <Typography sx={{ mt: 2 }}>Loading editor...</Typography>
-                </Box>
-              ) : sectionId && section ? (
-                <CmsSectionEditor
-                  key={section.id}
-                  section={section}
-                  busy={mutating}
-                  onDirtyChange={setDirty}
-                  onSaveContent={handleContentSave}
-                  onAddMedia={handleAddMedia}
-                  onReplaceMedia={handleReplaceMedia}
-                  onUpdateMedia={handleUpdateMedia}
-                  onDeleteMedia={handleDeleteMedia}
-                  onReorderMedia={handleReorderMedia}
-                />
-              ) : (
-                <Paper
-                  variant="outlined"
-                  sx={{ p: 4, textAlign: "center" }}
+            {activeSections.length === 0 ? (
+              <Paper variant="outlined" sx={{ p: 4, textAlign: "center" }}>
+                <Typography variant="h6" gutterBottom>
+                  No sections yet
+                </Typography>
+                <Typography color="text.secondary" gutterBottom>
+                  Start building by adding your first section.
+                </Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setAddSectionDialogOpen(true)}
+                  sx={{ mt: 2 }}
                 >
-                  <Typography variant="h6">Select a section to edit</Typography>
-                  <Typography color="text.secondary">
-                    Content fields and media controls will appear here.
-                  </Typography>
-                </Paper>
-              )}
-            </Grid>
-          </Grid>
+                  Add First Section
+                </Button>
+              </Paper>
+            ) : (
+              <Stack spacing={2}>
+                {activeSections.map((s, index) => (
+                  <Box key={s.id}>
+                    <SectionBuilderCard
+                      section={s}
+                      busy={mutating}
+                      onEdit={editSection}
+                      onDuplicate={handleDuplicate}
+                      onVisibility={handleVisibility}
+                      onArchive={handleArchive}
+                      onRestore={handleRestore}
+                      onMoveUp={() => handleSectionMove(s, "up")}
+                      onMoveDown={() => handleSectionMove(s, "down")}
+                      canMoveUp={index > 0}
+                      canMoveDown={index < activeSections.length - 1}
+                    />
+                    {index < activeSections.length - 1 && (
+                      <Box
+                        sx={{
+                          py: 1,
+                          textAlign: "center",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          color: "primary.main",
+                          fontSize: "0.875rem",
+                          "&:hover": { textDecoration: "underline" },
+                        }}
+                        role="button"
+                        onClick={() => setAddSectionDialogOpen(true)}
+                      >
+                        + Add Section Here
+                      </Box>
+                    )}
+                  </Box>
+                ))}
+              </Stack>
+            )}
+
+            <ArchivedSections
+              sections={page.sections}
+              busy={mutating}
+              onRestore={handleRestore}
+            />
+
+            {loadingSection ? (
+              <Paper variant="outlined" sx={{ p: 4, textAlign: "center" }}>
+                <CircularProgress />
+                <Typography sx={{ mt: 2 }}>Loading editor...</Typography>
+              </Paper>
+            ) : sectionId && section ? (
+              <Paper variant="outlined" sx={{ p: 3 }}>
+                <Stack spacing={3}>
+                  <CmsSectionEditor
+                    key={section.id}
+                    section={section}
+                    busy={mutating}
+                    onDirtyChange={setDirty}
+                    onSaveContent={handleContentSave}
+                    onAddMedia={handleAddMedia}
+                    onAddMediaAsset={handleAddMediaAsset}
+                    onReplaceMedia={handleReplaceMedia}
+                    onReplaceMediaAsset={handleReplaceMediaAsset}
+                    onUpdateMedia={handleUpdateMedia}
+                    onDeleteMedia={handleDeleteMedia}
+                    onReorderMedia={handleReorderMedia}
+                  />
+
+                  <AppearanceEditor
+                    section={section}
+                    editingSchema={section.editingSchema}
+                    busy={mutating}
+                    onSaveAppearance={handleSaveAppearance}
+                  />
+                </Stack>
+              </Paper>
+            ) : null}
+          </Stack>
         ) : null}
       </Stack>
-      <ConfirmDeleteModal open={Boolean(pendingNavigation)} title="Discard unsaved changes?" message="You have unsaved content changes. Discard them and continue?" confirmLabel="Discard changes" severity="warning" onCancel={() => setPendingNavigation(null)} onConfirm={discardAndNavigate} />
+
+      <AddSectionDialog
+        open={addSectionDialogOpen}
+        pageId={pageId}
+        onClose={() => setAddSectionDialogOpen(false)}
+        onSectionCreated={handleSectionCreated}
+      />
+
+      <ConfirmDeleteModal
+        open={Boolean(pendingNavigation)}
+        title="Discard unsaved changes?"
+        message="You have unsaved content changes. Discard them and continue?"
+        confirmLabel="Discard changes"
+        severity="warning"
+        onCancel={() => setPendingNavigation(null)}
+        onConfirm={discardAndNavigate}
+      />
     </Container>
   );
 }

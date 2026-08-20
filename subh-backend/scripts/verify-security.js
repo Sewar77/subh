@@ -10,6 +10,7 @@ import authRouter from "../src/routes/auth.Routes.js";
 import booksRouter from "../src/routes/books.Routes.js";
 import categoriesRouter from "../src/routes/categories.Routes.js";
 import pagesRouter from "../src/routes/pages.Routes.js";
+import mediaAssetRouter from "../src/routes/mediaAsset.Routes.js";
 import sectionRouter from "../src/routes/section.Routes.js";
 import translationRouter from "../src/routes/sectionTranslation.Routes.js";
 import uploadRouter from "../src/routes/uploadImage.Routes.js";
@@ -173,6 +174,7 @@ for (const router of [
   booksRouter,
   categoriesRouter,
   pagesRouter,
+  mediaAssetRouter,
   sectionRouter,
   translationRouter,
   uploadRouter,

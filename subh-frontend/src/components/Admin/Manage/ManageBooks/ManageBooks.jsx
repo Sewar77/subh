@@ -24,6 +24,7 @@ import { deleteBook, getAdminBooks } from "../../../../Services/bookService.js";
 import AdminInstructions from "../../AdminInstructions.jsx";
 import ConfirmDeleteModal from "../../Modal/ConfirmDeleteModal.jsx";
 import TruncatedText from "../../TruncatedText.jsx";
+import BookCoverImage from "../../../Books/BookCoverImage.jsx";
 
 export default function ManageBooks() {
   const navigate = useNavigate();
@@ -111,20 +112,12 @@ export default function ManageBooks() {
                 <TableRow key={book.id} hover>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
-                    {book.coverImage && (
-                      <Box
-                        component="img"
-                        src={book.coverImage}
-                        alt=""
-                        loading="lazy"
-                        sx={{
-                          width: 56,
-                          height: 44,
-                          objectFit: "cover",
-                          borderRadius: 1,
-                        }}
-                      />
-                    )}
+                    <BookCoverImage
+                      src={book.coverImage}
+                      alt={book.nameEn || book.nameAr || "Book cover"}
+                      fallback="No cover"
+                      variant="admin"
+                    />
                   </TableCell>
                   <TableCell>
                     <TruncatedText>{book.nameEn}</TruncatedText>

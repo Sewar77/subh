@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CmsMediaItem from "./CmsMediaItem.jsx";
+import MediaPicker from "../Media/MediaPicker.jsx";
 import { humanize } from "./cmsUtils.js";
 
 const acceptedTypes = {
@@ -30,7 +31,9 @@ export default function CmsMediaSlot({
   items,
   busy,
   onAdd,
+  onAddAsset,
   onReplace,
+  onReplaceAsset,
   onSaveMetadata,
   onDelete,
   onReorder,
@@ -43,6 +46,7 @@ export default function CmsMediaSlot({
   const atLimit = orderedItems.length >= slot.maxItems;
   const singleWithItem = !slot.multiple && orderedItems.length === 1;
   const accept = slot.mediaTypes
+    .filter((type) => type !== "image")
     .map((type) => acceptedTypes[type])
     .filter(Boolean)
     .join(",");
@@ -130,6 +134,11 @@ export default function CmsMediaSlot({
                     ? (target, file) => onReplace(target, file)
                     : undefined
                 }
+                onReplaceAsset={
+                  item.mediaType === "image"
+                    ? (target, asset) => onReplaceAsset(target, asset)
+                    : undefined
+                }
                 onSaveMetadata={onSaveMetadata}
                 onDelete={onDelete}
                 onMove={handleMove}
@@ -138,26 +147,34 @@ export default function CmsMediaSlot({
           </Stack>
         )}
 
-        <Button
-          component="label"
-          htmlFor={inputId}
-          variant="contained"
-          startIcon={busy ? <CircularProgress size={18} /> : <CloudUploadIcon />}
-          disabled={busy || (atLimit && !singleWithItem)}
-        >
-          {singleWithItem ? "Replace media" : "Upload media"}
-          <input
-            id={inputId}
-            hidden
-            type="file"
-            accept={accept}
-            onChange={(event) => {
-              const [file] = event.target.files || [];
-              handleFile(file);
-              event.target.value = "";
-            }}
+        {slot.mediaTypes.includes("image") && !singleWithItem && (
+          <MediaPicker
+            disabled={busy || atLimit}
+            onSelect={(asset) => onAddAsset(slot, asset)}
           />
-        </Button>
+        )}
+        {accept && (
+          <Button
+            component="label"
+            htmlFor={inputId}
+            variant="contained"
+            startIcon={busy ? <CircularProgress size={18} /> : <CloudUploadIcon />}
+            disabled={busy || (atLimit && !singleWithItem)}
+          >
+            {singleWithItem ? "Replace media" : "Upload video or file"}
+            <input
+              id={inputId}
+              hidden
+              type="file"
+              accept={accept}
+              onChange={(event) => {
+                const [file] = event.target.files || [];
+                handleFile(file);
+                event.target.value = "";
+              }}
+            />
+          </Button>
+        )}
       </Stack>
     </Paper>
   );

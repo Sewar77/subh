@@ -16,7 +16,10 @@ const toFieldErrors = (errors) => {
     }
 
     const field = error?.field || "_general";
-    result[field] = [...(result[field] || []), error?.message || "Invalid value"];
+    result[field] = [
+      ...(result[field] || []),
+      error?.message || "Invalid value",
+    ];
     return result;
   }, {});
 };
@@ -108,8 +111,7 @@ export const getAdminPage = (pageId) =>
       api.get("/sections"),
     ]);
     const sections = (sectionsResponse.data.sections || []).filter(
-      (section) =>
-        String(section.pageId ?? section.page_id) === String(pageId),
+      (section) => String(section.pageId ?? section.page_id) === String(pageId),
     );
     return normalizePage(pageResponse.data.page, sections);
   });
@@ -148,10 +150,10 @@ export const restoreSection = (sectionId) =>
     return normalizeAdminSection(response.data.section);
   });
 
-export const reorderPageSections = (pageId, sections) =>
+export const reorderPageSections = (pageId, sectionIds) =>
   request(async () => {
     const response = await api.patch(`/pages/${pageId}/sections/reorder`, {
-      sections: sections.map(({ id, position }) => ({ id, position })),
+      sectionIds,
     });
     return (response.data.sections || []).map(normalizeAdminSection);
   });
@@ -200,4 +202,33 @@ export const uploadCmsFile = (file) =>
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data.url;
+  });
+
+export const getSectionTemplates = () =>
+  request(async () => {
+    const response = await api.get("/cms/section-templates");
+    return response.data.templates || [];
+  });
+
+export const createSection = (pageId, payload) =>
+  request(async () => {
+    const response = await api.post(`/pages/${pageId}/sections`, payload);
+    return normalizeAdminSection(response.data.section);
+  });
+
+export const duplicateSection = (sectionId, payload = {}) =>
+  request(async () => {
+    const response = await api.post(
+      `/sections/${sectionId}/duplicate`,
+      payload,
+    );
+    return normalizeAdminSection(response.data.section);
+  });
+
+export const updateSectionAppearance = (sectionId, appearance) =>
+  request(async () => {
+    const response = await api.patch(`/sections/${sectionId}/appearance`, {
+      appearance,
+    });
+    return normalizeAdminSection(response.data.section);
   });

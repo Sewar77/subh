@@ -8,6 +8,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import PhotoLibraryOutlinedIcon from "@mui/icons-material/PhotoLibraryOutlined";
 import { Link, useLocation } from "react-router-dom";
 
 const sections = [
@@ -15,9 +16,9 @@ const sections = [
   { title: "Categories", items: [{ label: "View categories", path: "/admin/categories", icon: CategoryOutlinedIcon, activePrefixes: ["/admin/category/"] }, { label: "Add category", path: "/admin/new-category", icon: AddCircleOutlineIcon }] },
   { title: "Users", items: [{ label: "Users", path: "/admin/users", icon: PeopleAltOutlinedIcon, activePrefixes: ["/admin/user/"] }, { label: "Add user", path: "/admin/add/user", icon: AddCircleOutlineIcon }] },
   { title: "Requests", items: [{ label: "Book requests", path: "/admin/requests", icon: AssignmentOutlinedIcon }] },
-  { title: "Pages", items: [{ label: "Structured CMS", path: "/admin/cms", icon: ArticleOutlinedIcon }] },
+  { title: "Pages", items: [{ label: "Structured CMS", path: "/admin/cms", icon: ArticleOutlinedIcon }, { label: "Media Library", path: "/admin/media", icon: PhotoLibraryOutlinedIcon }] },
   { title: "Books", items: [{ label: "View books", path: "/admin/books", icon: MenuBookOutlinedIcon, activePrefixes: ["/admin/book/"] }, { label: "Add book", path: "/admin/book/new", icon: AddCircleOutlineIcon }] },
-  { title: "Workshops", items: [{ label: "View workshops", path: "/admin/workshops", icon: EventNoteOutlinedIcon }] },
+  { title: "Workshops", items: [{ label: "Workshops", path: "/admin/workshops", icon: EventNoteOutlinedIcon }, { label: "Categories & presenters", path: "/admin/workshop-resources", icon: PeopleAltOutlinedIcon }, { label: "Workshop bookings", path: "/admin/workshop-bookings", icon: AssignmentOutlinedIcon }] },
 ];
 
 export default function AdminSidebar({ collapsed = false, onNavigate }) {

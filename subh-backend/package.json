@@ -3,6 +3,8 @@
   "scripts": {
     "start": "nodemon index.js",
     "cms:verify": "node scripts/verify-cms.js",
+    "cms:sections:verify": "node scripts/verify-section-management.js",
+    "media-assets:verify": "node scripts/verify-media-assets.js",
     "localization:verify": "node scripts/verify-public-localization.js",
     "auth:verify": "node scripts/verify-auth.js",
     "security:verify": "node scripts/verify-security.js",
@@ -10,6 +12,7 @@
     "book-requests:verify": "node scripts/verify-book-requests.js",
     "admin-book-requests:verify": "node scripts/verify-admin-book-requests.js",
     "request-payments:verify": "node scripts/verify-request-payments.js",
+    "workshops:verify": "node scripts/verify-workshops.js",
     "admin:bootstrap": "node scripts/bootstrap-admin.js",
     "db:migrate": "node database/migrations/run-migrations.js",
     "db:seed": "node database/seeds/dev-users-seed.js"

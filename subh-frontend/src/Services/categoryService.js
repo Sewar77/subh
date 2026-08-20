@@ -23,8 +23,3 @@ export const getAdminCategory = (id) => request(async () => (await api.get(`/cat
 export const createCategory = (payload) => request(async () => (await api.post("/categories", payload)).data.category);
 export const updateCategory = (id, payload) => request(async () => (await api.patch(`/categories/${id}`, payload)).data.category);
 export const deleteCategory = (id) => request(() => api.delete(`/categories/${id}`));
-export const uploadCategoryImage = async (file) => {
-  const data = new FormData();
-  data.append("image", file);
-  return request(async () => (await api.post("/upload", data, { headers: { "Content-Type": "multipart/form-data" } })).data.url);
-};

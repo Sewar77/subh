@@ -1,4 +1,5 @@
 import {
+  getAppearanceKeyFromStorageKey,
   getAdminEditingMetadata,
   getSectionTemplate,
 } from "../../cms/sectionTemplateRegistry.js";
@@ -58,6 +59,26 @@ const groupBySection = (rows) => {
   return grouped;
 };
 
+const splitStoredRecords = (records, template) => {
+  const contentRecords = [];
+  const appearance = {};
+  const allowedAppearance = new Set(
+    (template?.appearance || []).map(({ key }) => key),
+  );
+
+  for (const record of records) {
+    const appearanceKey = getAppearanceKeyFromStorageKey(record.field_key);
+    if (!appearanceKey) {
+      contentRecords.push(record);
+      continue;
+    }
+    if (allowedAppearance.has(appearanceKey)) {
+      appearance[appearanceKey] = record.field_value;
+    }
+  }
+  return { contentRecords, appearance };
+};
+
 export const hydrateSections = async (sections, { admin = false, locale } = {}) => {
   if (!Array.isArray(sections) || sections.length === 0) return [];
   const sectionIds = sections.map(({ id }) => id);
@@ -84,19 +105,20 @@ export const hydrateSections = async (sections, { admin = false, locale } = {}) 
     const legacy = legacyBySection.get(sectionId) || [];
     const templateKey = section.template_key || section.type;
     const template = getSectionTemplate(templateKey);
+    const { contentRecords, appearance } = splitStoredRecords(records, template);
     const media = admin
       ? serializeSectionMediaList(rawMedia)
       : serializePublicMedia(rawMedia);
     const legacyTranslations = serializeLegacyTranslations(legacy);
     const translations =
-      records.length > 0
-        ? buildStructuredTranslations(section.id, templateKey, records, rawMedia)
+      contentRecords.length > 0
+        ? buildStructuredTranslations(section.id, templateKey, contentRecords, rawMedia)
         : legacyTranslations.length > 0
           ? attachMediaToTranslations(legacyTranslations, rawMedia, templateKey)
           : buildStructuredTranslations(section.id, templateKey, [], rawMedia);
     const content =
-      records.length > 0
-        ? serializeSectionContentObject(records)
+      contentRecords.length > 0
+        ? serializeSectionContentObject(contentRecords)
         : serializeLegacyContentObject(legacy, template);
 
     return admin
@@ -106,11 +128,13 @@ export const hydrateSections = async (sections, { admin = false, locale } = {}) 
           media,
           translations,
           getAdminEditingMetadata(templateKey),
+          appearance,
         )
       : serializePublicSection(
           section,
           getPublicContent(translations, publicLocale),
           media,
+          appearance,
         );
   });
 };

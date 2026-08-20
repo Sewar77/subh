@@ -77,10 +77,21 @@ const ViewBook = lazy(
 const UpdateBook = lazy(
   () => import("./components/Admin/Manage/ManageBooks/UpdateBook.jsx"),
 );
-const ManageWorkshops = lazy(
-  () => import("./components/Admin/Manage/ManageWorkshops/ManageWorkshops.jsx"),
-);
+const WorkshopsPage = lazy(() => import("./Pages/Workshops/WorkshopsPage.jsx"));
+const WorkshopDetailPage = lazy(() => import("./Pages/Workshops/WorkshopDetailPage.jsx"));
+const WorkshopBookingPage = lazy(() => import("./Pages/Workshops/WorkshopBookingPage.jsx"));
+const MyWorkshopBookingsPage = lazy(() => import("./Pages/Workshops/MyWorkshopBookingsPage.jsx"));
+const MyWorkshopBookingDetailPage = lazy(() => import("./Pages/Workshops/MyWorkshopBookingDetailPage.jsx"));
+const AdminWorkshopsPage = lazy(() => import("./Pages/Admin/AdminWorkshopsPage.jsx"));
+const AdminWorkshopEditorPage = lazy(() => import("./Pages/Admin/AdminWorkshopEditorPage.jsx"));
+const AdminWorkshopDetailPage = lazy(() => import("./Pages/Admin/AdminWorkshopDetailPage.jsx"));
+const AdminWorkshopResourcesPage = lazy(() => import("./Pages/Admin/AdminWorkshopResourcesPage.jsx"));
+const AdminWorkshopBookingsPage = lazy(() => import("./Pages/Admin/AdminWorkshopBookingsPage.jsx"));
+const AdminWorkshopBookingDetailPage = lazy(() => import("./Pages/Admin/AdminWorkshopBookingDetailPage.jsx"));
 const CmsAdminPage = lazy(() => import("./Pages/Admin/CmsAdminPage.jsx"));
+const AdminMediaLibraryPage = lazy(
+  () => import("./Pages/Admin/AdminMediaLibraryPage.jsx"),
+);
 const AdminBookRequestsPage = lazy(
   () => import("./Pages/Admin/AdminBookRequestsPage.jsx"),
 );
@@ -134,6 +145,8 @@ function App() {
             path="books/:id"
             element={<LazyRoute component={BookDetailPage} />}
           />
+          <Route path="workshops" element={<LazyRoute component={WorkshopsPage} />} />
+          <Route path="workshops/:id" element={<LazyRoute component={WorkshopDetailPage} />} />
           <Route path="subh">
             <Route index element={<LazyRoute component={LandingPage} />} />
             <Route
@@ -154,6 +167,9 @@ function App() {
               path="my-requests/:id"
               element={<LazyRoute component={MyBookRequestDetailPage} />}
             />
+            <Route path="workshops/:workshopId/sessions/:sessionId/book" element={<LazyRoute component={WorkshopBookingPage} />} />
+            <Route path="my-workshops" element={<LazyRoute component={MyWorkshopBookingsPage} />} />
+            <Route path="my-workshops/:id" element={<LazyRoute component={MyWorkshopBookingDetailPage} />} />
           </Route>
         </Route>
         {/* admin routes */}
@@ -181,8 +197,14 @@ function App() {
             />
             <Route
               path="workshops"
-              element={<LazyRoute component={ManageWorkshops} />}
+              element={<LazyRoute component={AdminWorkshopsPage} />}
             />
+            <Route path="workshops/new" element={<LazyRoute component={AdminWorkshopEditorPage} />} />
+            <Route path="workshops/:id" element={<LazyRoute component={AdminWorkshopDetailPage} />} />
+            <Route path="workshops/:id/edit" element={<LazyRoute component={AdminWorkshopEditorPage} />} />
+            <Route path="workshop-resources" element={<LazyRoute component={AdminWorkshopResourcesPage} />} />
+            <Route path="workshop-bookings" element={<LazyRoute component={AdminWorkshopBookingsPage} />} />
+            <Route path="workshop-bookings/:id" element={<LazyRoute component={AdminWorkshopBookingDetailPage} />} />
             <Route
               path="new-category"
               element={<LazyRoute component={AddCategory} />}
@@ -230,6 +252,10 @@ function App() {
             <Route
               path="cms"
               element={<LazyRoute component={CmsAdminPage} />}
+            />
+            <Route
+              path="media"
+              element={<LazyRoute component={AdminMediaLibraryPage} />}
             />
             <Route
               path="requests"

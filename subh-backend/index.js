@@ -18,6 +18,8 @@ import sectionRoutes from "./src/routes/section.Routes.js";
 import sectionTranlsationRoutes from "./src/routes/sectionTranslation.Routes.js";
 import bookRequestRoutes from "./src/routes/bookRequest.Routes.js";
 import adminBookRequestRoutes from "./src/routes/adminBookRequest.Routes.js";
+import mediaAssetRoutes from "./src/routes/mediaAsset.Routes.js";
+import workshopRoutes from "./src/routes/workshop.Routes.js";
 dotenv.config();
 assertProductionSecurityConfig();
 const app = express();
@@ -41,6 +43,8 @@ app.use("/api", sectionRoutes);
 app.use("/api", sectionTranlsationRoutes);
 app.use("/api", bookRequestRoutes);
 app.use("/api", adminBookRequestRoutes);
+app.use("/api", mediaAssetRoutes);
+app.use("/api", workshopRoutes);
 app.use((req, res) => res.status(404).json({ message: "Not found" }));
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
@@ -52,7 +56,7 @@ app.use((error, req, res, next) => {
     return res.status(400).json({ message: "Invalid upload request" });
   }
   if (error?.status && error?.publicMessage) {
-    return res.status(error.status).json({ message: error.publicMessage });
+    return res.status(error.status).json({ message: error.publicMessage, ...(error.code ? { code: error.code } : {}) });
   }
   if (error?.message === "Origin is not allowed by CORS") {
     return res.status(403).json({ message: "Origin is not allowed" });

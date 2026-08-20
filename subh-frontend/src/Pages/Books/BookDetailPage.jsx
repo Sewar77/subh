@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { useLanguage } from "../../Context/LanguageContext.jsx";
+import BookCoverImage from "../../components/Books/BookCoverImage.jsx";
 import { getPublicBook } from "../../Services/bookService.js";
 
 const translations = {
@@ -354,30 +355,21 @@ export default function BookDetailPage() {
               },
             }}
           >
-            {book.coverImage ? (
-              <Box
-                component="img"
-                src={book.coverImage}
-                alt={book.name || t.noCover}
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                sx={{
-                  maxWidth: "100%",
-                  width: "auto",
-                  height: "100%",
-                  maxHeight: 520,
-
-                  objectFit: "contain",
-
-                  borderRadius: 2,
-
-                  boxShadow: "0 24px 50px rgba(0,0,0,.30)",
-                }}
-              />
-            ) : (
-              <Typography color="rgba(255,255,255,.7)">{t.noCover}</Typography>
-            )}
+            <BookCoverImage
+              src={book.coverImage}
+              alt={book.name || t.noCover}
+              fallback={t.noCover}
+              variant="detail"
+              loading="eager"
+              sx={{
+                maxHeight: 540,
+                bgcolor: "rgba(255,255,255,.08)",
+                boxShadow: book.coverImage
+                  ? "0 24px 50px rgba(0,0,0,.30)"
+                  : "none",
+                "& .MuiTypography-root": { color: "rgba(255,255,255,.7)" },
+              }}
+            />
           </Box>
 
           {/* Description */}

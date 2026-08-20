@@ -1,5 +1,8 @@
 import Joi from "joi";
-import { getSectionTemplate } from "../cms/sectionTemplateRegistry.js";
+import {
+  getAppearanceStorageKey,
+  getSectionTemplate,
+} from "../cms/sectionTemplateRegistry.js";
 
 const scalarValue = Joi.alternatives().try(
   Joi.string(),
@@ -139,6 +142,32 @@ export const validateContentPatchForTemplate = (templateKey, content) => {
   return { ok: errors.length === 0, errors, records, template };
 };
 
+export const validateAppearanceForTemplate = (templateKey, appearance = {}) => {
+  const template = getSectionTemplate(templateKey);
+  if (!template) return { ok: false, errors: ["Unknown section template"], records: [] };
+
+  const errors = [];
+  const records = [];
+  for (const [key, value] of Object.entries(appearance)) {
+    const control = template.appearance.find((item) => item.key === key);
+    if (!control) {
+      errors.push(`Unknown appearance field: ${key}`);
+      continue;
+    }
+    if (value !== null && !control.values.includes(value)) {
+      errors.push(`${key} must be one of: ${control.values.join(", ")}`);
+      continue;
+    }
+    records.push({
+      locale: "neutral",
+      fieldKey: getAppearanceStorageKey(key),
+      fieldValue: value,
+      fieldType: "text",
+    });
+  }
+  return { ok: errors.length === 0, errors, records, template };
+};
+
 export const sectionIdParamSchema = Joi.object({
   id: Joi.number().integer().positive().required(),
 }).unknown(false);
@@ -160,6 +189,10 @@ export const sectionVisibilitySchema = Joi.object({
 }).unknown(false);
 
 export const sectionReorderSchema = Joi.object({
+  sectionIds: Joi.array()
+    .items(Joi.number().integer().positive().required())
+    .min(1)
+    .unique(),
   sections: Joi.array()
     .items(
       Joi.object({
@@ -170,8 +203,10 @@ export const sectionReorderSchema = Joi.object({
     .min(1)
     .unique("id")
     .unique("position")
-    .required(),
-}).unknown(false);
+    .unique("position"),
+})
+  .xor("sectionIds", "sections")
+  .unknown(false);
 
 export const legacyTranslationPatchSchema = Joi.object({
   title: Joi.alternatives().try(Joi.string(), Joi.valid(null)),

@@ -1,9 +1,40 @@
 import { Box, Typography, Paper } from "@mui/material";
+import {
+  getAppearanceValue,
+  mapAppearanceToStyle,
+  textVariantStyles,
+  contentWidthStyles,
+  alignmentStyles,
+} from "../Utils/appearanceMapping";
 
 export default function TextSection({ section }) {
   const { title, content, align = "center" } = section || {};
 
   if (!section) return null;
+
+  const appearance = section.appearance || {};
+
+  // Get appearance values with defaults
+  const variant = getAppearanceValue(appearance, "variant", "article");
+  const contentWidth = getAppearanceValue(
+    appearance,
+    "contentWidth",
+    "standard",
+  );
+  const alignment = getAppearanceValue(appearance, "alignment", "center");
+
+  // Map appearance values to styles
+  const variantSx = mapAppearanceToStyle(textVariantStyles, variant, {});
+  const contentWidthSx = mapAppearanceToStyle(
+    contentWidthStyles,
+    contentWidth,
+    contentWidthStyles.standard,
+  );
+  const alignmentSx = mapAppearanceToStyle(
+    alignmentStyles,
+    alignment,
+    alignmentStyles.center,
+  );
 
   const textItems =
     typeof content === "string"
@@ -12,41 +43,49 @@ export default function TextSection({ section }) {
         ? Object.values(content)
         : [];
 
+  const isHighlight = variant === "highlight";
+  const isCentered = variant === "centered";
+
   return (
     <Box
       sx={{
         py: 8,
         px: 2,
         display: "flex",
-        justifyContent: "center",
+        justifyContent: alignmentSx.justifyContent,
       }}
     >
       <Box
         sx={{
-          maxWidth: "1000px",
+          ...contentWidthSx,
           width: "100%",
-          textAlign: align,
+          textAlign: alignmentSx.textAlign,
         }}
       >
         {title && (
           <Typography
-            variant="h4"
+            variant={isCentered || isHighlight ? "h4" : "h5"}
             sx={{
               position: "relative",
-              display: "inline-block",
+              display: isCentered ? "inline-block" : "block",
               fontWeight: 700,
               mb: 5,
-              "&::after": {
-                mx: "auto",
-                content: '""',
-                position: "absolute",
-                left: 0,
-                bottom: -8,
-                width: "100%",
-                height: "4px",
-                borderRadius: "4px",
-                background: "linear-gradient(90deg, #41f2c3, #102943)",
-              },
+              ...(variant !== "highlight"
+                ? {
+                    "&::after": {
+                      mx: alignmentSx.textAlign === "center" ? "auto" : 0,
+                      content: '""',
+                      position: "absolute",
+                      left: alignmentSx.textAlign === "right" ? "auto" : 0,
+                      right: alignmentSx.textAlign === "right" ? 0 : "auto",
+                      bottom: -8,
+                      width: isCentered ? "100%" : "60px",
+                      height: "4px",
+                      borderRadius: "4px",
+                      background: "linear-gradient(90deg, #41f2c3, #102943)",
+                    },
+                  }
+                : {}),
             }}
           >
             {title}
@@ -57,7 +96,7 @@ export default function TextSection({ section }) {
           sx={{
             display: "grid",
             gridTemplateColumns:
-              textItems.length > 1
+              textItems.length > 1 && !isHighlight
                 ? {
                     xs: "1fr",
                     md: "repeat(2, 1fr)",
@@ -70,27 +109,30 @@ export default function TextSection({ section }) {
           {textItems.map((text, index) => (
             <Paper
               key={index}
-              elevation={0}
+              elevation={isHighlight ? 0 : 0}
               sx={{
-                p: 4,
-                borderRadius: 3,
+                ...(isHighlight
+                  ? {
+                      p: 4,
+                      bgcolor: "info.light",
+                      borderLeft: "4px solid",
+                      borderColor: "info.main",
+                      borderRadius: 0,
+                    }
+                  : {
+                      p: 4,
+                      borderRadius: 3,
+                      backgroundColor: "background.paper",
+                      border: "1px solid",
+                      borderColor: "divider",
+                    }),
                 textAlign: "start",
-                backgroundColor: "background.paper",
-                border: "1px solid",
-                borderColor: "divider",
-                transition: "0.3s ease",
-                "&:hover": {
-                  transform: "translateY(-5px)",
-                  boxShadow: 4,
-                },
               }}
             >
               <Typography
-                variant="body1"
                 sx={{
-                  lineHeight: 1.9,
-                  opacity: 0.9,
-                  fontSize: "1.05rem",
+                  lineHeight: 1.8,
+                  color: isHighlight ? "info.dark" : "text.primary",
                 }}
               >
                 {text}

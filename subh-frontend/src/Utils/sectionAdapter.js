@@ -32,6 +32,7 @@ export function prepareSection(section, language) {
   if (firstMedia?.alt && !content.alt) content.alt = firstMedia.alt;
 
   const title = content.title ?? translation?.title;
+  const appearance = section.appearance || {};
 
   return {
     ...section,
@@ -42,5 +43,6 @@ export function prepareSection(section, language) {
     text: content.text,
     img: content.img || content.image,
     reverse: templateKey === "text_image",
+    appearance,
   };
 }

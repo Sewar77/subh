@@ -1,6 +1,8 @@
 import express from "express";
 import {
   archiveSectionController,
+  createSectionController,
+  duplicateSectionController,
   getAllSectionsController,
   getSectionByIdController,
   getSectionTemplatesController,
@@ -10,6 +12,7 @@ import {
   restoreSectionController,
   toggleSectionVisibilityController,
   updateSectionVisibilityController,
+  updateSectionAppearanceController,
 } from "../controller/section.Controller.js";
 import {
   getSectionContentController,
@@ -34,6 +37,11 @@ import {
   sectionReorderSchema,
   sectionVisibilitySchema,
 } from "../validation/sectionContent.Validation.js";
+import {
+  sectionAppearancePatchSchema,
+  sectionCreateSchema,
+  sectionDuplicateSchema,
+} from "../validation/sectionManagement.Validation.js";
 import {
   sectionMediaCreateSchema,
   sectionMediaParamSchema,
@@ -62,6 +70,20 @@ router.get(
 
 router.get("/cms/section-templates", ...admin, getSectionTemplatesController);
 router.get("/sections", ...admin, getAllSectionsController);
+router.post(
+  "/pages/:pageId/sections",
+  ...admin,
+  validate(pageIdParamSchema, "params"),
+  validate(sectionCreateSchema, "body"),
+  createSectionController,
+);
+router.post(
+  "/sections/:id/duplicate",
+  ...admin,
+  validate(sectionIdParamSchema, "params"),
+  validate(sectionDuplicateSchema, "body"),
+  duplicateSectionController,
+);
 router.get(
   "/sections/:id",
   ...admin,
@@ -80,6 +102,13 @@ router.patch(
   validate(sectionIdParamSchema, "params"),
   validate(sectionContentPatchSchema, "body"),
   patchSectionContentController,
+);
+router.patch(
+  "/sections/:id/appearance",
+  ...admin,
+  validate(sectionIdParamSchema, "params"),
+  validate(sectionAppearancePatchSchema, "body"),
+  updateSectionAppearanceController,
 );
 
 router.get(

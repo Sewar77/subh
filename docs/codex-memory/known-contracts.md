@@ -4,9 +4,9 @@
 
 - Status: Active
 - Scope: CMS
-- Decision: Administrators edit approved bilingual and neutral content, media and metadata, section position, visibility, archive state, restore state, and approved links only.
+- Decision: Administrators manage section instances on fixed pages: create from registered templates, duplicate, reorder, hide/show, archive/restore, and edit approved bilingual or neutral content, media metadata, controlled appearance, and approved links.
 - Reason: CMS content is constrained by fixed templates.
-- Impact: Requests and UI controls must derive allowable fields and media slots from the backend registry rather than client-selected templates.
+- Impact: Requests and UI controls must derive allowable content fields, media slots, limits, variants, and appearance controls from the backend registry. Pages and template definitions remain immutable.
 
 ## CMS editing schema delivery
 
@@ -15,6 +15,14 @@
 - Decision: Administrator section responses provide serializable `editingSchema` metadata with fields and media slots.
 - Reason: The administrator editor needs developer-defined metadata without exposing registry mutation APIs.
 - Impact: Treat `editingSchema` as read-only and use it to render editable controls.
+
+## Administrator Media Library contract
+
+- Status: Active
+- Scope: Backend media assets
+- Decision: `/api/admin/media-assets` is an administrator-only, server-paginated registry for Cloudinary-backed JPEG, PNG, and WebP assets. V1 supports upload/register, list/search, detail, safe metadata editing, archive, and restore; it exposes no hard-delete endpoint.
+- Reason: Reusable assets must remain available to existing consumers and retain auditable provider and uploader metadata.
+- Impact: Uploads reuse the hardened signature, size, temporary-file, rate-limit, and Cloudinary controls. The server owns storage metadata and removes only a newly uploaded Cloudinary asset when its database registration fails.
 
 ## Durable memory precedence
 
@@ -126,7 +134,7 @@
 - Scope: Public catalog and CMS imagery
 - Decision: Listing and below-fold images lazy-load with stable display geometry; primary Book Detail artwork and the first rendered CMS section image load eagerly with high fetch priority.
 - Reason: Critical imagery should not be delayed, while below-fold media should not compete with initial content or cause avoidable layout shift.
-- Impact: Book covers retain `contain` on detail pages, listing/category images retain appropriate `cover`, and missing CMS image references must not render broken image requests.
+- Impact: Book covers use a stable `2 / 3` presentation container: list/admin thumbnails use `cover`, while detail views use `contain` to preserve full artwork. Listing and below-fold images lazy-load, primary Book Detail artwork remains eager, category images retain appropriate `cover`, and missing CMS image references must not render broken image requests.
 
 ## Company account identity boundary
 
@@ -183,3 +191,19 @@
 - Decision: The existing `/admin/requests/:id` detail page is the only administrator offline-payment workspace. It uses `adminBookRequestService` to record payments, record refunds, and audit-void ledger entries; payment status and all monetary summaries remain read-only backend results.
 - Reason: Subh records offline money movement but never processes card credentials, and administrators need one auditable request context rather than a parallel payment module.
 - Impact: Entry forms send only allowed payment metadata, payment entry requires an accepted quote or confirmed request in the UI, refund availability reflects backend net paid, and voiding requires a reason through the reusable confirmation modal. Voided records remain visible and every successful mutation refreshes the full request detail.
+
+## Administrator Media Library UI boundary
+
+- Status: Active
+- Scope: Administrator Media Library and CMS image selection
+- Decision: `/admin/media` and reusable admin image pickers use one `mediaAssetService` with server-side search and pagination. New images upload once to the canonical Media Library; selecting an existing active asset only returns that asset and never uploads it again.
+- Reason: Administrators need one reusable image source without duplicating Cloudinary assets or creating CMS-specific libraries.
+- Impact: CMS, Book cover/barcode, and Category image forms link only the selected asset URL through their existing domain endpoints. Existing unregistered URLs remain valid and replaceable. CMS continues to own slot limits and media behavior; Book and Category APIs remain unchanged. Archiving hides assets from normal selection without deleting Cloudinary content or breaking existing references.
+
+## Workshop V1 boundary
+
+- Status: Active application contract; persistence must be provisioned separately
+- Scope: Workshop categories, presenters, Workshops, sessions, bookings, offline confirmation, attendance, and confirmation email
+- Decision: Workshops are independent from Books. Individual and company users share the same authenticated booking flow; one account may hold one active booking per session, and each active booking reserves exactly one seat. Session capacity is enforced in a transaction after locking the session row.
+- Reason: Workshop scheduling, eligibility, attendance, and offline confirmation need their own historical records and privacy rules without coupling to Book Requests or trusting client price/status/capacity values.
+- Impact: Public reads are localized through `?lang=en|ar`, show only published Workshops and future open sessions, and never expose meeting links or private location instructions. Customer reads are owner-filtered in SQL and reveal delivery details only for confirmed/completed bookings. Only the transactional administrator offline-payment operation may confirm a booking; it writes payment/status/outbox records atomically, then email delivery occurs after commit and may be retried. Workshop images reuse the canonical Media Library URL and `MediaPicker`.

@@ -16,6 +16,7 @@ import {
   formatCatalogPrice,
   getCatalogCopy,
 } from "../../Utils/catalogI18n.js";
+import BookCoverImage from "./BookCoverImage.jsx";
 
 export default function BookCardGrid({ books }) {
   const { language } = useLanguage();
@@ -83,53 +84,18 @@ export default function BookCardGrid({ books }) {
             }}
           >
             {/* Cover */}
-            <Box
+            <BookCoverImage
+              src={book.coverImage}
+              alt={title || text.noCover}
+              fallback={text.noCover}
               sx={{
-                position: "relative",
-                overflow: "hidden",
-                bgcolor: "action.hover",
-                aspectRatio: "3 / 4",
+                "& img": { transition: "transform 350ms ease" },
+                ".MuiCard-root:hover & img": { transform: "scale(1.035)" },
+                "@media (prefers-reduced-motion: reduce)": {
+                  "& img": { transition: "none" },
+                },
               }}
             >
-              {book.coverImage ? (
-                <Box
-                  component="img"
-                  src={book.coverImage}
-                  alt={title || text.noCover}
-                  loading="lazy"
-                  decoding="async"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-
-                    transition: "transform 350ms ease",
-
-                    ".MuiCard-root:hover &": {
-                      transform: "scale(1.035)",
-                    },
-
-                    "@media (prefers-reduced-motion: reduce)": {
-                      transition: "none",
-                    },
-                  }}
-                />
-              ) : (
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    display: "grid",
-                    placeItems: "center",
-                    px: 3,
-                    textAlign: "center",
-                    color: "text.secondary",
-                  }}
-                >
-                  <Typography>{text.noCover}</Typography>
-                </Box>
-              )}
-
               {category && (
                 <Chip
                   size="small"
@@ -146,7 +112,7 @@ export default function BookCardGrid({ books }) {
                   }}
                 />
               )}
-            </Box>
+            </BookCoverImage>
 
             <CardContent
               sx={{
