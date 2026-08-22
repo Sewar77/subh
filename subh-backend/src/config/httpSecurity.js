@@ -10,20 +10,25 @@ const normalizeOrigin = (value) => {
 };
 
 export const getAllowedOrigins = (environment = process.env) => {
-  const configured = environment.CORS_ORIGINS || environment.FRONTEND_ORIGIN || "";
+  const configured =
+    environment.CORS_ORIGINS || environment.FRONTEND_ORIGIN || "";
   const origins = configured
     .split(",")
     .map((origin) => normalizeOrigin(origin.trim()))
     .filter(Boolean);
 
   if (origins.length > 0) return [...new Set(origins)];
-  return environment.NODE_ENV === "production" ? [] : [DEFAULT_DEVELOPMENT_ORIGIN];
+  return environment.NODE_ENV === "production"
+    ? []
+    : [DEFAULT_DEVELOPMENT_ORIGIN];
 };
 
 export const assertProductionSecurityConfig = (environment = process.env) => {
   if (environment.NODE_ENV !== "production") return true;
   if (!environment.JWT_SECRET || environment.JWT_SECRET.length < 32) {
-    throw new Error("Production JWT_SECRET must contain at least 32 characters");
+    throw new Error(
+      "Production JWT_SECRET must contain at least 32 characters",
+    );
   }
   if (getAllowedOrigins(environment).length === 0) {
     throw new Error("Production CORS_ORIGINS or FRONTEND_ORIGIN is required");
@@ -55,13 +60,17 @@ export const requireTrustedMutationOrigin = (environment = process.env) => {
     if (SAFE_METHODS.has(req.method)) return next();
 
     const origin = normalizeOrigin(req.get("origin") || "");
-    const fetchSite = req.get("sec-fetch-site");
-    if (fetchSite === "cross-site" || (origin && !allowedOrigins.has(origin))) {
-      return res.status(403).json({ message: "Untrusted request origin" });
+
+    if (origin && !allowedOrigins.has(origin)) {
+      return res.status(403).json({
+        message: "Untrusted request origin",
+      });
     }
 
     if (isProduction && req.cookies?.token && !origin) {
-      return res.status(403).json({ message: "Request origin is required" });
+      return res.status(403).json({
+        message: "Request origin is required",
+      });
     }
 
     return next();
