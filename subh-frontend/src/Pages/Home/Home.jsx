@@ -12,7 +12,7 @@ export default function Home() {
   const { language } = useLanguage();
 
   useEffect(() => {
-    getSectionsByPageKey("home-page", language);
+    getSectionsByPageKey("home", language);
   }, [getSectionsByPageKey, language]);
 
   const sections = useMemo(() => {
@@ -21,7 +21,13 @@ export default function Home() {
       .filter((section) => section && section.templateKey);
   }, [sectionKey]);
   return (
-    <Box sx={{ direction: language === "ar" ? "rtl" : "ltr", display: "grid", minWidth: 0 }}>
+    <Box
+      sx={{
+        direction: language === "ar" ? "rtl" : "ltr",
+        display: "grid",
+        minWidth: 0,
+      }}
+    >
       {sections.map((section, index) => (
         <SectionRenderer
           key={section.id}

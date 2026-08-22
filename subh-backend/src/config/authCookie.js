@@ -3,9 +3,7 @@ const AUTH_COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 const getSameSite = (environment) => {
   const configured = environment.COOKIE_SAME_SITE?.toLowerCase();
-  return ["strict", "lax", "none"].includes(configured)
-    ? configured
-    : "lax";
+  return ["strict", "lax", "none"].includes(configured) ? configured : "lax";
 };
 
 export const getAuthCookieOptions = (
@@ -20,11 +18,7 @@ export const getAuthCookieOptions = (
     path: "/",
     sameSite,
     secure,
-    ...(environment.COOKIE_DOMAIN
-      ? { domain: environment.COOKIE_DOMAIN }
-      : {}),
-    ...(clear
-      ? { expires: new Date(0) }
-      : { maxAge: AUTH_COOKIE_MAX_AGE_MS }),
+    ...(environment.COOKIE_DOMAIN ? { domain: environment.COOKIE_DOMAIN } : {}),
+    ...(clear ? { expires: new Date(0) } : { maxAge: AUTH_COOKIE_MAX_AGE_MS }),
   };
 };
