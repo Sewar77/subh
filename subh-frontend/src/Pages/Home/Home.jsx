@@ -12,7 +12,7 @@ export default function Home() {
   const { language } = useLanguage();
 
   useEffect(() => {
-    getSectionsByPageKey("home", language);
+    getSectionsByPageKey("home-page", language);
   }, [getSectionsByPageKey, language]);
 
   const sections = useMemo(() => {

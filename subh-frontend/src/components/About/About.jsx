@@ -11,7 +11,7 @@ export default function About() {
   const { language } = useLanguage();
 
   useEffect(() => {
-    getSectionsByPageKey("about", language);
+    getSectionsByPageKey("about-page", language);
   }, [getSectionsByPageKey, language]);
 
   const sections = useMemo(() => {
