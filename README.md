@@ -416,25 +416,6 @@ Never commit `.env` files or private credentials to GitHub.
 
 ---
 
-## Screenshots
-
-Add project screenshots here when available.
-
-```text
-docs/screenshots/home.png
-docs/screenshots/books.png
-docs/screenshots/workshops.png
-docs/screenshots/admin-dashboard.png
-```
-
-Example Markdown:
-
-```md
-![Subh Home](docs/screenshots/home.png)
-```
-
----
-
 ## Future Improvements
 
 Possible future improvements include:
