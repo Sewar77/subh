@@ -1,4 +1,4 @@
-const DEFAULT_DEVELOPMENT_ORIGIN = "http://localhost:5173";
+const DEFAULT_DEVELOPMENT_ORIGIN = "https://subh-hazel.vercel.app" || "http://localhost:5173";
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 const normalizeOrigin = (value) => {
