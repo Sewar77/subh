@@ -6,8 +6,8 @@ The platform brings together educational books, curriculum resources, workshop b
 
 ## Live Demo
 
-- Frontend: https://subh-fronend.onrender.com
-- Backend API: https://subh-backend.onrender.com
+- Frontend: https://subh-center.onrender.com/
+- Backend API: https://subh-back.onrender.com/health
 
 > The current deployment is a demo environment and may use sample data.
 
