@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "node index.js",
     "cms:verify": "node scripts/verify-cms.js",
     "cms:sections:verify": "node scripts/verify-section-management.js",
     "media-assets:verify": "node scripts/verify-media-assets.js",
