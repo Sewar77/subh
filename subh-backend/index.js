@@ -34,6 +34,9 @@ app.use(cookieParser());
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(requireTrustedMutationOrigin());
+app.get("/health", (req, res) => {
+res.send("work")
+})
 app.use("/api", authRoute);
 app.use("/api", userRoutes);
 app.use("/api", categoriesRoutes);
